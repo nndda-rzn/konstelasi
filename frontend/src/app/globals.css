@@ -1,0 +1,227 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+:root {
+  --background: #0f0f14;
+  --foreground: #f0e6e6;
+  --card-bg: rgba(255, 255, 255, 0.04);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --red-glow: rgba(220, 38, 38, 0.15);
+  --gold: #D4AF37;
+  --gold-soft: rgba(212, 175, 55, 0.15);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ── Base ── */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+::selection {
+  background: rgba(220, 38, 38, 0.35);
+  color: #fff;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(220, 38, 38, 0.3);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(220, 38, 38, 0.5);
+}
+
+/* ── Animations ── */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 15px rgba(220, 38, 38, 0.15), 0 0 30px rgba(220, 38, 38, 0.05); }
+  50% { box-shadow: 0 0 25px rgba(220, 38, 38, 0.25), 0 0 50px rgba(220, 38, 38, 0.1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes orb-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
+}
+
+@keyframes orb-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-25px, 25px) scale(1.08); }
+  66% { transform: translate(20px, -15px) scale(0.92); }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out both;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-orb-1 {
+  animation: orb-float-1 12s ease-in-out infinite;
+}
+
+.animate-orb-2 {
+  animation: orb-float-2 15s ease-in-out infinite;
+}
+
+/* ── React Flow Overrides ── */
+.react-flow__node {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.react-flow__node.selected {
+  box-shadow: none !important;
+}
+
+.react-flow__handle {
+  width: 10px !important;
+  height: 10px !important;
+  background: rgba(220, 38, 38, 0.35) !important;
+  border: 1.5px solid rgba(220, 38, 38, 0.15) !important;
+  border-radius: 50% !important;
+  transition: all 0.2s ease !important;
+  cursor: crosshair !important;
+}
+
+.react-flow__node:hover .react-flow__handle {
+  background: rgba(248, 113, 113, 0.6) !important;
+  border-color: rgba(248, 113, 113, 0.3) !important;
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.3) !important;
+}
+
+.react-flow__handle:hover {
+  width: 14px !important;
+  height: 14px !important;
+  background: rgba(248, 113, 113, 0.9) !important;
+  border-color: rgba(248, 113, 113, 0.5) !important;
+  box-shadow: 0 0 14px rgba(220, 38, 38, 0.5) !important;
+}
+
+.react-flow__handle.connecting,
+.react-flow__handle.valid {
+  width: 14px !important;
+  height: 14px !important;
+  background: rgba(248, 113, 113, 1) !important;
+  box-shadow: 0 0 18px rgba(220, 38, 38, 0.6) !important;
+}
+
+.react-flow__background {
+  background-color: #0f0f14 !important;
+}
+
+.react-flow__controls {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.react-flow__controls button {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  fill: rgba(255, 255, 255, 0.5) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.react-flow__controls button:hover {
+  background: rgba(220, 38, 38, 0.15) !important;
+  fill: #f87171 !important;
+}
+
+.react-flow__minimap {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+.react-flow__edge-path {
+  stroke: rgba(239, 68, 68, 0.4) !important;
+  stroke-width: 2.5px !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  filter: drop-shadow(0 0 2px rgba(220, 38, 38, 0.3));
+}
+
+.react-flow__edge:hover .react-flow__edge-path,
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: rgba(248, 113, 113, 1) !important;
+  stroke-width: 3.5px !important;
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.8)) drop-shadow(0 0 16px rgba(220, 38, 38, 0.4)) !important;
+  stroke-dasharray: 8 8;
+  animation: flow-dash 1s linear infinite;
+}
+
+@keyframes flow-dash {
+  from { stroke-dashoffset: 16; }
+  to { stroke-dashoffset: 0; }
+}
+
+.react-flow__connection-path {
+  stroke: #f87171 !important;
+  stroke-width: 2px !important;
+  stroke-dasharray: 5 5 !important;
+}
+
+/* ── Prose Dark Mode ── */
+.prose-dark {
+  --tw-prose-body: #d1d5db;
+  --tw-prose-headings: #f3f4f6;
+  --tw-prose-bold: #f3f4f6;
+  --tw-prose-links: #f87171;
+  --tw-prose-bullets: #9ca3af;
+  --tw-prose-counters: #9ca3af;
+  --tw-prose-quotes: #d1d5db;
+  --tw-prose-quote-borders: rgba(220, 38, 38, 0.4);
+}

@@ -1,0 +1,115 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input AddNoteImageInput {
+  caption: String
+  imageUrl: String!
+  noteId: String!
+  order: Int
+}
+
+input CreateNoteInput {
+  positionX: Float
+  positionY: Float
+  title: String
+}
+
+input CreateNoteLinkInput {
+  sourceHandle: String
+  sourceId: String!
+  targetHandle: String
+  targetId: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  addNoteImage(input: AddNoteImageInput!): NoteImage!
+  createNote(input: CreateNoteInput!): Note!
+  createNoteLink(input: CreateNoteLinkInput!): NoteLink!
+  deleteNote(id: String!): Boolean!
+  deleteNoteImage(id: String!): Boolean!
+  deleteNoteLink(id: String!): Boolean!
+  updateNoteContent(input: UpdateNoteContentInput!): Note!
+  updateNoteLink(input: UpdateNoteLinkInput!): NoteLink!
+  updateNotePosition(input: UpdateNotePositionInput!): Note!
+}
+
+type Note {
+  children: [Note]
+  color: String
+  content: String
+  createdAt: DateTime!
+  height: Float
+  id: String!
+  images: [NoteImage]
+  incomingEdges: [NoteLink]
+  outgoingEdges: [NoteLink]
+  parent: Note
+  positionX: Float!
+  positionY: Float!
+  title: String!
+  type: String!
+  updatedAt: DateTime!
+  user: User!
+  width: Float
+}
+
+type NoteImage {
+  caption: String
+  createdAt: DateTime!
+  id: String!
+  imageUrl: String!
+  note: Note!
+  order: Int!
+  user: User!
+}
+
+type NoteLink {
+  animated: Boolean!
+  color: String
+  createdAt: DateTime!
+  id: String!
+  label: String
+  source: Note!
+  sourceHandle: String
+  target: Note!
+  targetHandle: String
+  type: String!
+}
+
+type Query {
+  getNotes: [Note!]!
+  getProfile: String!
+}
+
+input UpdateNoteContentInput {
+  color: String
+  content: String
+  id: String!
+  title: String
+}
+
+input UpdateNoteLinkInput {
+  color: String
+  id: String!
+  label: String
+}
+
+input UpdateNotePositionInput {
+  id: String!
+  positionX: Float!
+  positionY: Float!
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  id: String!
+  images: [NoteImage]
+  notes: [Note]
+}
