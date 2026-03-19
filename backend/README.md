@@ -1,98 +1,173 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🛰️ Konstelasi — Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend GraphQL API untuk aplikasi Visual Node-Based Diary, dibangun dengan **NestJS 11**, **MikroORM 6**, dan **Apollo Server 5**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 🏗️ Tech Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+| Teknologi | Versi | Fungsi |
+|-----------|-------|--------|
+| [NestJS](https://nestjs.com) | 11 | Framework backend utama |
+| [GraphQL](https://graphql.org) | 16 | API query language |
+| [Apollo Server](https://www.apollographql.com) | 5 | GraphQL server |
+| [MikroORM](https://mikro-orm.io) | 6 | ORM untuk PostgreSQL |
+| [PostgreSQL](https://www.postgresql.org) | 15+ | Database relasional |
+| [Passport JWT](http://www.passportjs.org) | 4 | Autentikasi berbasis JWT |
+| [Supabase](https://supabase.com) | - | Auth & Storage provider |
 
-## Project setup
+---
 
-```bash
-$ npm install
+## 📁 Struktur Direktori
+
+```
+backend/
+├── src/
+│   ├── app.module.ts          # Root module
+│   ├── main.ts                # Entry point & bootstrap
+│   ├── mikro-orm.config.ts    # Konfigurasi database
+│   │
+│   ├── entities/              # Database entities (MikroORM)
+│   │   ├── user.entity.ts     # Entitas pengguna
+│   │   ├── note.entity.ts     # Entitas catatan (node di canvas)
+│   │   ├── note-link.entity.ts  # Entitas koneksi antar-catatan (edge)
+│   │   └── note-image.entity.ts # Entitas gambar catatan
+│   │
+│   ├── auth/                  # Modul autentikasi
+│   │   ├── auth.module.ts
+│   │   ├── auth.resolver.ts   # GraphQL resolver untuk login/register
+│   │   ├── jwt.strategy.ts    # Passport JWT strategy
+│   │   ├── gql-auth.guard.ts  # Guard untuk proteksi query/mutation
+│   │   └── current-user.decorator.ts
+│   │
+│   └── notes/                 # Modul catatan (CRUD + relasi)
+│       ├── notes.module.ts
+│       ├── notes.resolver.ts  # GraphQL resolver untuk notes
+│       ├── notes.service.ts   # Business logic
+│       └── dto/
+│           └── note.input.ts  # Input types untuk mutations
+│
+├── .env                       # Environment variables
+├── package.json
+├── tsconfig.json
+└── nest-cli.json
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+## 📊 Entity Relationship Diagram
 
-# watch mode
-$ npm run start:dev
+```mermaid
+erDiagram
+    USER ||--o{ NOTE : memiliki
+    NOTE ||--o{ NOTE_LINK : "source (outgoing)"
+    NOTE ||--o{ NOTE_LINK : "target (incoming)"
+    NOTE ||--o{ NOTE_IMAGE : memiliki
 
-# production mode
-$ npm run start:prod
+    USER {
+        uuid id PK
+        string email
+        datetime created_at
+    }
+
+    NOTE {
+        uuid id PK
+        string title
+        text content
+        float position_x
+        float position_y
+        string color
+        uuid user_id FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    NOTE_LINK {
+        uuid id PK
+        string label
+        string color
+        string source_handle
+        string target_handle
+        uuid source_id FK
+        uuid target_id FK
+    }
+
+    NOTE_IMAGE {
+        uuid id PK
+        string image_url
+        string caption
+        int order
+        uuid note_id FK
+        uuid user_id FK
+    }
 ```
 
-## Run tests
+---
 
-```bash
-# unit tests
-$ npm run test
+## 🔌 GraphQL API
 
-# e2e tests
-$ npm run test:e2e
+### Queries
 
-# test coverage
-$ npm run test:cov
+| Query | Deskripsi |
+|-------|-----------|
+| `getNotes` | Mengambil semua catatan milik user beserta edges dan gambar |
+
+### Mutations
+
+| Mutation | Deskripsi |
+|----------|-----------|
+| `createNote` | Membuat catatan baru di posisi tertentu |
+| `updateNotePosition` | Memperbarui posisi X/Y catatan di canvas |
+| `updateNoteContent` | Memperbarui judul, konten, dan warna catatan |
+| `deleteNote` | Menghapus catatan beserta relasi terkait |
+| `createNoteLink` | Membuat koneksi (edge) antar catatan |
+| `updateNoteLink` | Memperbarui label dan warna koneksi |
+| `deleteNoteLink` | Menghapus koneksi antar catatan |
+| `addNoteImage` | Menambahkan gambar ke catatan |
+| `deleteNoteImage` | Menghapus gambar dari catatan |
+
+---
+
+## ⚙️ Konfigurasi
+
+### Environment Variables (`.env`)
+
+```env
+# PostgreSQL Connection String (dari Supabase)
+DATABASE_URL="postgresql://user:password@host:5432/postgres"
+
+# Supabase JWT Secret (untuk verifikasi token autentikasi)
+SUPABASE_JWT_SECRET="your-jwt-secret"
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 🚀 Menjalankan
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Install dependencies
+npm install
+
+# Generate schema database (pertama kali)
+npx mikro-orm schema:create --run
+
+# Development mode (hot-reload)
+npm run start:dev
+
+# Production build
+npm run build
+npm run start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Server berjalan di **http://localhost:3001/graphql**
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+## 🧪 Testing
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+npm run test          # Unit tests
+npm run test:watch    # Watch mode
+npm run test:cov      # Coverage report
+npm run test:e2e      # End-to-end tests
+```
