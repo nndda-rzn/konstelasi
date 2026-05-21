@@ -46,7 +46,7 @@ export class StoryService {
 
   async getStory(userId: string, storyId: string): Promise<Story> {
     return this.em.findOneOrFail(Story, { id: storyId, user: { id: userId } }, {
-      populate: ['nodes'],
+      populate: ['nodes', 'nodes.images', 'nodes.tags', 'nodes.outgoingEdges', 'nodes.outgoingEdges.source', 'nodes.outgoingEdges.target', 'nodes.incomingEdges', 'nodes.incomingEdges.source', 'nodes.incomingEdges.target'] as any,
     });
   }
 
