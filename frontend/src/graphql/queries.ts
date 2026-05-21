@@ -170,3 +170,21 @@ export const GET_EMOTIONAL_ARC = gql`
     }
   }
 `;
+
+export const GET_MEMORY_TIMELINE = gql`
+  query GetMemoryTimeline($storyId: String!) {
+    getMemoryTimeline(storyId: $storyId) {
+      timelineItems {
+        nodeId title nodeType mood
+        eventDate eventLocation writeDate
+        daysSinceEvent daysSinceWritten content
+      }
+      totalWithEventDate
+      totalWithoutEventDate
+      oldestMemory { title eventDate daysSince }
+      newestMemory { title eventDate daysSince }
+      avgDaysSinceEvent
+      monthlyDistribution { month count }
+    }
+  }
+`;

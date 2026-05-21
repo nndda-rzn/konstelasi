@@ -117,6 +117,14 @@ export class Note {
   @Property({ nullable: true })
   archivedAt?: Date;
 
+  @Field(() => Date, { nullable: true })
+  @Property({ nullable: true })
+  eventDate?: Date;
+
+  @Field(() => String, { nullable: true })
+  @Property({ nullable: true })
+  eventLocation?: string;
+
   @Field(() => Date)
   @Property()
   createdAt: Date = new Date();

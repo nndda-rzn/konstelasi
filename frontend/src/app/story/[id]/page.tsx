@@ -13,7 +13,7 @@ import {
   addEdge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOpen, Image, List, BarChart3, Download, PenTool, Heart } from 'lucide-react';
+import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOpen, Image, List, BarChart3, Download, PenTool, Heart, Hourglass } from 'lucide-react';
 import { ApolloWrapper } from '@/lib/apollo/ApolloWrapper';
 import { Providers } from '@/lib/Providers';
 import { GET_STORY, UPDATE_STORY, ADD_NODE_TO_STORY } from '@/graphql/story';
@@ -32,6 +32,7 @@ import StoryExportPanel from '@/components/story/StoryExportPanel';
 import StoryNodeEditor from '@/components/story/StoryNodeEditor';
 import WritingStatsPanel from '@/components/story/WritingStatsPanel';
 import EmotionalArcPanel from '@/components/story/EmotionalArcPanel';
+import MemoryTimelinePanel from '@/components/story/MemoryTimelinePanel';
 
 const nodeTypes = { storyNode: StoryNode };
 const edgeTypes = { storyEdge: StoryEdge };
@@ -48,6 +49,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   const [showExport, setShowExport] = useState(false);
   const [showWritingStats, setShowWritingStats] = useState(false);
   const [showEmotionalArc, setShowEmotionalArc] = useState(false);
+  const [showMemoryTimeline, setShowMemoryTimeline] = useState(false);
   const [selectedNote, setSelectedNote] = useState<any>(null);
 
   const { data, loading, refetch } = useQuery<any>(GET_STORY, {
@@ -238,6 +240,9 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           <button onClick={() => setShowEmotionalArc(!showEmotionalArc)} className={`p-2 rounded-lg transition-all ${showEmotionalArc ? 'bg-[#FF6B8B]/10 text-[#FF6B8B]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
             <Heart className="w-4 h-4" />
           </button>
+          <button onClick={() => setShowMemoryTimeline(!showMemoryTimeline)} className={`p-2 rounded-lg transition-all ${showMemoryTimeline ? 'bg-[#CC5DE8]/10 text-[#CC5DE8]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
+            <Hourglass className="w-4 h-4" />
+          </button>
           <button onClick={() => setShowExport(!showExport)} className={`p-2 rounded-lg transition-all ${showExport ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
             <Download className="w-4 h-4" />
           </button>
@@ -319,6 +324,15 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             storyId={storyId}
             isOpen={showEmotionalArc}
             onClose={() => setShowEmotionalArc(false)}
+          />
+        )}
+
+        {/* Memory Timeline Panel */}
+        {showMemoryTimeline && (
+          <MemoryTimelinePanel
+            storyId={storyId}
+            isOpen={showMemoryTimeline}
+            onClose={() => setShowMemoryTimeline(false)}
           />
         )}
 

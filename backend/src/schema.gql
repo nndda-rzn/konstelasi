@@ -99,6 +99,40 @@ type LongestNodeInfo {
   wordCount: Int!
 }
 
+type MemoryInfo {
+  daysSince: Int!
+  eventDate: DateTime!
+  title: String!
+}
+
+type MemoryTimeline {
+  avgDaysSinceEvent: Int!
+  monthlyDistribution: [MonthlyCount!]!
+  newestMemory: MemoryInfo
+  oldestMemory: MemoryInfo
+  timelineItems: [MemoryTimelineItem!]!
+  totalWithEventDate: Int!
+  totalWithoutEventDate: Int!
+}
+
+type MemoryTimelineItem {
+  content: String!
+  daysSinceEvent: Int
+  daysSinceWritten: Int!
+  eventDate: DateTime
+  eventLocation: String
+  mood: String
+  nodeId: String!
+  nodeType: String!
+  title: String!
+  writeDate: DateTime!
+}
+
+type MonthlyCount {
+  count: Int!
+  month: String!
+}
+
 type MoodCount {
   count: Int!
   mood: String!
@@ -156,6 +190,8 @@ type Note {
   color: String
   content: String
   createdAt: DateTime!
+  eventDate: DateTime
+  eventLocation: String
   height: Float
   id: String!
   images: [NoteImage]
@@ -226,6 +262,7 @@ type Query {
   getArchivedNotes(canvasId: String): [Note!]!
   getBookmarks(storyId: String!): [StoryEngagement!]!
   getEmotionalArc(storyId: String!): EmotionalArc!
+  getMemoryTimeline(storyId: String!): MemoryTimeline!
   getNoteVersions(noteId: String!): [NoteVersion!]!
   getNotes(canvasId: String, tagIds: [String!]): [Note!]!
   getProfile: String!

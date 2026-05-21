@@ -3,6 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { StoryService } from './story.service';
 import { StatisticsService } from './statistics.service';
 import { EmotionalArcService } from './emotional-arc.service';
+import { MemoryTimelineService } from './memory-timeline.service';
 import { Story, StoryType, StoryStatus, PrivacyLevel } from '../entities/story.entity';
 import { StoryAccess, AccessLevel } from '../entities/story-access.entity';
 import { Note } from '../entities/note.entity';
@@ -93,6 +94,44 @@ class EmotionalArc {
   @Field() trend!: string;
 }
 
+@ObjectType()
+class MemoryTimelineItem {
+  @Field() nodeId!: string;
+  @Field() title!: string;
+  @Field() nodeType!: string;
+  @Field({ nullable: true }) mood?: string;
+  @Field({ nullable: true }) eventDate?: Date;
+  @Field({ nullable: true }) eventLocation?: string;
+  @Field() writeDate!: Date;
+  @Field(() => Int, { nullable: true }) daysSinceEvent?: number;
+  @Field(() => Int) daysSinceWritten!: number;
+  @Field() content!: string;
+}
+
+@ObjectType()
+class MemoryInfo {
+  @Field() title!: string;
+  @Field() eventDate!: Date;
+  @Field(() => Int) daysSince!: number;
+}
+
+@ObjectType()
+class MonthlyCount {
+  @Field() month!: string;
+  @Field(() => Int) count!: number;
+}
+
+@ObjectType()
+class MemoryTimeline {
+  @Field(() => [MemoryTimelineItem]) timelineItems!: MemoryTimelineItem[];
+  @Field(() => Int) totalWithEventDate!: number;
+  @Field(() => Int) totalWithoutEventDate!: number;
+  @Field(() => MemoryInfo, { nullable: true }) oldestMemory?: MemoryInfo;
+  @Field(() => MemoryInfo, { nullable: true }) newestMemory?: MemoryInfo;
+  @Field(() => Int) avgDaysSinceEvent!: number;
+  @Field(() => [MonthlyCount]) monthlyDistribution!: MonthlyCount[];
+}
+
 @Resolver(() => Story)
 @UseGuards(GqlAuthGuard)
 export class StoryResolver {
@@ -100,6 +139,7 @@ export class StoryResolver {
     private readonly storyService: StoryService,
     private readonly statisticsService: StatisticsService,
     private readonly emotionalArcService: EmotionalArcService,
+    private readonly memoryTimelineService: MemoryTimelineService,
   ) {}
 
   @Query(() => [Story])
@@ -187,5 +227,10 @@ export class StoryResolver {
   @Query(() => EmotionalArc)
   async getEmotionalArc(@CurrentUser() user: any, @Args('storyId') storyId: string) {
     return this.emotionalArcService.getEmotionalArc(user.id, storyId);
+  }
+
+  @Query(() => MemoryTimeline)
+  async getMemoryTimeline(@CurrentUser() user: any, @Args('storyId') storyId: string) {
+    return this.memoryTimelineService.getMemoryTimeline(user.id, storyId);
   }
 }

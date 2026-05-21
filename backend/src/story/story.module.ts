@@ -5,9 +5,10 @@ import { EngagementService } from './engagement.service';
 import { EngagementResolver } from './engagement.resolver';
 import { StatisticsService } from './statistics.service';
 import { EmotionalArcService } from './emotional-arc.service';
+import { MemoryTimelineService } from './memory-timeline.service';
 
 @Module({
-  providers: [StoryService, StoryResolver, EngagementService, EngagementResolver, StatisticsService, EmotionalArcService],
-  exports: [StoryService, EngagementService, StatisticsService, EmotionalArcService],
+  providers: [StoryService, StoryResolver, EngagementService, EngagementResolver, StatisticsService, EmotionalArcService, MemoryTimelineService],
+  exports: [StoryService, EngagementService, StatisticsService, EmotionalArcService, MemoryTimelineService],
 })
 export class StoryModule {}
