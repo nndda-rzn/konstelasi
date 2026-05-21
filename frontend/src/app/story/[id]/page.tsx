@@ -13,7 +13,7 @@ import {
   addEdge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowLeft, Settings, Lock, Globe, Users, Eye } from 'lucide-react';
+import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOpen, Image, List } from 'lucide-react';
 import { ApolloWrapper } from '@/lib/apollo/ApolloWrapper';
 import { Providers } from '@/lib/Providers';
 import { GET_STORY, UPDATE_STORY, ADD_NODE_TO_STORY } from '@/graphql/story';
@@ -23,6 +23,10 @@ import StorySettingsPanel from '@/components/story/StorySettingsPanel';
 import StoryNode from '@/components/story/StoryNode';
 import StoryEdge from '@/components/story/StoryEdge';
 import NodeTypeSelector from '@/components/story/NodeTypeSelector';
+import StoryTimelineView from '@/components/story/StoryTimelineView';
+import StoryReadingView from '@/components/story/StoryReadingView';
+import StoryGalleryView from '@/components/story/StoryGalleryView';
+import StoryOutlineView from '@/components/story/StoryOutlineView';
 
 const nodeTypes = { storyNode: StoryNode };
 const edgeTypes = { storyEdge: StoryEdge };
@@ -34,6 +38,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [showNodeSelector, setShowNodeSelector] = useState(false);
+  const [viewMode, setViewMode] = useState<'canvas' | 'timeline' | 'reading' | 'gallery' | 'outline'>('canvas');
 
   const { data, loading, refetch } = useQuery<any>(GET_STORY, {
     variables: { id: storyId },
@@ -167,6 +172,22 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* View Switcher */}
+          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#FFB4A2]/10 dark:bg-[#FF8FA3]/10">
+            {[
+              { mode: 'canvas', icon: LayoutGrid, label: 'Canvas' },
+              { mode: 'timeline', icon: Clock, label: 'Timeline' },
+              { mode: 'reading', icon: BookOpen, label: 'Reading' },
+              { mode: 'gallery', icon: Image, label: 'Gallery' },
+              { mode: 'outline', icon: List, label: 'Outline' },
+            ].map(({ mode, icon: ModeIcon, label }) => (
+              <button key={mode} onClick={() => setViewMode(mode as any)} title={label}
+                className={`p-1.5 rounded-md transition-all ${viewMode === mode ? 'bg-white dark:bg-[#2a2438] shadow-sm text-[#FF8FA3]' : 'text-[#5A3E4C]/40 dark:text-[#e2d9f3]/40 hover:text-[#5A3E4C]/70'}`}>
+                <ModeIcon className="w-3.5 h-3.5" />
+              </button>
+            ))}
+          </div>
+
           <button onClick={() => setShowNodeSelector(true)} className="px-3 py-1.5 rounded-xl bg-[#FF8FA3]/10 hover:bg-[#FF8FA3]/20 text-[#FF8FA3] text-xs font-medium transition-all">
             + Add Scene
           </button>
@@ -176,23 +197,41 @@ function StoryCanvas({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      {/* Canvas */}
+      {/* Content Area */}
       <div className="flex-1 relative">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          fitView
-          className="bg-[#FFFAF7] dark:bg-[#1a1625]"
-        >
-          <Background color="#FFB4A2" gap={24} size={1} />
-          <Controls />
-          <MiniMap />
-        </ReactFlow>
+        {viewMode === 'canvas' && (
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            fitView
+            className="bg-[#FFFAF7] dark:bg-[#1a1625]"
+          >
+            <Background color="#FFB4A2" gap={24} size={1} />
+            <Controls />
+            <MiniMap />
+          </ReactFlow>
+        )}
+
+        {viewMode === 'timeline' && (
+          <StoryTimelineView nodes={story?.nodes || []} onNodeClick={(id) => setViewMode('canvas')} />
+        )}
+
+        {viewMode === 'reading' && (
+          <StoryReadingView nodes={story?.nodes || []} storyTitle={story?.title || ''} storySubtitle={story?.subtitle} />
+        )}
+
+        {viewMode === 'gallery' && (
+          <StoryGalleryView nodes={story?.nodes || []} />
+        )}
+
+        {viewMode === 'outline' && (
+          <StoryOutlineView nodes={story?.nodes || []} onNodeClick={(id) => setViewMode('canvas')} />
+        )}
 
         {/* Settings Panel */}
         {showSettings && story && (

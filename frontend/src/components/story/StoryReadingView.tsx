@@ -1,0 +1,132 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight, BookOpen, MapPin, Clock } from 'lucide-react';
+
+interface StoryReadingViewProps {
+  nodes: any[];
+  storyTitle: string;
+  storySubtitle?: string;
+}
+
+export default function StoryReadingView({ nodes, storyTitle, storySubtitle }: StoryReadingViewProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const sortedNodes = useMemo(() => {
+    return [...nodes].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  }, [nodes]);
+
+  if (sortedNodes.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-sm text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">Belum ada node dalam story ini</p>
+      </div>
+    );
+  }
+
+  const currentNode = sortedNodes[currentIndex];
+  let metadata: any = {};
+  try { if (currentNode.storyMetadata) metadata = JSON.parse(currentNode.storyMetadata); } catch {}
+
+  const goNext = () => setCurrentIndex(Math.min(currentIndex + 1, sortedNodes.length - 1));
+  const goPrev = () => setCurrentIndex(Math.max(currentIndex - 1, 0));
+
+  return (
+    <div className="h-full flex flex-col bg-[#FFFAF7] dark:bg-[#1a1625]">
+      {/* Reading Header */}
+      <div className="flex items-center justify-between px-8 py-4 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+        <div className="flex items-center gap-2">
+          <BookOpen className="w-4 h-4 text-[#FF8FA3]" />
+          <span className="text-xs font-medium text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50">{storyTitle}</span>
+        </div>
+        <span className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">
+          {currentIndex + 1} / {sortedNodes.length}
+        </span>
+      </div>
+
+      {/* Reading Content */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div className="max-w-xl mx-auto px-8 py-12">
+          {/* Node type badge */}
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-[9px] uppercase tracking-wider font-semibold text-[#FF8FA3]">
+              {(currentNode.storyNodeType || 'scene').replace('_', ' ')}
+            </span>
+            {metadata.sceneLocation && (
+              <span className="flex items-center gap-1 text-[9px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">
+                <MapPin className="w-2.5 h-2.5" /> {metadata.sceneLocation}
+              </span>
+            )}
+            {metadata.sceneTime && (
+              <span className="flex items-center gap-1 text-[9px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">
+                <Clock className="w-2.5 h-2.5" /> {metadata.sceneTime}
+              </span>
+            )}
+          </div>
+
+          {/* Title */}
+          <h1 className="text-2xl font-bold text-[#4A2F3C] dark:text-[#e2d9f3] mb-6 leading-tight">
+            {currentNode.title || 'Untitled'}
+          </h1>
+
+          {/* Images */}
+          {currentNode.images?.length > 0 && (
+            <div className="mb-6 rounded-xl overflow-hidden">
+              <img src={currentNode.images[0].imageUrl} alt="" className="w-full max-h-[300px] object-cover" />
+              {currentNode.images.length > 1 && (
+                <div className="flex gap-1.5 mt-1.5">
+                  {currentNode.images.slice(1, 4).map((img: any) => (
+                    <div key={img.id} className="flex-1 h-16 rounded-lg overflow-hidden">
+                      <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Content */}
+          <div className="prose-dark prose prose-sm max-w-none text-[#5A3E4C] dark:text-[#e2d9f3]/80 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: currentNode.content || '<p class="text-[#5A3E4C]/30 italic">Belum ada konten...</p>' }} />
+
+          {/* Mood */}
+          {currentNode.mood && (
+            <div className="mt-8 pt-4 border-t border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+              <span className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 italic">
+                Mood: {currentNode.mood}
+              </span>
+            </div>
+          )}
+
+          {/* Date */}
+          <div className="mt-4">
+            <span className="text-[9px] text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20">
+              {new Date(currentNode.createdAt).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex items-center justify-between px-8 py-4 border-t border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+        <button onClick={goPrev} disabled={currentIndex === 0}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50 hover:bg-[#FFB4A2]/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+          <ChevronLeft className="w-4 h-4" /> Sebelumnya
+        </button>
+
+        {/* Progress dots */}
+        <div className="flex gap-1">
+          {sortedNodes.map((_: any, i: number) => (
+            <button key={i} onClick={() => setCurrentIndex(i)}
+              className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentIndex ? 'bg-[#FF8FA3] w-4' : 'bg-[#FFB4A2]/30 hover:bg-[#FFB4A2]/50'}`} />
+          ))}
+        </div>
+
+        <button onClick={goNext} disabled={currentIndex === sortedNodes.length - 1}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50 hover:bg-[#FFB4A2]/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+          Selanjutnya <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
