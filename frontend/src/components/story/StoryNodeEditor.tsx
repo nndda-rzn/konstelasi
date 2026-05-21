@@ -71,7 +71,12 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
           },
         });
         onUpdateCache(note.id, title, content, undefined, undefined, mood);
-      } catch (err) {
+      } catch (err: any) {
+        // If note not found (deleted), close editor silently
+        if (err?.message?.includes('not found') || err?.message?.includes('Not Found')) {
+          onDeleteSuccess();
+          return;
+        }
         console.error('Auto-save failed:', err);
       }
     }, 800);
