@@ -29,6 +29,8 @@ import StoryGalleryView from '@/components/story/StoryGalleryView';
 import StoryOutlineView from '@/components/story/StoryOutlineView';
 import StoryAnalyticsPanel from '@/components/story/StoryAnalyticsPanel';
 import StoryExportPanel from '@/components/story/StoryExportPanel';
+import NoteEditorSidebar from '@/components/canvas/NoteEditorSidebar';
+import { UPDATE_NOTE_CONTENT } from '@/graphql/mutations';
 
 const nodeTypes = { storyNode: StoryNode };
 const edgeTypes = { storyEdge: StoryEdge };
@@ -43,6 +45,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   const [viewMode, setViewMode] = useState<'canvas' | 'timeline' | 'reading' | 'gallery' | 'outline'>('canvas');
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<any>(null);
 
   const { data, loading, refetch } = useQuery<any>(GET_STORY, {
     variables: { id: storyId },
@@ -141,6 +144,34 @@ function StoryCanvas({ params }: { params: { id: string } }) {
     }
   };
 
+  // Double-click to edit node
+  const handleNodeDoubleClick = useCallback((_event: any, node: any) => {
+    const noteData = story?.nodes?.find((n: any) => n.id === node.id);
+    if (noteData) {
+      setSelectedNote(noteData);
+    }
+  }, [story]);
+
+  // Update cache when editing
+  const handleUpdateCache = (nodeId: string, newTitle?: string, newContent?: string, newImages?: any[], color?: string, mood?: string) => {
+    setNodes((nds: any) => nds.map((n: any) => {
+      if (n.id === nodeId) {
+        return {
+          ...n,
+          data: {
+            ...n.data,
+            title: newTitle ?? n.data.title,
+            content: newContent ?? n.data.content,
+            images: newImages ?? n.data.images,
+            color: color ?? n.data.color,
+            mood: mood ?? n.data.mood,
+          },
+        };
+      }
+      return n;
+    }));
+  };
+
   const privacyIcon = story?.privacyLevel === 'private' ? Lock
     : story?.privacyLevel === 'friends_only' ? Users : Globe;
   const PrivIcon = privacyIcon;
@@ -213,6 +244,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
+            onNodeDoubleClick={handleNodeDoubleClick}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
             fitView
@@ -269,6 +301,16 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             nodes={story.nodes || []}
             isOpen={showExport}
             onClose={() => setShowExport(false)}
+          />
+        )}
+
+        {/* Note Editor Sidebar */}
+        {selectedNote && (
+          <NoteEditorSidebar
+            note={selectedNote}
+            onClose={() => { setSelectedNote(null); refetch(); }}
+            onUpdateCache={handleUpdateCache}
+            onDeleteSuccess={() => { setSelectedNote(null); refetch(); }}
           />
         )}
       </div>
