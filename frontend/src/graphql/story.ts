@@ -48,6 +48,8 @@ export const GET_STORY = gql`
         storyNodeType
         storyMetadata
         isLocked
+        eventDate
+        eventLocation
         images { id imageUrl caption }
         tags { id name color }
         outgoingEdges { id source { id } target { id } sourceHandle targetHandle label color }

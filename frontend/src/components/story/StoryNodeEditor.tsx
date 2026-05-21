@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Trash2, Lock, Unlock, MapPin, Clock, Heart, Save, Loader2 } from 'lucide-react';
+import { X, Trash2, Lock, Unlock, MapPin, Clock, Heart, Save, Loader2, Calendar } from 'lucide-react';
 import { useMutation } from '@apollo/client/react';
 import { UPDATE_NOTE_CONTENT, DELETE_NOTE } from '@/graphql/mutations';
 import { TOGGLE_NODE_LOCK } from '@/graphql/story';
@@ -44,6 +44,8 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
   const [content, setContent] = useState(note?.content || '');
   const [mood, setMood] = useState(note?.mood || '');
   const [isLocked, setIsLocked] = useState(note?.isLocked || false);
+  const [eventDate, setEventDate] = useState(note?.eventDate ? note.eventDate.split('T')[0] : '');
+  const [eventLocation, setEventLocation] = useState(note?.eventLocation || '');
   const [saving, setSaving] = useState(false);
 
   // Parse metadata
@@ -67,6 +69,8 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
               title,
               content,
               mood: mood || undefined,
+              eventDate: eventDate || undefined,
+              eventLocation: eventLocation || undefined,
             },
           },
         });
@@ -81,7 +85,7 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
       }
     }, 800);
     return () => clearTimeout(handler);
-  }, [title, content, mood]);
+  }, [title, content, mood, eventDate, eventLocation]);
 
   // Reset state when note changes
   useEffect(() => {
@@ -90,6 +94,8 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
       setContent(note.content || '');
       setMood(note.mood || '');
       setIsLocked(note.isLocked || false);
+      setEventDate(note.eventDate ? note.eventDate.split('T')[0] : '');
+      setEventLocation(note.eventLocation || '');
       try { setMetadata(note.storyMetadata ? JSON.parse(note.storyMetadata) : {}); } catch { setMetadata({}); }
     }
   }, [note?.id]);
@@ -199,6 +205,24 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
                 {em.label}
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Event Date & Location (for Memory Timeline) */}
+        <div>
+          <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-2">Kapan & Dimana</label>
+          <div className="flex gap-2">
+            <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#CC5DE8]/5 border border-[#CC5DE8]/10">
+              <Calendar className="w-3.5 h-3.5 text-[#CC5DE8]/60" />
+              <input type="date" value={eventDate} onChange={e => setEventDate(e.target.value)}
+                className="flex-1 text-xs text-[#4A2F3C] dark:text-[#e2d9f3] bg-transparent outline-none" />
+            </div>
+            <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#38D9A9]/5 border border-[#38D9A9]/10">
+              <MapPin className="w-3.5 h-3.5 text-[#38D9A9]/60" />
+              <input type="text" value={eventLocation} onChange={e => setEventLocation(e.target.value)}
+                placeholder="Lokasi kejadian..."
+                className="flex-1 text-xs text-[#4A2F3C] dark:text-[#e2d9f3] bg-transparent outline-none placeholder:text-[#5A3E4C]/20" />
+            </div>
           </div>
         </div>
 

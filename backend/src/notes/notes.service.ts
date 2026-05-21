@@ -114,6 +114,8 @@ export class NotesService {
     if (input.color !== undefined) note.color = input.color;
     if (input.type !== undefined) note.type = input.type;
     if (input.mood !== undefined) (note as any).mood = input.mood;
+    if (input.eventDate !== undefined) (note as any).eventDate = input.eventDate ? new Date(input.eventDate) : null;
+    if (input.eventLocation !== undefined) (note as any).eventLocation = input.eventLocation || null;
     await this.em.flush();
     
     // Record writing activity for streak

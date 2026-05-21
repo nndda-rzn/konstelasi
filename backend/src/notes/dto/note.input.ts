@@ -51,6 +51,12 @@ export class UpdateNoteContentInput {
   mood?: string;
 
   @Field(() => String, { nullable: true })
+  eventDate?: string;
+
+  @Field(() => String, { nullable: true })
+  eventLocation?: string;
+
+  @Field(() => String, { nullable: true })
   canvasId?: string;
 
   @Field(() => [String], { nullable: true })

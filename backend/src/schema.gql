@@ -408,6 +408,8 @@ input UpdateNoteContentInput {
   canvasId: String
   color: String
   content: String
+  eventDate: String
+  eventLocation: String
   id: String!
   mood: String
   tagIds: [String!]
