@@ -2,13 +2,24 @@
 @plugin "@tailwindcss/typography";
 
 :root {
-  --background: #0f0f14;
-  --foreground: #f0e6e6;
-  --card-bg: rgba(255, 255, 255, 0.04);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --red-glow: rgba(220, 38, 38, 0.15);
-  --gold: #D4AF37;
-  --gold-soft: rgba(212, 175, 55, 0.15);
+  --background: #FFFAF7;
+  --foreground: #5A3E4C;
+  --card-bg: rgba(255, 245, 240, 0.8);
+  --card-border: rgba(255, 180, 162, 0.25);
+  --accent: #FF8FA3;
+  --accent-soft: rgba(255, 143, 163, 0.15);
+  --peach: #FFB4A2;
+  --peach-soft: rgba(255, 180, 162, 0.15);
+
+  /* Toast — Peach Blossom */
+  --toast-bg: #FFF5F0;
+  --toast-text: #5A3E4C;
+  --toast-border: rgba(255, 180, 162, 0.4);
+  --toast-shadow: rgba(255, 122, 138, 0.12);
+  --toast-success: #FFB4A2;
+  --toast-error: #FF6B9D;
+  --toast-info: #FFCAD4;
+  --toast-warning: #FFD6A5;
 }
 
 @theme inline {
@@ -26,8 +37,23 @@ body {
 }
 
 ::selection {
-  background: rgba(220, 38, 38, 0.35);
-  color: #fff;
+  background: rgba(255, 143, 163, 0.3);
+  color: #5A3E4C;
+}
+
+/* Custom Scrollbar for NoteNode */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 180, 162, 0.4);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 180, 162, 0.6);
 }
 
 /* ── Scrollbar ── */
@@ -35,20 +61,20 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 180, 162, 0.05);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(220, 38, 38, 0.3);
+  background: rgba(255, 143, 163, 0.3);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(220, 38, 38, 0.5);
+  background: rgba(255, 143, 163, 0.5);
 }
 
 /* ── Animations ── */
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 15px rgba(220, 38, 38, 0.15), 0 0 30px rgba(220, 38, 38, 0.05); }
-  50% { box-shadow: 0 0 25px rgba(220, 38, 38, 0.25), 0 0 50px rgba(220, 38, 38, 0.1); }
+  0%, 100% { box-shadow: 0 0 15px rgba(255, 180, 162, 0.2), 0 0 30px rgba(255, 180, 162, 0.08); }
+  50% { box-shadow: 0 0 25px rgba(255, 180, 162, 0.35), 0 0 50px rgba(255, 180, 162, 0.15); }
 }
 
 @keyframes shimmer {
@@ -127,78 +153,78 @@ body {
 .react-flow__handle {
   width: 10px !important;
   height: 10px !important;
-  background: rgba(220, 38, 38, 0.35) !important;
-  border: 1.5px solid rgba(220, 38, 38, 0.15) !important;
+  background: rgba(255, 143, 163, 0.5) !important;
+  border: 1.5px solid rgba(255, 143, 163, 0.25) !important;
   border-radius: 50% !important;
   transition: all 0.2s ease !important;
   cursor: crosshair !important;
 }
 
 .react-flow__node:hover .react-flow__handle {
-  background: rgba(248, 113, 113, 0.6) !important;
-  border-color: rgba(248, 113, 113, 0.3) !important;
-  box-shadow: 0 0 8px rgba(220, 38, 38, 0.3) !important;
+  background: rgba(255, 143, 163, 0.7) !important;
+  border-color: rgba(255, 143, 163, 0.4) !important;
+  box-shadow: 0 0 8px rgba(255, 143, 163, 0.3) !important;
 }
 
 .react-flow__handle:hover {
   width: 14px !important;
   height: 14px !important;
-  background: rgba(248, 113, 113, 0.9) !important;
-  border-color: rgba(248, 113, 113, 0.5) !important;
-  box-shadow: 0 0 14px rgba(220, 38, 38, 0.5) !important;
+  background: rgba(255, 143, 163, 0.9) !important;
+  border-color: rgba(255, 143, 163, 0.6) !important;
+  box-shadow: 0 0 14px rgba(255, 143, 163, 0.5) !important;
 }
 
 .react-flow__handle.connecting,
 .react-flow__handle.valid {
   width: 14px !important;
   height: 14px !important;
-  background: rgba(248, 113, 113, 1) !important;
-  box-shadow: 0 0 18px rgba(220, 38, 38, 0.6) !important;
+  background: rgba(255, 143, 163, 1) !important;
+  box-shadow: 0 0 18px rgba(255, 143, 163, 0.6) !important;
 }
 
 .react-flow__background {
-  background-color: #0f0f14 !important;
+  background-color: #FFFAF7 !important;
 }
 
 .react-flow__controls {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(255, 180, 162, 0.2) !important;
   border-radius: 12px !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(255, 143, 163, 0.1) !important;
   backdrop-filter: blur(12px) !important;
 }
 
 .react-flow__controls button {
   background: transparent !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
-  fill: rgba(255, 255, 255, 0.5) !important;
-  color: rgba(255, 255, 255, 0.5) !important;
+  border-bottom: 1px solid rgba(255, 180, 162, 0.15) !important;
+  fill: rgba(90, 62, 76, 0.5) !important;
+  color: rgba(90, 62, 76, 0.5) !important;
 }
 
 .react-flow__controls button:hover {
-  background: rgba(220, 38, 38, 0.15) !important;
-  fill: #f87171 !important;
+  background: rgba(255, 180, 162, 0.15) !important;
+  fill: #FF8FA3 !important;
 }
 
 .react-flow__minimap {
-  background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(255, 180, 162, 0.2) !important;
   border-radius: 12px !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(255, 143, 163, 0.1) !important;
 }
 
 .react-flow__edge-path {
-  stroke: rgba(239, 68, 68, 0.4) !important;
+  stroke: rgba(255, 143, 163, 0.5) !important;
   stroke-width: 2.5px !important;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  filter: drop-shadow(0 0 2px rgba(220, 38, 38, 0.3));
+  filter: drop-shadow(0 0 2px rgba(255, 143, 163, 0.3));
 }
 
 .react-flow__edge:hover .react-flow__edge-path,
 .react-flow__edge.selected .react-flow__edge-path {
-  stroke: rgba(248, 113, 113, 1) !important;
+  stroke: rgba(255, 143, 163, 1) !important;
   stroke-width: 3.5px !important;
-  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.8)) drop-shadow(0 0 16px rgba(220, 38, 38, 0.4)) !important;
+  filter: drop-shadow(0 0 8px rgba(255, 143, 163, 0.6)) drop-shadow(0 0 16px rgba(255, 180, 162, 0.3)) !important;
   stroke-dasharray: 8 8;
   animation: flow-dash 1s linear infinite;
 }
@@ -209,19 +235,36 @@ body {
 }
 
 .react-flow__connection-path {
-  stroke: #f87171 !important;
+  stroke: #FF8FA3 !important;
   stroke-width: 2px !important;
   stroke-dasharray: 5 5 !important;
 }
 
-/* ── Prose Dark Mode ── */
+/* ── Prose ── */
 .prose-dark {
-  --tw-prose-body: #d1d5db;
-  --tw-prose-headings: #f3f4f6;
-  --tw-prose-bold: #f3f4f6;
-  --tw-prose-links: #f87171;
-  --tw-prose-bullets: #9ca3af;
-  --tw-prose-counters: #9ca3af;
-  --tw-prose-quotes: #d1d5db;
-  --tw-prose-quote-borders: rgba(220, 38, 38, 0.4);
+  --tw-prose-body: #5A3E4C;
+  --tw-prose-headings: #4A2F3C;
+  --tw-prose-bold: #4A2F3C;
+  --tw-prose-links: #FF8FA3;
+  --tw-prose-bullets: #9B8A91;
+  --tw-prose-counters: #9B8A91;
+  --tw-prose-quotes: #5A3E4C;
+  --tw-prose-quote-borders: rgba(255, 143, 163, 0.4);
+}
+
+/* ── Toast Styles (Peach Blossom) ── */
+.konstelasi-toast-success {
+  border-left: 4px solid var(--toast-success) !important;
+}
+
+.konstelasi-toast-error {
+  border-left: 4px solid var(--toast-error) !important;
+}
+
+.konstelasi-toast-info {
+  border-left: 4px solid var(--toast-info) !important;
+}
+
+.konstelasi-toast-warning {
+  border-left: 4px solid var(--toast-warning) !important;
 }

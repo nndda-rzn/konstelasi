@@ -1,9 +1,12 @@
+/* eslint-disable prettier/prettier */
 // eslint-disable-next-line prettier/prettier
-import { Entity, PrimaryKey, Property, ManyToOne, OneToMany, Collection } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, OneToMany, Collection, ManyToMany } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { User } from './user.entity';
 import { NoteImage } from './note-image.entity';
 import { NoteLink } from './note-link.entity';
+import { Tag } from './tag.entity';
+import { Canvas } from './canvas.entity';
 import { ObjectType, Field, Float } from '@nestjs/graphql';
 
 @ObjectType()
@@ -45,6 +48,10 @@ export class Note {
   @Property({ nullable: true })
   color?: string;
 
+  @Field(() => String, { nullable: true })
+  @Property({ nullable: true })
+  mood?: string;
+
   // Fitur Grouping (Self-Relation)
   @Field(() => Note, { nullable: true })
   @ManyToOne(() => Note, { nullable: true })
@@ -70,6 +77,24 @@ export class Note {
   @Field(() => [NoteLink], { nullable: 'itemsAndList' })
   @OneToMany(() => NoteLink, link => link.target)
   incomingEdges = new Collection<NoteLink>(this);
+
+  // Canvas relationship (Multi-canvas support)
+  @Field(() => Canvas, { nullable: true })
+  @ManyToOne(() => Canvas, { nullable: true })
+  canvas?: Canvas;
+
+  // Tag relationship (Many-to-many)
+  @Field(() => [Tag], { nullable: 'itemsAndList' })
+  @ManyToMany(() => Tag, tag => tag.notes, { owner: true })
+  tags = new Collection<Tag>(this);
+
+  @Field(() => Boolean)
+  @Property({ default: false })
+  isArchived: boolean = false;
+
+  @Field(() => Date, { nullable: true })
+  @Property({ nullable: true })
+  archivedAt?: Date;
 
   @Field(() => Date)
   @Property()

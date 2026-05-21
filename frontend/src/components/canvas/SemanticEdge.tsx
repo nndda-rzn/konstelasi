@@ -1,15 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { BaseEdge, EdgeLabelRenderer, getBezierPath } from '@xyflow/react';
+import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath } from '@xyflow/react';
 
 const EDGE_THEMES: Record<string, { stroke: string, glow: string, labelHoverText: string, labelHoverBorder: string }> = {
-  default: { stroke: 'rgba(255,255,255,0.3)', glow: 'rgba(255,255,255,0.2)', labelHoverText: 'group-hover:text-white', labelHoverBorder: 'group-hover:border-white/30' },
-  red: { stroke: 'rgba(239,68,68,0.7)', glow: 'rgba(239,68,68,0.4)', labelHoverText: 'group-hover:text-red-300', labelHoverBorder: 'group-hover:border-red-500/50' },
-  amber: { stroke: 'rgba(245,158,11,0.7)', glow: 'rgba(245,158,11,0.4)', labelHoverText: 'group-hover:text-amber-300', labelHoverBorder: 'group-hover:border-amber-500/50' },
-  emerald: { stroke: 'rgba(16,185,129,0.7)', glow: 'rgba(16,185,129,0.4)', labelHoverText: 'group-hover:text-emerald-300', labelHoverBorder: 'group-hover:border-emerald-500/50' },
-  blue: { stroke: 'rgba(59,130,246,0.7)', glow: 'rgba(59,130,246,0.4)', labelHoverText: 'group-hover:text-blue-300', labelHoverBorder: 'group-hover:border-blue-500/50' },
-  indigo: { stroke: 'rgba(99,102,241,0.7)', glow: 'rgba(99,102,241,0.4)', labelHoverText: 'group-hover:text-indigo-300', labelHoverBorder: 'group-hover:border-indigo-500/50' },
-  purple: { stroke: 'rgba(168,85,247,0.7)', glow: 'rgba(168,85,247,0.4)', labelHoverText: 'group-hover:text-purple-300', labelHoverBorder: 'group-hover:border-purple-500/50' },
-  pink: { stroke: 'rgba(236,72,153,0.7)', glow: 'rgba(236,72,153,0.4)', labelHoverText: 'group-hover:text-pink-300', labelHoverBorder: 'group-hover:border-pink-500/50' },
+  default: { stroke: 'rgba(255,180,162,0.5)', glow: 'rgba(255,180,162,0.3)', labelHoverText: 'group-hover:text-[#5A3E4C]', labelHoverBorder: 'group-hover:border-[#FFB4A2]/50' },
+  red: { stroke: 'rgba(255,143,163,0.7)', glow: 'rgba(255,143,163,0.4)', labelHoverText: 'group-hover:text-[#FF8FA3]', labelHoverBorder: 'group-hover:border-[#FF8FA3]/50' },
+  amber: { stroke: 'rgba(251,191,36,0.7)', glow: 'rgba(251,191,36,0.4)', labelHoverText: 'group-hover:text-amber-600', labelHoverBorder: 'group-hover:border-amber-400/50' },
+  emerald: { stroke: 'rgba(52,211,153,0.7)', glow: 'rgba(52,211,153,0.4)', labelHoverText: 'group-hover:text-emerald-600', labelHoverBorder: 'group-hover:border-emerald-400/50' },
+  blue: { stroke: 'rgba(96,165,250,0.7)', glow: 'rgba(96,165,250,0.4)', labelHoverText: 'group-hover:text-blue-600', labelHoverBorder: 'group-hover:border-blue-400/50' },
+  indigo: { stroke: 'rgba(129,140,248,0.7)', glow: 'rgba(129,140,248,0.4)', labelHoverText: 'group-hover:text-indigo-600', labelHoverBorder: 'group-hover:border-indigo-400/50' },
+  purple: { stroke: 'rgba(192,132,252,0.7)', glow: 'rgba(192,132,252,0.4)', labelHoverText: 'group-hover:text-purple-600', labelHoverBorder: 'group-hover:border-purple-400/50' },
+  pink: { stroke: 'rgba(244,114,182,0.7)', glow: 'rgba(244,114,182,0.4)', labelHoverText: 'group-hover:text-pink-600', labelHoverBorder: 'group-hover:border-pink-400/50' },
 };
 
 export default function SemanticEdge({
@@ -24,13 +24,14 @@ export default function SemanticEdge({
   markerEnd,
   data,
 }: any) {
-  const [edgePath, labelX, labelY] = getBezierPath({
+  const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
     sourceY,
     sourcePosition,
     targetX,
     targetY,
     targetPosition,
+    borderRadius: 24,
   });
 
   const { label = '', color = 'default', onLabelChange } = data || {};
@@ -90,15 +91,15 @@ export default function SemanticEdge({
               onChange={(e) => setEditValue(e.target.value)}
               onBlur={handleSubmit}
               onKeyDown={handleKeyDown}
-              className="bg-[#13131c]/90 border border-red-500/50 text-white text-[11px] px-2.5 py-1 rounded-lg shadow-2xl focus:outline-none w-32 text-center"
+              className="bg-white/95 border border-[#FF8FA3]/50 text-[#4A2F3C] text-[11px] px-2.5 py-1 rounded-lg shadow-2xl focus:outline-none w-32 text-center"
               placeholder="Edge label..."
             />
           ) : (
             <div 
               className={`px-3 py-1 rounded-full text-[10px] font-semibold tracking-wider transition-all cursor-pointer backdrop-blur-md border ${
                 label 
-                ? `bg-[#181824]/90 text-white border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.5)] group-hover:bg-[#1a1a26] ${theme.labelHoverBorder} ${theme.labelHoverText}` 
-                : 'bg-transparent text-transparent border-transparent group-hover:bg-[#13131c]/70 group-hover:text-white/40 group-hover:border-white/10'
+                ? `bg-white/90 text-[#5A3E4C] border-[#FFB4A2]/20 shadow-[0_4px_12px_rgba(255,180,162,0.2)] group-hover:bg-white ${theme.labelHoverBorder} ${theme.labelHoverText}` 
+                : 'bg-transparent text-transparent border-transparent group-hover:bg-white/70 group-hover:text-[#5A3E4C]/40 group-hover:border-[#FFB4A2]/20'
               }`}
             >
               {label || 'Label Edge'}

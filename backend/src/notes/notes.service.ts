@@ -1,27 +1,48 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
+import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { Note } from '../entities/note.entity';
 import { NoteLink } from '../entities/note-link.entity';
 import { NoteImage } from '../entities/note-image.entity';
 import { User } from '../entities/user.entity';
-import { CreateNoteInput, UpdateNotePositionInput, UpdateNoteContentInput, CreateNoteLinkInput, AddNoteImageInput, UpdateNoteLinkInput } from './dto/note.input';
+import { Tag } from '../entities/tag.entity';
+import { Canvas } from '../entities/canvas.entity';
+import { CreateNoteInput, UpdateNotePositionInput, UpdateNoteContentInput, CreateNoteLinkInput, AddNoteImageInput, UpdateNoteLinkInput, UpdateNoteSizeInput, BatchUpdateNoteInput } from './dto/note.input';
+import { StreakService } from '../streak/streak.service';
 
 @Injectable()
 export class NotesService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly streakService: StreakService,
+  ) {}
 
-  // Fetch all notes for a specific user, populating required relations
-  async findAllByUser(userId: string): Promise<Note[]> {
+  // Fetch all notes for a specific user, with optional filters for canvas and tags
+  async findAllByUser(
+    userId: string,
+    filters?: { canvasId?: string; tagIds?: string[] }
+  ): Promise<Note[]> {
+    const where: any = { user: { id: userId }, isArchived: false };
+
+    if (filters?.canvasId) {
+      where.canvas = { id: filters.canvasId };
+    }
+
+    if (filters?.tagIds?.length) {
+      where.tags = { id: { $in: filters.tagIds } };
+    }
+
     return this.em.find(
       Note,
-      { user: { id: userId } },
-      { populate: ['images', 'outgoingEdges', 'incomingEdges'] }
+      where,
+      {
+        populate: ['images', 'outgoingEdges', 'incomingEdges', 'canvas', 'tags']
+      }
     );
   }
 
   async createNote(userId: string, input: CreateNoteInput): Promise<Note> {
     const user = await this.em.findOneOrFail(User, { id: userId });
-    const note = this.em.create(Note, {
+    const noteData: any = {
       title: input.title || 'New Note',
       positionX: input.positionX || 0,
       positionY: input.positionY || 0,
@@ -29,8 +50,29 @@ export class NotesService {
       type: 'default',
       createdAt: new Date(),
       updatedAt: new Date(),
-    });
+    };
+
+    // Handle canvas assignment
+    if (input.canvasId) {
+      const canvas = await this.em.findOneOrFail(Canvas, { id: input.canvasId, user: { id: userId } });
+      noteData.canvas = canvas;
+    }
+
+    // Handle tag assignment
+    if (input.tagIds?.length) {
+      const tags = await this.em.find(
+        Tag,
+        { id: { $in: input.tagIds }, user: { id: userId } }
+      );
+      noteData.tags = tags;
+    }
+
+    const note = this.em.create(Note, noteData);
     await this.em.persistAndFlush(note);
+    
+    // Record writing activity for streak
+    await this.streakService.recordWriteActivity(userId);
+    
     return note;
   }
 
@@ -47,8 +89,40 @@ export class NotesService {
     if (input.title !== undefined) note.title = input.title;
     if (input.content !== undefined) note.content = input.content;
     if (input.color !== undefined) note.color = input.color;
+    if (input.type !== undefined) note.type = input.type;
+    if (input.mood !== undefined) (note as any).mood = input.mood;
+    await this.em.flush();
+    
+    // Record writing activity for streak
+    await this.streakService.recordWriteActivity(userId);
+    
+    return note;
+  }
+
+  async updateSize(userId: string, input: UpdateNoteSizeInput): Promise<Note> {
+    const note = await this.em.findOneOrFail(Note, { id: input.id, user: { id: userId } });
+    note.width = input.width;
+    note.height = input.height;
     await this.em.flush();
     return note;
+  }
+
+  async batchUpdateNotes(userId: string, inputs: BatchUpdateNoteInput[]): Promise<Note[]> {
+    const ids = inputs.map(i => i.id);
+    const notes = await this.em.find(Note, { id: { $in: ids }, user: { id: userId } });
+    
+    for (const input of inputs) {
+      const note = notes.find(n => n.id === input.id);
+      if (note) {
+        if (input.positionX !== undefined) note.positionX = input.positionX;
+        if (input.positionY !== undefined) note.positionY = input.positionY;
+        if (input.width !== undefined) note.width = input.width;
+        if (input.height !== undefined) note.height = input.height;
+      }
+    }
+    
+    await this.em.flush();
+    return notes;
   }
 
   async deleteNote(userId: string, noteId: string): Promise<boolean> {
@@ -141,5 +215,33 @@ export class NotesService {
     const image = await this.em.findOneOrFail(NoteImage, { id: imageId, user: { id: userId } });
     await this.em.removeAndFlush(image);
     return true;
+  }
+
+  // Archive Feature
+  async archiveNote(userId: string, noteId: string): Promise<Note> {
+    const note = await this.em.findOneOrFail(Note, { id: noteId, user: { id: userId } });
+    note.isArchived = true;
+    note.archivedAt = new Date();
+    await this.em.flush();
+    return note;
+  }
+
+  async unarchiveNote(userId: string, noteId: string): Promise<Note> {
+    const note = await this.em.findOneOrFail(Note, { id: noteId, user: { id: userId } });
+    note.isArchived = false;
+    note.archivedAt = undefined;
+    await this.em.flush();
+    return note;
+  }
+
+  async getArchivedNotes(userId: string, canvasId?: string): Promise<Note[]> {
+    const where: any = { user: { id: userId }, isArchived: true };
+    if (canvasId) {
+      where.canvas = { id: canvasId };
+    }
+    return this.em.find(Note, where, {
+      populate: ['images', 'canvas', 'tags'],
+      orderBy: { archivedAt: 'DESC' }
+    });
   }
 }

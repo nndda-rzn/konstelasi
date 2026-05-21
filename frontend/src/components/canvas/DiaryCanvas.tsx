@@ -18,14 +18,22 @@ import {
 import '@xyflow/react/dist/style.css';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { GET_NOTES } from '@/graphql/queries';
-import { CREATE_NOTE, UPDATE_NOTE_POSITION, CREATE_NOTE_LINK, DELETE_NOTE_LINK, UPDATE_NOTE_LINK, DELETE_NOTE } from '@/graphql/mutations';
+import { CREATE_NOTE, UPDATE_NOTE_POSITION, UPDATE_NOTE_SIZE, BATCH_UPDATE_NOTES, CREATE_NOTE_LINK, DELETE_NOTE_LINK, UPDATE_NOTE_LINK, DELETE_NOTE } from '@/graphql/mutations';
 import NoteNode from './NoteNode';
 import SemanticEdge from './SemanticEdge';
 import NoteEditorSidebar from './NoteEditorSidebar';
-import { Loader2, LogOut, Sparkles, Search, Download } from 'lucide-react';
+import TimelineView from './TimelineView';
+import { Loader2, LogOut, Sparkles, Search, Download, LayoutTemplate, List, Tag as TagIcon, Clock, BarChart3, Archive } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toPng } from 'html-to-image';
+import { useCanvas } from '@/context/CanvasContext';
+import { useTags } from '@/context/TagContext';
+import TagPanel from './TagPanel';
+import SearchPanel from './SearchPanel';
+import StatsPanel from './StatsPanel';
+import ArchivePanel from './ArchivePanel';
+import StreakWidget from './StreakWidget';
 
 const nodeTypes = {
   default: NoteNode,
@@ -40,19 +48,32 @@ let debounceTimer: NodeJS.Timeout;
 export default function DiaryCanvas() {
   const router = useRouter();
   const supabase = createClient();
+  const { selectedCanvasId } = useCanvas();
+  const { selectedTagFilters } = useTags();
   const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
   const [selectedNote, setSelectedNote] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'canvas' | 'thread' | 'timeline'>('canvas');
+  const [showTagPanel, setShowTagPanel] = useState(false);
+  const [showSearchPanel, setShowSearchPanel] = useState(false);
+  const [showStatsPanel, setShowStatsPanel] = useState(false);
+  const [showArchivePanel, setShowArchivePanel] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const { data, loading, error, refetch } = useQuery<any>(GET_NOTES, {
+    variables: { 
+      canvasId: selectedCanvasId || undefined,
+      tagIds: selectedTagFilters.length > 0 ? selectedTagFilters : undefined,
+    },
     fetchPolicy: 'cache-and-network',
     ssr: false
   });
   
   const [createNote] = useMutation<any>(CREATE_NOTE);
   const [updateNotePosition] = useMutation<any>(UPDATE_NOTE_POSITION);
+  const [updateNoteSize] = useMutation<any>(UPDATE_NOTE_SIZE);
+  const [batchUpdateNotes] = useMutation<any>(BATCH_UPDATE_NOTES);
   const [createNoteLink] = useMutation<any>(CREATE_NOTE_LINK);
   const [deleteNoteLink] = useMutation<any>(DELETE_NOTE_LINK);
   const [updateNoteLink] = useMutation<any>(UPDATE_NOTE_LINK);
@@ -69,11 +90,20 @@ export default function DiaryCanvas() {
           content: note.content,
           images: note.images,
           color: note.color || 'default',
+          type: note.type || 'default',
+          mood: note.mood || '',
           incomingEdges: note.incomingEdges,
+          outgoingEdges: note.outgoingEdges,
+          tags: note.tags || [],
+          createdAt: note.createdAt || new Date().toISOString(),
           isSearching: searchQuery !== '',
           isMatch: true,
           onDoubleClick: () => handleNodeDoubleClick(note.id)
         },
+        style: {
+          width: note.width || undefined,
+          height: note.height || undefined,
+        }
       }));
 
       const initialEdges: Edge[] = [];
@@ -158,7 +188,7 @@ export default function DiaryCanvas() {
     });
   };
 
-  const handleUpdateCache = (nodeId: string, newTitle?: string, newContent?: string, newImages?: any[], color?: string) => {
+  const handleUpdateCache = (nodeId: string, newTitle?: string, newContent?: string, newImages?: any[], color?: string, mood?: string) => {
     setNodes((nds: any[]) => nds.map(n => {
       if (n.id === nodeId) {
         return {
@@ -169,6 +199,7 @@ export default function DiaryCanvas() {
             content: newContent ?? n.data.content,
             images: newImages ?? n.data.images,
             color: color ?? n.data.color,
+            mood: mood ?? n.data.mood,
           }
         };
       }
@@ -246,24 +277,41 @@ export default function DiaryCanvas() {
         (c) => c.type === 'position' && c.dragging === false && c.position
       );
 
-      if (positionChanges.length > 0) {
+      const dimensionsChanges = changes.filter(
+        (c) => c.type === 'dimensions' && c.resizing === false && c.dimensions
+      );
+
+      if (positionChanges.length > 0 || dimensionsChanges.length > 0) {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
+          const batchInputs = new Map<string, any>();
+
           positionChanges.forEach((change: any) => {
-            updateNotePosition({
+            if (!batchInputs.has(change.id)) batchInputs.set(change.id, { id: change.id });
+            const input = batchInputs.get(change.id);
+            input.positionX = change.position.x;
+            input.positionY = change.position.y;
+          });
+
+          dimensionsChanges.forEach((change: any) => {
+            if (!batchInputs.has(change.id)) batchInputs.set(change.id, { id: change.id });
+            const input = batchInputs.get(change.id);
+            input.width = change.dimensions.width;
+            input.height = change.dimensions.height;
+          });
+
+          const inputsArray = Array.from(batchInputs.values());
+          if (inputsArray.length > 0) {
+            batchUpdateNotes({
               variables: {
-                input: {
-                  id: change.id,
-                  positionX: change.position.x,
-                  positionY: change.position.y,
-                }
+                inputs: inputsArray
               }
             });
-          });
+          }
         }, 500); 
       }
     },
-    [onNodesChange, updateNotePosition]
+    [onNodesChange, batchUpdateNotes]
   );
 
   const onConnect = useCallback(
@@ -383,7 +431,7 @@ export default function DiaryCanvas() {
                 data: {
                   getNotes: [
                     ...existingData.getNotes,
-                    { ...createNote, content: '', images: [], outgoingEdges: [], incomingEdges: [] }
+                    { ...createNote, content: '', images: [], outgoingEdges: [], incomingEdges: [], tags: [], createdAt: new Date().toISOString() }
                   ]
                 }
               });
@@ -406,77 +454,132 @@ export default function DiaryCanvas() {
   };
 
   if (loading) return (
-    <div className="flex h-screen w-full items-center justify-center bg-[#0f0f14]">
+    <div className="flex h-screen w-full items-center justify-center bg-[#FFFAF7]">
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
-          <div className="absolute inset-0 rounded-full bg-red-500/20 blur-xl animate-pulse" />
-          <Loader2 className="relative animate-spin w-12 h-12 text-red-400" />
+          <div className="absolute inset-0 rounded-full bg-[#FFB4A2]/20 blur-xl animate-pulse" />
+          <Loader2 className="relative animate-spin w-12 h-12 text-[#FF8FA3]" />
         </div>
-        <p className="text-white/40 text-sm font-medium tracking-wider uppercase">Loading your constellation...</p>
+        <p className="text-[#5A3E4C]/40 text-sm font-medium tracking-wider uppercase">Loading your constellation...</p>
       </div>
     </div>
   );
 
   if (error) return (
-    <div className="flex flex-col items-center justify-center h-screen bg-[#0f0f14] space-y-4">
-      <div className="text-red-400 font-medium text-lg">Error loading canvas</div>
-      <p className="text-white/40 text-sm">{error.message}</p>
-      <button onClick={() => refetch()} className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl font-medium transition-all shadow-lg shadow-red-900/30 hover:shadow-red-900/50">
+    <div className="flex flex-col items-center justify-center h-screen bg-[#FFFAF7] space-y-4">
+      <div className="text-[#FF6B9D] font-medium text-lg">Error loading canvas</div>
+      <p className="text-[#5A3E4C]/50 text-sm">{error.message}</p>
+      <button onClick={() => refetch()} className="px-6 py-2.5 bg-gradient-to-r from-[#FF8FA3] to-[#FFB4A2] hover:from-[#FF7A8A] hover:to-[#FF8FA3] text-white rounded-xl font-medium transition-all shadow-lg shadow-pink-300/30 hover:shadow-pink-300/50">
         Retry
       </button>
     </div>
   );
 
   return (
-    <div className="w-full h-screen relative bg-[#09090b] overflow-hidden">
+    <div className="w-full h-screen relative bg-[#FFFAF7] overflow-hidden">
       {/* ── Ambient Background Glows ── */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(220,38,38,0.08),_transparent_60%)] pointer-events-none" />
-      <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] bg-red-600/10 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[8000ms]" />
-      <div className="absolute -bottom-[20%] -left-[10%] w-[40%] h-[40%] bg-rose-600/10 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[10000ms]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(255,180,162,0.1),_transparent_60%)] pointer-events-none" />
+      <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] bg-[#FFCAD4]/15 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[8000ms]" />
+      <div className="absolute -bottom-[20%] -left-[10%] w-[40%] h-[40%] bg-[#FFB4A2]/15 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[10000ms]" />
 
       {/* ── Header ── */}
-      <div className="absolute top-0 left-0 right-0 h-16 bg-[#09090b]/60 backdrop-blur-3xl border-b border-white/[0.04] z-10 flex items-center justify-between px-6">
+      <div className="absolute top-0 left-0 right-0 h-16 bg-[#FFFAF7]/60 backdrop-blur-3xl border-b border-[#FFB4A2]/10 z-10 flex items-center justify-between px-6">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-[0_0_20px_rgba(220,38,38,0.4)]">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF8FA3] to-[#FFB4A2] flex items-center justify-center shadow-lg shadow-pink-300/30">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-red-200 via-rose-300 to-amber-100 bg-clip-text text-transparent tracking-tight">
+            <h1 className="text-lg font-bold bg-gradient-to-r from-[#FF8FA3] via-[#FFB4A2] to-[#FFD6A5] bg-clip-text text-transparent tracking-tight">
               Konstelasi
             </h1>
           </div>
           
           <div className="hidden md:flex items-center relative ml-4">
-            <Search className="w-4 h-4 text-white/30 absolute left-3 z-10" />
+            <Search className="w-4 h-4 text-[#5A3E4C]/30 absolute left-3 z-10" />
             <input 
               ref={searchInputRef}
               type="text" 
               placeholder="Search thoughts (Ctrl+F)" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-64 bg-white/[0.03] border border-white/[0.06] rounded-full pl-9 pr-4 py-1.5 text-sm text-white/80 placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-red-500/50 focus:border-red-500/50 transition-all hover:bg-white/[0.05]"
+              onFocus={() => setShowSearchPanel(true)}
+              className="w-64 bg-white/60 border border-[#FFB4A2]/15 rounded-full pl-9 pr-4 py-1.5 text-sm text-[#5A3E4C] placeholder-[#5A3E4C]/30 focus:outline-none focus:ring-1 focus:ring-[#FF8FA3]/40 focus:border-[#FF8FA3]/40 transition-all hover:bg-white/80"
             />
           </div>
         </div>
         
         <div className="flex items-center gap-4">
+          <div className="flex items-center bg-white/60 border border-[#FFB4A2]/15 rounded-xl p-1">
+            <button
+              onClick={() => setViewMode('canvas')}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'canvas' ? 'bg-white text-[#5A3E4C] shadow-sm' : 'text-[#5A3E4C]/40 hover:text-[#5A3E4C]/70'}`}
+              title="Canvas View"
+            >
+              <LayoutTemplate className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('thread')}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'thread' ? 'bg-white text-[#5A3E4C] shadow-sm' : 'text-[#5A3E4C]/40 hover:text-[#5A3E4C]/70'}`}
+              title="Thread View"
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('timeline')}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'timeline' ? 'bg-white text-[#5A3E4C] shadow-sm' : 'text-[#5A3E4C]/40 hover:text-[#5A3E4C]/70'}`}
+              title="Timeline View"
+            >
+              <Clock className="w-4 h-4" />
+            </button>
+          </div>
+
           <button 
             onClick={downloadImage}
             title="Export Canvas to PNG"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] hover:border-white/20 text-white/70 hover:text-white transition-all duration-300"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/60 hover:bg-white/80 border border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C] transition-all duration-300"
           >
             <Download className="w-4 h-4" />
             <span className="text-sm font-medium hidden sm:inline">Export</span>
           </button>
 
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.05] shadow-inner text-xs font-medium text-white/50 backdrop-blur-md">
-            <div className="w-1.5 h-1.5 rounded-full bg-red-500/80 shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" />
+          <button 
+            onClick={() => setShowTagPanel(!showTagPanel)}
+            title="Tags"
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 ${showTagPanel ? 'bg-[#FF8FA3]/10 border-[#FF8FA3]/30 text-[#FF8FA3]' : 'bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C]'}`}
+          >
+            <TagIcon className="w-4 h-4" />
+            <span className="text-sm font-medium hidden sm:inline">Tags</span>
+            {selectedTagFilters.length > 0 && (
+              <span className="w-4 h-4 rounded-full bg-[#FF8FA3] text-white text-[10px] flex items-center justify-center font-bold">{selectedTagFilters.length}</span>
+            )}
+          </button>
+
+          <button 
+            onClick={() => setShowStatsPanel(!showStatsPanel)}
+            title="Statistik"
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 ${showStatsPanel ? 'bg-[#FF8FA3]/10 border-[#FF8FA3]/30 text-[#FF8FA3]' : 'bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C]'}`}
+          >
+            <BarChart3 className="w-4 h-4" />
+          </button>
+
+          <button 
+            onClick={() => setShowArchivePanel(!showArchivePanel)}
+            title="Arsip"
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 ${showArchivePanel ? 'bg-[#FF8FA3]/10 border-[#FF8FA3]/30 text-[#FF8FA3]' : 'bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C]'}`}
+          >
+            <Archive className="w-4 h-4" />
+          </button>
+
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 border border-[#FFB4A2]/15 shadow-inner text-xs font-medium text-[#5A3E4C]/50 backdrop-blur-md">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#FF8FA3] shadow-[0_0_8px_rgba(255,143,163,0.6)] animate-pulse" />
             Auto-saving
           </div>
+
+          <StreakWidget />
           
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] hover:border-red-500/30 text-white/70 hover:text-white transition-all duration-300 shadow-[0_0_0_rgba(220,38,38,0)] hover:shadow-[0_0_20px_rgba(220,38,38,0.2)]"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/60 hover:bg-white/80 border border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C] transition-all duration-300"
           >
             <LogOut className="w-4 h-4" />
             <span className="text-sm font-medium">Exit</span>
@@ -484,41 +587,109 @@ export default function DiaryCanvas() {
         </div>
       </div>
 
-      {/* ── Canvas ── */}
+      {/* ── Canvas or Thread View ── */}
       <div className="w-full h-full pt-16 relative z-0" onContextMenu={handleCanvasContextMenu}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          edgeTypes={edgeTypes}
-          onNodesChange={handleNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onNodesDelete={handleNodesDelete}
-          onEdgesDelete={handleEdgesDelete}
-          connectionMode={ConnectionMode.Loose}
-          defaultEdgeOptions={{
-            type: 'semanticEdge',
-            animated: true,
-          }}
-          onNodeDoubleClick={(_, node) => handleNodeDoubleClick(node.id)}
-          nodeTypes={nodeTypes}
-          fitView
-          fitViewOptions={{ padding: 2 }}
-        >
-          <Background color="rgba(255,255,255,0.03)" gap={24} size={1.5} />
-          <Controls className="!bg-[#13131c]/80 !border-white/[0.06] !backdrop-blur-xl !shadow-2xl !rounded-xl overflow-hidden" />
-          <MiniMap 
-            className="!bg-[#13131c]/60 !border-white/[0.06] !backdrop-blur-xl !shadow-2xl !rounded-2xl overflow-hidden" 
-            nodeColor={(n) => n.id === selectedNote?.id ? '#ef4444' : 'rgba(255,255,255,0.1)'}
-            maskColor="rgba(0,0,0,0.4)"
+        {viewMode === 'canvas' ? (
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            edgeTypes={edgeTypes}
+            onNodesChange={handleNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodesDelete={handleNodesDelete}
+            onEdgesDelete={handleEdgesDelete}
+            connectionMode={ConnectionMode.Loose}
+            defaultEdgeOptions={{
+              type: 'semanticEdge',
+              animated: true,
+            }}
+            onNodeDoubleClick={(_, node) => handleNodeDoubleClick(node.id)}
+            nodeTypes={nodeTypes}
+            fitView
+            fitViewOptions={{ padding: 2 }}
+          >
+            <Background color="rgba(255,180,162,0.06)" gap={24} size={1.5} />
+            <Controls className="!bg-white/80 !border-[#FFB4A2]/15 !backdrop-blur-xl !shadow-lg !rounded-xl overflow-hidden" />
+            <MiniMap 
+              className="!bg-white/80 !border-[#FFB4A2]/15 !backdrop-blur-xl !shadow-lg !rounded-2xl overflow-hidden" 
+              nodeColor={(n) => n.id === selectedNote?.id ? '#FF8FA3' : 'rgba(255,180,162,0.3)'}
+              maskColor="rgba(255,250,247,0.4)"
+            />
+          </ReactFlow>
+        ) : (
+          <div className="w-full h-full overflow-y-auto pb-32">
+            <div className="max-w-2xl mx-auto py-12 px-6 flex flex-col gap-8">
+              {nodes
+                .filter((node: any) => node.data.isMatch)
+                .sort((a: any, b: any) => {
+                  const dateA = new Date(a.data.createdAt || 0).getTime();
+                  const dateB = new Date(b.data.createdAt || 0).getTime();
+                  return dateA - dateB;
+                })
+                .map((node: any) => {
+                  // Determine alignment based on tags
+                  // Assuming tags like "crush", "dia", "him", "her", or specific quotes mean the other person
+                  const tags = node.data.tags || [];
+                  const isOtherPerson = tags.some((t: any) => 
+                    ['crush', 'dia', 'him', 'her', 'quote', 'kutipan'].includes(t.name.toLowerCase())
+                  );
+                  const alignClass = isOtherPerson ? 'justify-start' : 'justify-end';
+                  const radiusClass = isOtherPerson ? 'rounded-tl-sm' : 'rounded-tr-sm';
+
+                  return (
+                    <div 
+                      key={node.id} 
+                      className={`flex ${alignClass} animate-in fade-in slide-in-from-bottom-4 duration-500 w-full`}
+                    >
+                      <div className="flex flex-col max-w-[85%]">
+                        {/* Optionally show incoming relations in thread view */}
+                        {node.data.incomingEdges && node.data.incomingEdges.length > 0 && (
+                          <div className={`text-xs text-[#5A3E4C]/30 mb-1 px-2 flex flex-col gap-0.5 ${isOtherPerson ? 'items-start' : 'items-end'}`}>
+                            {node.data.incomingEdges.map((edge: any, i: number) => (
+                              <span key={i} className="flex items-center gap-1">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                                Reply to: {edge.source?.title || 'a thought'}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        <div 
+                          className={`cursor-pointer transition-transform hover:scale-[1.02]`}
+                          onClick={() => handleNodeDoubleClick(node.id)}
+                        >
+                          <NoteNode data={{...node.data, _threadAlign: isOtherPerson ? 'left' : 'right'}} isConnectable={false} selected={selectedNote?.id === node.id} viewMode={viewMode} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {nodes.filter((node: any) => node.data.isMatch).length === 0 && (
+                  <div className="text-center text-[#5A3E4C]/30 py-20">
+                    No thoughts match your search.
+                  </div>
+                )}
+            </div>
+          </div>
+        )}
+
+        {viewMode === 'timeline' && data?.getNotes && (
+          <TimelineView
+            notes={data.getNotes}
+            onNoteClick={(noteId) => handleNodeDoubleClick(noteId)}
+            selectedNoteId={selectedNote?.id}
           />
-        </ReactFlow>
+        )}
 
         {/* Floating Hint */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-2.5 bg-black/40 backdrop-blur-xl border border-white/[0.08] text-white/50 text-sm rounded-full shadow-2xl pointer-events-none tracking-wide font-light flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-red-500/80 shadow-[0_0_8px_rgba(220,38,38,0.8)] animate-pulse" />
-          Right-click anywhere to create a new thought
-        </div>
+        {viewMode === 'canvas' && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-2.5 bg-white/70 backdrop-blur-xl border border-[#FFB4A2]/15 text-[#5A3E4C]/50 text-sm rounded-full shadow-lg pointer-events-none tracking-wide font-light flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FF8FA3] shadow-[0_0_8px_rgba(255,143,163,0.6)] animate-pulse" />
+            Right-click anywhere to create a new thought
+          </div>
+        )}
       </div>
 
       {/* ── Editor Sidebar ── */}
@@ -530,6 +701,35 @@ export default function DiaryCanvas() {
           onDeleteSuccess={handleDeleteSuccess}
         />
       )}
+
+      {/* ── Tag Panel ── */}
+      {showTagPanel && (
+        <TagPanel onClose={() => setShowTagPanel(false)} />
+      )}
+
+      {/* ── Search Panel ── */}
+      {showSearchPanel && data?.getNotes && (
+        <SearchPanel
+          notes={data.getNotes}
+          onNoteClick={(noteId) => { handleNodeDoubleClick(noteId); setShowSearchPanel(false); }}
+          onClose={() => setShowSearchPanel(false)}
+        />
+      )}
+
+      {/* ── Stats Panel ── */}
+      {showStatsPanel && data?.getNotes && (
+        <StatsPanel
+          notes={data.getNotes}
+          onClose={() => setShowStatsPanel(false)}
+        />
+      )}
+
+      {/* ── Archive Panel ── */}
+      <ArchivePanel
+        isOpen={showArchivePanel}
+        onClose={() => setShowArchivePanel(false)}
+        onRestoreSuccess={() => refetch()}
+      />
     </div>
   );
 }

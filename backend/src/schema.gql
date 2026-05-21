@@ -9,9 +9,35 @@ input AddNoteImageInput {
   order: Int
 }
 
-input CreateNoteInput {
+input BatchUpdateNoteInput {
+  height: Float
+  id: String!
   positionX: Float
   positionY: Float
+  width: Float
+}
+
+type Canvas {
+  archivedAt: DateTime
+  children: [Canvas]
+  createdAt: DateTime!
+  description: String
+  id: String!
+  isArchived: Boolean!
+  level: Int!
+  name: String!
+  notes: [Note]
+  order: Int!
+  parent: Canvas
+  updatedAt: DateTime!
+  user: User!
+}
+
+input CreateNoteInput {
+  canvasId: String
+  positionX: Float
+  positionY: Float
+  tagIds: [String!]
   title: String
 }
 
@@ -29,17 +55,35 @@ scalar DateTime
 
 type Mutation {
   addNoteImage(input: AddNoteImageInput!): NoteImage!
+  archiveCanvas(id: String!): Canvas!
+  archiveNote(id: String!): Note!
+  assignTagsToNote(noteId: String!, tagIds: [String!]!): Boolean!
+  batchUpdateNotes(inputs: [BatchUpdateNoteInput!]!): [Note!]!
+  createCanvas(description: String, name: String!, parentId: String): Canvas!
   createNote(input: CreateNoteInput!): Note!
   createNoteLink(input: CreateNoteLinkInput!): NoteLink!
+  createTag(color: String, description: String, name: String!): Tag!
+  deleteCanvas(id: String!): Boolean!
   deleteNote(id: String!): Boolean!
   deleteNoteImage(id: String!): Boolean!
   deleteNoteLink(id: String!): Boolean!
+  deleteTag(id: String!): Boolean!
+  moveCanvas(id: String!, parentId: String): Canvas!
+  recordWriteActivity: WritingStreak!
+  removeTagFromNote(noteId: String!, tagId: String!): Boolean!
+  unarchiveCanvas(id: String!): Canvas!
+  unarchiveNote(id: String!): Note!
+  updateCanvas(description: String, id: String!, name: String): Canvas!
   updateNoteContent(input: UpdateNoteContentInput!): Note!
   updateNoteLink(input: UpdateNoteLinkInput!): NoteLink!
   updateNotePosition(input: UpdateNotePositionInput!): Note!
+  updateNoteSize(input: UpdateNoteSizeInput!): Note!
+  updateTag(color: String, description: String, id: String!, name: String): Tag!
 }
 
 type Note {
+  archivedAt: DateTime
+  canvas: Canvas
   children: [Note]
   color: String
   content: String
@@ -48,10 +92,13 @@ type Note {
   id: String!
   images: [NoteImage]
   incomingEdges: [NoteLink]
+  isArchived: Boolean!
+  mood: String
   outgoingEdges: [NoteLink]
   parent: Note
   positionX: Float!
   positionY: Float!
+  tags: [Tag]
   title: String!
   type: String!
   updatedAt: DateTime!
@@ -83,15 +130,39 @@ type NoteLink {
 }
 
 type Query {
-  getNotes: [Note!]!
+  archivedCanvases: [Canvas!]!
+  canvas(id: String!): Canvas!
+  canvases: [Canvas!]!
+  childCanvases(parentId: String!): [Canvas!]!
+  getArchivedNotes(canvasId: String): [Note!]!
+  getNotes(canvasId: String, tagIds: [String!]): [Note!]!
   getProfile: String!
+  getWritingStreak: WritingStreak!
+  rootCanvases: [Canvas!]!
+  tag(id: String!): Tag!
+  tags: [Tag!]!
+}
+
+type Tag {
+  color: String
+  createdAt: DateTime!
+  description: String
+  id: String!
+  name: String!
+  notes: [Note]
+  updatedAt: DateTime!
+  user: User!
 }
 
 input UpdateNoteContentInput {
+  canvasId: String
   color: String
   content: String
   id: String!
+  mood: String
+  tagIds: [String!]
   title: String
+  type: String
 }
 
 input UpdateNoteLinkInput {
@@ -106,10 +177,27 @@ input UpdateNotePositionInput {
   positionY: Float!
 }
 
+input UpdateNoteSizeInput {
+  height: Float!
+  id: String!
+  width: Float!
+}
+
 type User {
   createdAt: DateTime!
   email: String!
   id: String!
   images: [NoteImage]
   notes: [Note]
+}
+
+type WritingStreak {
+  createdAt: DateTime!
+  currentStreak: Int!
+  id: String!
+  lastWriteDate: DateTime
+  longestStreak: Int!
+  totalWriteDays: Int!
+  updatedAt: DateTime!
+  user: User!
 }

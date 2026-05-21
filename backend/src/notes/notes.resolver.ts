@@ -6,7 +6,7 @@ import { NoteLink } from '../entities/note-link.entity';
 import { NoteImage } from '../entities/note-image.entity';
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
-import { CreateNoteInput, UpdateNotePositionInput, UpdateNoteContentInput, CreateNoteLinkInput, AddNoteImageInput, UpdateNoteLinkInput } from './dto/note.input';
+import { CreateNoteInput, UpdateNotePositionInput, UpdateNoteContentInput, CreateNoteLinkInput, AddNoteImageInput, UpdateNoteLinkInput, UpdateNoteSizeInput, BatchUpdateNoteInput } from './dto/note.input';
 
 @Resolver(() => Note)
 @UseGuards(GqlAuthGuard)
@@ -14,8 +14,12 @@ export class NotesResolver {
   constructor(private readonly notesService: NotesService) {}
 
   @Query(() => [Note])
-  async getNotes(@CurrentUser() user: any) {
-    return this.notesService.findAllByUser(user.id);
+  async getNotes(
+    @CurrentUser() user: any,
+    @Args('canvasId', { nullable: true }) canvasId?: string,
+    @Args('tagIds', { type: () => [String], nullable: true }) tagIds?: string[]
+  ) {
+    return this.notesService.findAllByUser(user.id, { canvasId, tagIds });
   }
 
   @Mutation(() => Note)
@@ -40,6 +44,22 @@ export class NotesResolver {
     @Args('input') input: UpdateNoteContentInput,
   ) {
     return this.notesService.updateContent(user.id, input);
+  }
+
+  @Mutation(() => Note)
+  async updateNoteSize(
+    @CurrentUser() user: any,
+    @Args('input') input: UpdateNoteSizeInput,
+  ) {
+    return this.notesService.updateSize(user.id, input);
+  }
+
+  @Mutation(() => [Note])
+  async batchUpdateNotes(
+    @CurrentUser() user: any,
+    @Args('inputs', { type: () => [BatchUpdateNoteInput] }) inputs: BatchUpdateNoteInput[],
+  ) {
+    return this.notesService.batchUpdateNotes(user.id, inputs);
   }
 
   @Mutation(() => Boolean)
@@ -88,5 +108,30 @@ export class NotesResolver {
     @Args('id') id: string,
   ) {
     return this.notesService.deleteNoteImage(user.id, id);
+  }
+
+  // Archive Feature
+  @Query(() => [Note])
+  async getArchivedNotes(
+    @CurrentUser() user: any,
+    @Args('canvasId', { nullable: true }) canvasId?: string,
+  ) {
+    return this.notesService.getArchivedNotes(user.id, canvasId);
+  }
+
+  @Mutation(() => Note)
+  async archiveNote(
+    @CurrentUser() user: any,
+    @Args('id') id: string,
+  ) {
+    return this.notesService.archiveNote(user.id, id);
+  }
+
+  @Mutation(() => Note)
+  async unarchiveNote(
+    @CurrentUser() user: any,
+    @Args('id') id: string,
+  ) {
+    return this.notesService.unarchiveNote(user.id, id);
   }
 }

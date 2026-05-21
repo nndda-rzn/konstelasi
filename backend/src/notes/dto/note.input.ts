@@ -10,6 +10,12 @@ export class CreateNoteInput {
 
   @Field(() => Float, { nullable: true })
   positionY?: number;
+
+  @Field(() => String, { nullable: true })
+  canvasId?: string;
+
+  @Field(() => [String], { nullable: true })
+  tagIds?: string[];
 }
 
 @InputType()
@@ -37,6 +43,48 @@ export class UpdateNoteContentInput {
 
   @Field(() => String, { nullable: true })
   color?: string;
+
+  @Field(() => String, { nullable: true })
+  type?: string;
+
+  @Field(() => String, { nullable: true })
+  mood?: string;
+
+  @Field(() => String, { nullable: true })
+  canvasId?: string;
+
+  @Field(() => [String], { nullable: true })
+  tagIds?: string[];
+}
+
+@InputType()
+export class UpdateNoteSizeInput {
+  @Field(() => String)
+  id!: string;
+
+  @Field(() => Float)
+  width!: number;
+
+  @Field(() => Float)
+  height!: number;
+}
+
+@InputType()
+export class BatchUpdateNoteInput {
+  @Field(() => String)
+  id!: string;
+
+  @Field(() => Float, { nullable: true })
+  positionX?: number;
+
+  @Field(() => Float, { nullable: true })
+  positionY?: number;
+
+  @Field(() => Float, { nullable: true })
+  width?: number;
+
+  @Field(() => Float, { nullable: true })
+  height?: number;
 }
 
 @InputType()

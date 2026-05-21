@@ -1,5 +1,11 @@
 // eslint-disable-next-line prettier/prettier
-import { Entity, PrimaryKey, Property, ManyToOne, Unique } from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  ManyToOne,
+  Unique,
+} from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { Note } from './note.entity';
 import { ObjectType, Field } from '@nestjs/graphql';

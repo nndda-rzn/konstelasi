@@ -8,6 +8,9 @@ import { join } from 'path';
 import mikroOrmConfig from './mikro-orm.config';
 import { AuthModule } from './auth/auth.module';
 import { NotesModule } from './notes/notes.module';
+import { CanvasModule } from './canvas/canvas.module';
+import { TagModule } from './tag/tag.module';
+import { StreakModule } from './streak/streak.module';
 
 @Module({
   imports: [
@@ -21,6 +24,9 @@ import { NotesModule } from './notes/notes.module';
     }),
     AuthModule,
     NotesModule,
+    CanvasModule,
+    TagModule,
+    StreakModule,
   ],
   controllers: [AppController],
   providers: [AppService],

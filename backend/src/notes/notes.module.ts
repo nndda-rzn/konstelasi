@@ -6,9 +6,13 @@ import { NoteImage } from '../entities/note-image.entity';
 import { User } from '../entities/user.entity';
 import { NotesService } from './notes.service';
 import { NotesResolver } from './notes.resolver';
+import { StreakModule } from '../streak/streak.module';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Note, NoteLink, NoteImage, User])],
+  imports: [
+    MikroOrmModule.forFeature([Note, NoteLink, NoteImage, User]),
+    StreakModule,
+  ],
   providers: [NotesService, NotesResolver],
 })
 export class NotesModule {}
