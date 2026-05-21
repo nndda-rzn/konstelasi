@@ -173,19 +173,33 @@ export default function DiaryCanvas() {
     let note = data?.getNotes?.find((n: any) => n.id === nodeId);
     
     setNodes((currentNodes) => {
-      if (!note) {
-        const localNode = currentNodes.find((n: any) => n.id === nodeId);
-        if (localNode) {
-          note = {
-            id: localNode.id,
-            title: localNode.data.title,
-            content: localNode.data.content,
-            images: localNode.data.images || [],
-            color: localNode.data.color || 'default',
-            positionX: localNode.position.x,
-            positionY: localNode.position.y,
-          };
-        }
+      const localNode = currentNodes.find((n: any) => n.id === nodeId);
+      
+      if (!note && localNode) {
+        note = {
+          id: localNode.id,
+          title: localNode.data.title,
+          content: localNode.data.content,
+          images: localNode.data.images || [],
+          color: localNode.data.color || 'default',
+          mood: localNode.data.mood || '',
+          type: localNode.data.type || 'text',
+          tags: localNode.data.tags || [],
+          positionX: localNode.position.x,
+          positionY: localNode.position.y,
+          incomingEdges: localNode.data.incomingEdges || [],
+          outgoingEdges: localNode.data.outgoingEdges || [],
+        };
+      } else if (note && localNode) {
+        // Merge: gunakan local node images karena lebih up-to-date
+        note = {
+          ...note,
+          images: localNode.data.images || note.images || [],
+          title: localNode.data.title || note.title,
+          content: localNode.data.content || note.content,
+          color: localNode.data.color || note.color,
+          mood: localNode.data.mood || note.mood,
+        };
       }
       
       if (note) {
