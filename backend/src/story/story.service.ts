@@ -45,6 +45,7 @@ export class StoryService {
   }
 
   async getStory(userId: string, storyId: string): Promise<Story> {
+    this.em.clear();
     const story = await this.em.findOneOrFail(Story, { id: storyId, user: { id: userId } });
     const nodes = await this.em.find(Note, { story: { id: storyId } }, {
       populate: ['images', 'tags', 'outgoingEdges', 'outgoingEdges.source', 'outgoingEdges.target', 'incomingEdges', 'incomingEdges.source', 'incomingEdges.target'] as any,
