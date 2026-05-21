@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, BookOpen, Heart, User, Compass, Star, Sparkles, Lock, Globe, Users } from 'lucide-react';
+import { Plus, BookOpen, Heart, User, Compass, Star, Sparkles, Lock, Globe, Users, ArrowLeft } from 'lucide-react';
 import { ApolloWrapper } from '@/lib/apollo/ApolloWrapper';
 import { Providers } from '@/lib/Providers';
 import { StoryProvider, useStory } from '@/context/StoryContext';
@@ -54,9 +54,14 @@ function StoryDashboard() {
       {/* Header */}
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-[#4A2F3C] dark:text-[#e2d9f3]">Stories</h1>
-            <p className="text-sm text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40 mt-1">Ceritakan kisah Anda melalui connected bubbles</p>
+          <div className="flex items-center gap-3">
+            <button onClick={() => router.push('/canvas')} className="p-2 rounded-lg hover:bg-[#FFB4A2]/10 transition-colors">
+              <ArrowLeft className="w-5 h-5 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-[#4A2F3C] dark:text-[#e2d9f3]">Stories</h1>
+              <p className="text-sm text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40 mt-1">Ceritakan kisah Anda melalui connected bubbles</p>
+            </div>
           </div>
           <button
             onClick={() => setShowWizard(true)}
