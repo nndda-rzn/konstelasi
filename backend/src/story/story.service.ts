@@ -45,9 +45,12 @@ export class StoryService {
   }
 
   async getStory(userId: string, storyId: string): Promise<Story> {
-    return this.em.findOneOrFail(Story, { id: storyId, user: { id: userId } }, {
-      populate: ['nodes', 'nodes.images', 'nodes.tags', 'nodes.outgoingEdges', 'nodes.outgoingEdges.source', 'nodes.outgoingEdges.target', 'nodes.incomingEdges', 'nodes.incomingEdges.source', 'nodes.incomingEdges.target'] as any,
+    const story = await this.em.findOneOrFail(Story, { id: storyId, user: { id: userId } });
+    const nodes = await this.em.find(Note, { story: { id: storyId } }, {
+      populate: ['images', 'tags', 'outgoingEdges', 'outgoingEdges.source', 'outgoingEdges.target', 'incomingEdges', 'incomingEdges.source', 'incomingEdges.target'] as any,
     });
+    (story as any).nodes = nodes;
+    return story;
   }
 
   async getPublicStory(storyId: string): Promise<Story | null> {
