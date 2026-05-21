@@ -43,13 +43,13 @@ function StoryNode({ data, selected }: any) {
   } catch {}
 
   return (
-    <div className={`relative group transition-all duration-300 ${selected ? 'scale-[1.02]' : ''}`}>
+    <div className={`relative group transition-all duration-300 w-full h-full ${selected ? 'scale-[1.02]' : ''}`}>
       <NodeResizer
-        minWidth={180}
-        minHeight={100}
+        minWidth={160}
+        minHeight={80}
         isVisible={selected}
-        lineClassName="!border-[#FF8FA3]/40"
-        handleClassName="!w-2.5 !h-2.5 !bg-[#FF8FA3] !border-white !rounded-full"
+        lineClassName="!border-[#FF6B8B]/40"
+        handleClassName="!w-2.5 !h-2.5 !bg-[#FF6B8B] !border-white !rounded-full"
       />
 
       {/* Ambient Glow */}
@@ -59,7 +59,7 @@ function StoryNode({ data, selected }: any) {
       />
 
       {/* Main Card */}
-      <div className={`relative bg-gradient-to-br ${config.bgGradient} backdrop-blur-sm border border-white/60 dark:border-[#FF8FA3]/10 rounded-xl shadow-lg shadow-black/5 overflow-hidden min-w-[180px] min-h-[100px] ${selected ? 'ring-2 ring-[#FF8FA3]/40' : ''}`}>
+      <div className={`relative w-full h-full bg-gradient-to-br ${config.bgGradient} backdrop-blur-sm border border-white/60 dark:border-[#FF8FA3]/10 rounded-xl shadow-lg shadow-black/5 overflow-hidden ${selected ? 'ring-2 ring-[#FF6B8B]/40' : ''}`}>
         {/* Top accent line */}
         <div className="h-0.5 w-full" style={{ backgroundColor: emotionColor }} />
 
