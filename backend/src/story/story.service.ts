@@ -151,10 +151,10 @@ export class StoryService {
   async addNodeToStory(userId: string, storyId: string, noteId: string, nodeType?: string, metadata?: string): Promise<Note> {
     await this.em.findOneOrFail(Story, { id: storyId, user: { id: userId } });
     const note = await this.em.findOneOrFail(Note, { id: noteId, user: { id: userId } });
-    (note as any).story = this.em.getReference(Story, storyId);
+    note.story = this.em.getReference(Story, storyId);
     if (nodeType) note.storyNodeType = nodeType;
     if (metadata) note.storyMetadata = metadata;
-    await this.em.flush();
+    await this.em.persistAndFlush(note);
     return note;
   }
 
