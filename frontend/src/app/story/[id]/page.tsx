@@ -16,10 +16,16 @@ import '@xyflow/react/dist/style.css';
 import { ArrowLeft, Settings, Lock, Globe, Users, Eye } from 'lucide-react';
 import { ApolloWrapper } from '@/lib/apollo/ApolloWrapper';
 import { Providers } from '@/lib/Providers';
-import { GET_STORY, UPDATE_STORY } from '@/graphql/story';
+import { GET_STORY, UPDATE_STORY, ADD_NODE_TO_STORY } from '@/graphql/story';
 import { CREATE_NOTE, CREATE_NOTE_LINK } from '@/graphql/mutations';
 import { ThemeProvider } from '@/context/ThemeContext';
 import StorySettingsPanel from '@/components/story/StorySettingsPanel';
+import StoryNode from '@/components/story/StoryNode';
+import StoryEdge from '@/components/story/StoryEdge';
+import NodeTypeSelector from '@/components/story/NodeTypeSelector';
+
+const nodeTypes = { storyNode: StoryNode };
+const edgeTypes = { storyEdge: StoryEdge };
 
 function StoryCanvas({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -27,6 +33,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
   const [showSettings, setShowSettings] = useState(false);
+  const [showNodeSelector, setShowNodeSelector] = useState(false);
 
   const { data, loading, refetch } = useQuery<any>(GET_STORY, {
     variables: { id: storyId },
@@ -36,6 +43,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   const [createNote] = useMutation<any>(CREATE_NOTE);
   const [createNoteLink] = useMutation<any>(CREATE_NOTE_LINK);
   const [updateStory] = useMutation<any>(UPDATE_STORY);
+  const [addNodeToStory] = useMutation<any>(ADD_NODE_TO_STORY);
 
   const story = data?.getStory;
 
@@ -56,7 +64,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
         images: note.images || [],
         tags: note.tags || [],
       },
-      type: 'default',
+      type: 'storyNode',
     }));
 
     const flowEdges: any[] = [];
@@ -69,6 +77,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           sourceHandle: edge.sourceHandle,
           targetHandle: edge.targetHandle,
           data: { label: edge.label, color: edge.color },
+          type: 'storyEdge',
         });
       });
     });
@@ -95,21 +104,30 @@ function StoryCanvas({ params }: { params: { id: string } }) {
     }
   }, [createNoteLink, setEdges]);
 
-  const handleAddNode = async () => {
+  const handleAddNode = async (nodeType: string, title: string, emotion: string, metadata: any) => {
     const position = { x: Math.random() * 500 + 100, y: Math.random() * 400 + 100 };
     try {
       const { data: noteData } = await createNote({
         variables: {
           input: {
-            title: 'New Scene',
+            title,
             content: '',
             positionX: position.x,
             positionY: position.y,
             canvasId: null,
+            mood: emotion || undefined,
           },
         },
       });
       if (noteData?.createNote) {
+        await addNodeToStory({
+          variables: {
+            storyId,
+            noteId: noteData.createNote.id,
+            nodeType,
+            metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : undefined,
+          },
+        });
         refetch();
       }
     } catch (err) {
@@ -149,7 +167,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleAddNode} className="px-3 py-1.5 rounded-xl bg-[#FF8FA3]/10 hover:bg-[#FF8FA3]/20 text-[#FF8FA3] text-xs font-medium transition-all">
+          <button onClick={() => setShowNodeSelector(true)} className="px-3 py-1.5 rounded-xl bg-[#FF8FA3]/10 hover:bg-[#FF8FA3]/20 text-[#FF8FA3] text-xs font-medium transition-all">
             + Add Scene
           </button>
           <button onClick={() => setShowSettings(!showSettings)} className={`p-2 rounded-lg transition-all ${showSettings ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
@@ -166,6 +184,8 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           fitView
           className="bg-[#FFFAF7] dark:bg-[#1a1625]"
         >
@@ -186,6 +206,13 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           />
         )}
       </div>
+
+      {/* Node Type Selector Modal */}
+      <NodeTypeSelector
+        isOpen={showNodeSelector}
+        onClose={() => setShowNodeSelector(false)}
+        onSelect={handleAddNode}
+      />
     </div>
   );
 }
