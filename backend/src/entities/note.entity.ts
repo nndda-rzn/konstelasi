@@ -7,6 +7,7 @@ import { NoteImage } from './note-image.entity';
 import { NoteLink } from './note-link.entity';
 import { Tag } from './tag.entity';
 import { Canvas } from './canvas.entity';
+import { Story } from './story.entity';
 import { ObjectType, Field, Float } from '@nestjs/graphql';
 
 @ObjectType()
@@ -82,6 +83,26 @@ export class Note {
   @Field(() => Canvas, { nullable: true })
   @ManyToOne(() => Canvas, { nullable: true })
   canvas?: Canvas;
+
+  // Story relationship
+  @Field(() => Story, { nullable: true })
+  @ManyToOne(() => Story, { nullable: true })
+  story?: Story;
+
+  // Story node type (scene, memory, character, dialogue, moment, feeling, timeline_event, media, quote, reflection)
+  @Field(() => String, { nullable: true })
+  @Property({ nullable: true })
+  storyNodeType?: string;
+
+  // Story node metadata (JSON for flexible data)
+  @Field(() => String, { nullable: true })
+  @Property({ type: 'text', nullable: true })
+  storyMetadata?: string;
+
+  // Lock specific nodes for privacy
+  @Field(() => Boolean)
+  @Property({ default: false })
+  isLocked: boolean = false;
 
   // Tag relationship (Many-to-many)
   @Field(() => [Tag], { nullable: 'itemsAndList' })

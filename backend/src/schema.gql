@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+enum AccessLevel {
+  EDIT
+  VIEW
+}
+
 input AddNoteImageInput {
   caption: String
   imageUrl: String!
@@ -48,12 +53,23 @@ input CreateNoteLinkInput {
   targetId: String!
 }
 
+input CreateStoryInput {
+  authorNote: String
+  coverImage: String
+  description: String
+  storyType: StoryType
+  subtitle: String
+  theme: String
+  title: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
 type Mutation {
+  addNodeToStory(metadata: String, nodeType: String, noteId: String!, storyId: String!): Note!
   addNoteImage(input: AddNoteImageInput!): NoteImage!
   archiveCanvas(id: String!): Canvas!
   archiveNote(id: String!): Note!
@@ -62,16 +78,22 @@ type Mutation {
   createCanvas(description: String, name: String!, parentId: String): Canvas!
   createNote(input: CreateNoteInput!): Note!
   createNoteLink(input: CreateNoteLinkInput!): NoteLink!
+  createStory(input: CreateStoryInput!): Story!
   createTag(color: String, description: String, name: String!): Tag!
   deleteCanvas(id: String!): Boolean!
   deleteNote(id: String!): Boolean!
   deleteNoteImage(id: String!): Boolean!
   deleteNoteLink(id: String!): Boolean!
+  deleteStory(id: String!): Boolean!
   deleteTag(id: String!): Boolean!
+  grantStoryAccess(email: String!, level: AccessLevel! = VIEW, storyId: String!): StoryAccess!
   moveCanvas(id: String!, parentId: String): Canvas!
   recordWriteActivity: WritingStreak!
+  removeNodeFromStory(noteId: String!): Note!
   removeTagFromNote(noteId: String!, tagId: String!): Boolean!
   restoreNoteVersion(versionId: String!): Note!
+  revokeStoryAccess(accessId: String!, storyId: String!): Boolean!
+  toggleNodeLock(noteId: String!): Note!
   unarchiveCanvas(id: String!): Canvas!
   unarchiveNote(id: String!): Note!
   updateCanvas(description: String, id: String!, name: String): Canvas!
@@ -79,6 +101,7 @@ type Mutation {
   updateNoteLink(input: UpdateNoteLinkInput!): NoteLink!
   updateNotePosition(input: UpdateNotePositionInput!): Note!
   updateNoteSize(input: UpdateNoteSizeInput!): Note!
+  updateStory(input: UpdateStoryInput!): Story!
   updateTag(color: String, description: String, id: String!, name: String): Tag!
 }
 
@@ -94,11 +117,15 @@ type Note {
   images: [NoteImage]
   incomingEdges: [NoteLink]
   isArchived: Boolean!
+  isLocked: Boolean!
   mood: String
   outgoingEdges: [NoteLink]
   parent: Note
   positionX: Float!
   positionY: Float!
+  story: Story
+  storyMetadata: String
+  storyNodeType: String
   tags: [Tag]
   title: String!
   type: String!
@@ -141,6 +168,12 @@ type NoteVersion {
   version: Int!
 }
 
+enum PrivacyLevel {
+  FRIENDS_ONLY
+  PRIVATE
+  PUBLIC
+}
+
 type Query {
   archivedCanvases: [Canvas!]!
   canvas(id: String!): Canvas!
@@ -150,10 +183,57 @@ type Query {
   getNoteVersions(noteId: String!): [NoteVersion!]!
   getNotes(canvasId: String, tagIds: [String!]): [Note!]!
   getProfile: String!
+  getPublicStory(id: String!): Story
+  getStories: [Story!]!
+  getStory(id: String!): Story!
+  getStoryAccess(storyId: String!): [StoryAccess!]!
   getWritingStreak: WritingStreak!
   rootCanvases: [Canvas!]!
   tag(id: String!): Tag!
   tags: [Tag!]!
+}
+
+type Story {
+  archivedAt: DateTime
+  authorNote: String
+  coverImage: String
+  createdAt: DateTime!
+  description: String
+  id: String!
+  isArchived: Boolean!
+  nodes: [Note]
+  privacyLevel: PrivacyLevel!
+  status: StoryStatus!
+  storyType: StoryType!
+  subtitle: String
+  theme: String
+  title: String!
+  updatedAt: DateTime!
+  user: User!
+}
+
+type StoryAccess {
+  accessLevel: AccessLevel!
+  expiresAt: DateTime
+  grantedAt: DateTime!
+  grantedTo: User!
+  id: String!
+  story: Story!
+}
+
+enum StoryStatus {
+  ARCHIVED
+  DRAFT
+  PUBLISHED
+}
+
+enum StoryType {
+  ADVENTURE
+  BIOGRAPHY
+  CHARACTER_STUDY
+  CUSTOM
+  LOVE_STORY
+  MEMORY_COLLECTION
 }
 
 type Tag {
@@ -194,6 +274,19 @@ input UpdateNoteSizeInput {
   height: Float!
   id: String!
   width: Float!
+}
+
+input UpdateStoryInput {
+  authorNote: String
+  coverImage: String
+  description: String
+  id: String!
+  privacyLevel: PrivacyLevel
+  status: StoryStatus
+  storyType: StoryType
+  subtitle: String
+  theme: String
+  title: String
 }
 
 type User {

@@ -11,6 +11,7 @@ import { NotesModule } from './notes/notes.module';
 import { CanvasModule } from './canvas/canvas.module';
 import { TagModule } from './tag/tag.module';
 import { StreakModule } from './streak/streak.module';
+import { StoryModule } from './story/story.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { StreakModule } from './streak/streak.module';
     CanvasModule,
     TagModule,
     StreakModule,
+    StoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

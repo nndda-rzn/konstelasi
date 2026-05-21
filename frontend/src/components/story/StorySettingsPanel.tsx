@@ -1,0 +1,180 @@
+'use client';
+
+import { useState } from 'react';
+import { X, Lock, Globe, Users, Trash2, Save } from 'lucide-react';
+import { useQuery, useMutation } from '@apollo/client/react';
+import { GET_STORY_ACCESS, GRANT_STORY_ACCESS, REVOKE_STORY_ACCESS } from '@/graphql/story';
+import { notify } from '@/lib/toast';
+
+interface StorySettingsPanelProps {
+  story: any;
+  onClose: () => void;
+  onUpdate: (input: any) => Promise<void>;
+}
+
+const PRIVACY_OPTIONS = [
+  { value: 'PRIVATE', label: 'Private', icon: Lock, desc: 'Hanya Anda' },
+  { value: 'FRIENDS_ONLY', label: 'Friends Only', icon: Users, desc: 'Teman yang diundang' },
+  { value: 'PUBLIC', label: 'Public', icon: Globe, desc: 'Siapa saja' },
+];
+
+const STATUS_OPTIONS = [
+  { value: 'DRAFT', label: 'Draft', color: 'amber' },
+  { value: 'PUBLISHED', label: 'Published', color: 'emerald' },
+  { value: 'ARCHIVED', label: 'Archived', color: 'gray' },
+];
+
+export default function StorySettingsPanel({ story, onClose, onUpdate }: StorySettingsPanelProps) {
+  const [title, setTitle] = useState(story.title || '');
+  const [subtitle, setSubtitle] = useState(story.subtitle || '');
+  const [description, setDescription] = useState(story.description || '');
+  const [privacyLevel, setPrivacyLevel] = useState(story.privacyLevel?.toUpperCase() || 'PRIVATE');
+  const [status, setStatus] = useState(story.status?.toUpperCase() || 'DRAFT');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const { data: accessData, refetch: refetchAccess } = useQuery<any>(GET_STORY_ACCESS, {
+    variables: { storyId: story.id },
+    skip: privacyLevel !== 'FRIENDS_ONLY',
+  });
+
+  const [grantAccess] = useMutation(GRANT_STORY_ACCESS);
+  const [revokeAccess] = useMutation(REVOKE_STORY_ACCESS);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await onUpdate({ title, subtitle, description, privacyLevel, status });
+      notify.success('Story berhasil diupdate');
+    } catch (err) {
+      notify.error('Gagal mengupdate story');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleInvite = async () => {
+    if (!inviteEmail.trim()) return;
+    try {
+      await grantAccess({ variables: { storyId: story.id, email: inviteEmail, level: 'VIEW' } });
+      setInviteEmail('');
+      refetchAccess();
+      notify.success('Akses berhasil diberikan');
+    } catch (err) {
+      notify.error('Gagal memberikan akses');
+    }
+  };
+
+  const handleRevoke = async (accessId: string) => {
+    try {
+      await revokeAccess({ variables: { storyId: story.id, accessId } });
+      refetchAccess();
+      notify.success('Akses dicabut');
+    } catch (err) {
+      notify.error('Gagal mencabut akses');
+    }
+  };
+
+  return (
+    <div className="absolute top-0 right-0 h-full w-[360px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+        <h3 className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">Story Settings</h3>
+        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB4A2]/10 transition-colors">
+          <X className="w-4 h-4 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar">
+        {/* Title & Subtitle */}
+        <div className="space-y-3">
+          <div>
+            <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-1.5">Judul</label>
+            <input type="text" value={title} onChange={e => setTitle(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] focus:outline-none focus:border-[#FF8FA3]/50" />
+          </div>
+          <div>
+            <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-1.5">Subtitle</label>
+            <input type="text" value={subtitle} onChange={e => setSubtitle(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] focus:outline-none focus:border-[#FF8FA3]/50" />
+          </div>
+          <div>
+            <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-1.5">Deskripsi</label>
+            <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
+              className="w-full px-3 py-2 rounded-lg border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] focus:outline-none focus:border-[#FF8FA3]/50 resize-none" />
+          </div>
+        </div>
+
+        {/* Status */}
+        <div>
+          <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-2">Status</label>
+          <div className="flex gap-2">
+            {STATUS_OPTIONS.map(opt => (
+              <button key={opt.value} onClick={() => setStatus(opt.value)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${status === opt.value ? 'bg-[#FF8FA3]/10 text-[#FF8FA3] border border-[#FF8FA3]/30' : 'border border-[#FFB4A2]/15 text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40 hover:border-[#FF8FA3]/20'}`}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Privacy */}
+        <div>
+          <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-2">Privasi</label>
+          <div className="space-y-2">
+            {PRIVACY_OPTIONS.map(opt => {
+              const Icon = opt.icon;
+              return (
+                <button key={opt.value} onClick={() => setPrivacyLevel(opt.value)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${privacyLevel === opt.value ? 'border-[#FF8FA3] bg-[#FF8FA3]/5' : 'border-[#FFB4A2]/15 hover:border-[#FF8FA3]/20'}`}>
+                  <Icon className={`w-4 h-4 ${privacyLevel === opt.value ? 'text-[#FF8FA3]' : 'text-[#5A3E4C]/30'}`} />
+                  <div>
+                    <p className="text-xs font-medium text-[#4A2F3C] dark:text-[#e2d9f3]">{opt.label}</p>
+                    <p className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">{opt.desc}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Friends Access (only show when friends_only) */}
+        {privacyLevel === 'FRIENDS_ONLY' && (
+          <div>
+            <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-2">Undang Teman</label>
+            <div className="flex gap-2 mb-3">
+              <input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
+                placeholder="Email teman..."
+                className="flex-1 px-3 py-2 rounded-lg border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-xs text-[#4A2F3C] dark:text-[#e2d9f3] focus:outline-none focus:border-[#FF8FA3]/50" />
+              <button onClick={handleInvite} className="px-3 py-2 rounded-lg bg-[#FF8FA3] text-white text-xs font-medium">
+                Undang
+              </button>
+            </div>
+            {accessData?.getStoryAccess?.length > 0 && (
+              <div className="space-y-1.5">
+                {accessData.getStoryAccess.map((access: any) => (
+                  <div key={access.id} className="flex items-center justify-between p-2 rounded-lg bg-[#FFB4A2]/5 dark:bg-[#FF8FA3]/5">
+                    <span className="text-xs text-[#4A2F3C] dark:text-[#e2d9f3]">{access.grantedTo.email}</span>
+                    <button onClick={() => handleRevoke(access.id)} className="p-1 rounded hover:bg-red-50 text-red-400">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Save Button */}
+      <div className="px-5 py-4 border-t border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+        <button onClick={handleSave} disabled={saving}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#FF8FA3] hover:bg-[#FF8FA3]/90 text-white text-sm font-medium transition-all disabled:opacity-50">
+          <Save className="w-4 h-4" />
+          {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+        </button>
+      </div>
+    </div>
+  );
+}
