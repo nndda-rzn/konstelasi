@@ -13,9 +13,14 @@ export const CREATE_NOTE = gql`
       height
       color
       mood
+      isArchived
+      isLocked
+      storyNodeType
+      storyMetadata
       createdAt
       canvas { id name }
       tags { id name color }
+      images { id imageUrl caption }
     }
   }
 `;
@@ -93,9 +98,12 @@ export const UPDATE_NOTE_CONTENT = gql`
       color
       mood
       type
+      isArchived
+      isLocked
       createdAt
       canvas { id name }
       tags { id name color }
+      images { id imageUrl caption }
     }
   }
 `;
