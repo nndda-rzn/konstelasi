@@ -16,18 +16,32 @@ interface StoryAnalyticsPanelProps {
   storyId: string;
   isOpen: boolean;
   onClose: () => void;
+  nodes?: any[];
 }
 
-export default function StoryAnalyticsPanel({ storyId, isOpen, onClose }: StoryAnalyticsPanelProps) {
-  const { data, loading } = useQuery<any>(GET_STORY_ANALYTICS, {
+export default function StoryAnalyticsPanel({ storyId, isOpen, onClose, nodes = [] }: StoryAnalyticsPanelProps) {
+  const { data, loading, error } = useQuery<any>(GET_STORY_ANALYTICS, {
     variables: { storyId },
     skip: !isOpen,
     fetchPolicy: 'cache-and-network',
+    errorPolicy: 'ignore',
   });
 
   if (!isOpen) return null;
 
   const analytics = data?.getStoryAnalytics;
+
+  // Story-level stats from nodes (always available)
+  const totalNodes = nodes.length;
+  const totalWords = nodes.reduce((sum: number, n: any) => {
+    const text = (n.content || '').replace(/<[^>]+>/g, '');
+    return sum + text.split(/\s+/).filter((w: string) => w.length > 0).length;
+  }, 0);
+  const nodeTypes: Record<string, number> = {};
+  nodes.forEach((n: any) => {
+    const t = n.storyNodeType || 'scene';
+    nodeTypes[t] = (nodeTypes[t] || 0) + 1;
+  });
 
   const formatTime = (seconds: number) => {
     if (seconds < 60) return `${seconds}s`;
@@ -50,18 +64,45 @@ export default function StoryAnalyticsPanel({ storyId, isOpen, onClose }: StoryA
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar">
+        {/* Story Stats (always shown) */}
+        <div>
+          <h4 className="text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 font-semibold mb-2">Story Stats</h4>
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="p-3 rounded-xl bg-[#FF6B8B]/5 dark:bg-[#FF6B8B]/10">
+              <p className="text-lg font-bold text-[#4A2F3C] dark:text-[#e2d9f3]">{totalNodes}</p>
+              <p className="text-[9px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">Total Nodes</p>
+            </div>
+            <div className="p-3 rounded-xl bg-[#7C83FD]/5 dark:bg-[#7C83FD]/10">
+              <p className="text-lg font-bold text-[#4A2F3C] dark:text-[#e2d9f3]">{totalWords.toLocaleString()}</p>
+              <p className="text-[9px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">Total Kata</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Node Type Breakdown (always shown) */}
+        {Object.keys(nodeTypes).length > 0 && (
+          <div>
+            <h4 className="text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 font-semibold mb-2">Node Types</h4>
+            <div className="flex flex-wrap gap-1.5">
+              {Object.entries(nodeTypes).map(([type, count]) => (
+                <span key={type} className="px-2 py-1 rounded-full bg-[#FF6B8B]/10 text-[10px] font-medium text-[#4A2F3C] dark:text-[#e2d9f3]">
+                  {type.replace('_', ' ')} ({count})
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Engagement Stats (when available) */}
         {loading ? (
-          <div className="flex items-center justify-center py-10">
-            <div className="w-5 h-5 border-2 border-[#FF8FA3] border-t-transparent rounded-full animate-spin" />
+          <div className="flex items-center justify-center py-6">
+            <div className="w-5 h-5 border-2 border-[#FF6B8B] border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : !analytics ? (
-          <div className="text-center py-10">
-            <p className="text-xs text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">Belum ada data analytics</p>
-          </div>
-        ) : (
+        ) : analytics ? (
           <>
-            {/* Overview Stats */}
-            <div className="grid grid-cols-2 gap-2.5">
+            <div>
+              <h4 className="text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 font-semibold mb-2">Engagement</h4>
+              <div className="grid grid-cols-2 gap-2.5">
               <div className="p-3 rounded-xl bg-[#FF8FA3]/5 dark:bg-[#FF8FA3]/10">
                 <div className="flex items-center gap-1.5 mb-1">
                   <Eye className="w-3 h-3 text-[#FF8FA3]" />
@@ -89,6 +130,7 @@ export default function StoryAnalyticsPanel({ storyId, isOpen, onClose }: StoryA
                   <span className="text-[9px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">Bookmarks</span>
                 </div>
                 <p className="text-lg font-bold text-[#4A2F3C] dark:text-[#e2d9f3]">{analytics.totalBookmarks}</p>
+              </div>
               </div>
             </div>
 
@@ -122,7 +164,7 @@ export default function StoryAnalyticsPanel({ storyId, isOpen, onClose }: StoryA
               </div>
             </div>
           </>
-        )}
+        ) : null}
       </div>
     </div>
   );

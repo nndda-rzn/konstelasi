@@ -290,6 +290,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             storyId={storyId}
             isOpen={showAnalytics}
             onClose={() => setShowAnalytics(false)}
+            nodes={story?.nodes || []}
           />
         )}
 
