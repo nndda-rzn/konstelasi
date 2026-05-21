@@ -13,7 +13,7 @@ import {
   addEdge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOpen, Image, List } from 'lucide-react';
+import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOpen, Image, List, BarChart3 } from 'lucide-react';
 import { ApolloWrapper } from '@/lib/apollo/ApolloWrapper';
 import { Providers } from '@/lib/Providers';
 import { GET_STORY, UPDATE_STORY, ADD_NODE_TO_STORY } from '@/graphql/story';
@@ -27,6 +27,7 @@ import StoryTimelineView from '@/components/story/StoryTimelineView';
 import StoryReadingView from '@/components/story/StoryReadingView';
 import StoryGalleryView from '@/components/story/StoryGalleryView';
 import StoryOutlineView from '@/components/story/StoryOutlineView';
+import StoryAnalyticsPanel from '@/components/story/StoryAnalyticsPanel';
 
 const nodeTypes = { storyNode: StoryNode };
 const edgeTypes = { storyEdge: StoryEdge };
@@ -39,6 +40,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showNodeSelector, setShowNodeSelector] = useState(false);
   const [viewMode, setViewMode] = useState<'canvas' | 'timeline' | 'reading' | 'gallery' | 'outline'>('canvas');
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   const { data, loading, refetch } = useQuery<any>(GET_STORY, {
     variables: { id: storyId },
@@ -194,6 +196,9 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           <button onClick={() => setShowSettings(!showSettings)} className={`p-2 rounded-lg transition-all ${showSettings ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
             <Settings className="w-4 h-4" />
           </button>
+          <button onClick={() => setShowAnalytics(!showAnalytics)} className={`p-2 rounded-lg transition-all ${showAnalytics ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
+            <BarChart3 className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -242,6 +247,15 @@ function StoryCanvas({ params }: { params: { id: string } }) {
               await updateStory({ variables: { input: { id: storyId, ...input } } });
               refetch();
             }}
+          />
+        )}
+
+        {/* Analytics Panel */}
+        {showAnalytics && (
+          <StoryAnalyticsPanel
+            storyId={storyId}
+            isOpen={showAnalytics}
+            onClose={() => setShowAnalytics(false)}
           />
         )}
       </div>

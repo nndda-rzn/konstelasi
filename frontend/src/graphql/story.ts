@@ -196,3 +196,45 @@ export const TOGGLE_NODE_LOCK = gql`
     }
   }
 `;
+
+// Engagement
+export const TOGGLE_BOOKMARK = gql`
+  mutation ToggleBookmark($storyId: String!, $nodeId: String) {
+    toggleBookmark(storyId: $storyId, nodeId: $nodeId)
+  }
+`;
+
+export const ADD_BADGE = gql`
+  mutation AddBadge($storyId: String!, $nodeId: String!, $badgeType: String!) {
+    addBadge(storyId: $storyId, nodeId: $nodeId, badgeType: $badgeType)
+  }
+`;
+
+export const RECORD_VIEW = gql`
+  mutation RecordView($storyId: String!, $nodeId: String, $timeSpent: Float) {
+    recordView(storyId: $storyId, nodeId: $nodeId, timeSpent: $timeSpent)
+  }
+`;
+
+export const GET_BOOKMARKS = gql`
+  query GetBookmarks($storyId: String!) {
+    getBookmarks(storyId: $storyId) {
+      id
+      node { id title }
+      createdAt
+    }
+  }
+`;
+
+export const GET_STORY_ANALYTICS = gql`
+  query GetStoryAnalytics($storyId: String!) {
+    getStoryAnalytics(storyId: $storyId) {
+      totalViews
+      uniqueViewers
+      totalTimeSpent
+      totalBookmarks
+      totalBadges
+      badgeBreakdown { type count }
+    }
+  }
+`;

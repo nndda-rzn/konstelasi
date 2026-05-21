@@ -14,6 +14,11 @@ input AddNoteImageInput {
   order: Int
 }
 
+type BadgeCount {
+  count: Int!
+  type: String!
+}
+
 input BatchUpdateNoteInput {
   height: Float
   id: String!
@@ -69,6 +74,7 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
+  addBadge(badgeType: String!, nodeId: String!, storyId: String!): Boolean!
   addNodeToStory(metadata: String, nodeType: String, noteId: String!, storyId: String!): Note!
   addNoteImage(input: AddNoteImageInput!): NoteImage!
   archiveCanvas(id: String!): Canvas!
@@ -88,11 +94,13 @@ type Mutation {
   deleteTag(id: String!): Boolean!
   grantStoryAccess(email: String!, level: AccessLevel! = VIEW, storyId: String!): StoryAccess!
   moveCanvas(id: String!, parentId: String): Canvas!
+  recordView(nodeId: String, storyId: String!, timeSpent: Float): Boolean!
   recordWriteActivity: WritingStreak!
   removeNodeFromStory(noteId: String!): Note!
   removeTagFromNote(noteId: String!, tagId: String!): Boolean!
   restoreNoteVersion(versionId: String!): Note!
   revokeStoryAccess(accessId: String!, storyId: String!): Boolean!
+  toggleBookmark(nodeId: String, storyId: String!): Boolean!
   toggleNodeLock(noteId: String!): Note!
   unarchiveCanvas(id: String!): Canvas!
   unarchiveNote(id: String!): Note!
@@ -180,6 +188,7 @@ type Query {
   canvases: [Canvas!]!
   childCanvases(parentId: String!): [Canvas!]!
   getArchivedNotes(canvasId: String): [Note!]!
+  getBookmarks(storyId: String!): [StoryEngagement!]!
   getNoteVersions(noteId: String!): [NoteVersion!]!
   getNotes(canvasId: String, tagIds: [String!]): [Note!]!
   getProfile: String!
@@ -187,6 +196,7 @@ type Query {
   getStories: [Story!]!
   getStory(id: String!): Story!
   getStoryAccess(storyId: String!): [StoryAccess!]!
+  getStoryAnalytics(storyId: String!): StoryAnalytics!
   getWritingStreak: WritingStreak!
   rootCanvases: [Canvas!]!
   tag(id: String!): Tag!
@@ -219,6 +229,28 @@ type StoryAccess {
   grantedTo: User!
   id: String!
   story: Story!
+}
+
+type StoryAnalytics {
+  badgeBreakdown: [BadgeCount!]!
+  totalBadges: Int!
+  totalBookmarks: Int!
+  totalTimeSpent: Int!
+  totalViews: Int!
+  uniqueViewers: Int!
+}
+
+type StoryEngagement {
+  badgeType: String
+  createdAt: DateTime!
+  id: String!
+  node: Note
+  story: Story!
+  timeSpent: Int!
+  type: String!
+  updatedAt: DateTime!
+  user: User!
+  viewCount: Int!
 }
 
 enum StoryStatus {

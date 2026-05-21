@@ -44,3 +44,21 @@ CREATE INDEX IF NOT EXISTS "idx_story_access_story_id" ON "story_access" ("story
 CREATE INDEX IF NOT EXISTS "idx_story_access_granted_to" ON "story_access" ("granted_to_id");
 CREATE INDEX IF NOT EXISTS "idx_note_story_id" ON "note" ("story_id");
 CREATE INDEX IF NOT EXISTS "idx_note_story_node_type" ON "note" ("story_node_type");
+
+-- 5. Create Story Engagement table
+CREATE TABLE IF NOT EXISTS "story_engagement" (
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  "story_id" uuid NOT NULL REFERENCES "story"("id") ON DELETE CASCADE,
+  "user_id" uuid NOT NULL REFERENCES "user"("id") ON DELETE CASCADE,
+  "node_id" uuid REFERENCES "note"("id") ON DELETE SET NULL,
+  "type" varchar(50) NOT NULL,
+  "badge_type" varchar(50),
+  "view_count" integer NOT NULL DEFAULT 0,
+  "time_spent" integer NOT NULL DEFAULT 0,
+  "created_at" timestamptz NOT NULL DEFAULT now(),
+  "updated_at" timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS "idx_engagement_story_id" ON "story_engagement" ("story_id");
+CREATE INDEX IF NOT EXISTS "idx_engagement_user_id" ON "story_engagement" ("user_id");
+CREATE INDEX IF NOT EXISTS "idx_engagement_type" ON "story_engagement" ("type");
