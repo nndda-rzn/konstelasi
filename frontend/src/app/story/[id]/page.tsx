@@ -309,7 +309,13 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             note={selectedNote}
             onClose={() => { setSelectedNote(null); refetch(); }}
             onUpdateCache={handleUpdateCache}
-            onDeleteSuccess={() => { setSelectedNote(null); refetch(); }}
+            onDeleteSuccess={() => {
+              const deletedId = selectedNote?.id;
+              setSelectedNote(null);
+              setNodes((nds: any) => nds.filter((n: any) => n.id !== deletedId));
+              setEdges((eds: any) => eds.filter((e: any) => e.source !== deletedId && e.target !== deletedId));
+              refetch();
+            }}
           />
         )}
       </div>
