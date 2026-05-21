@@ -2,6 +2,7 @@ import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { StoryService } from './story.service';
 import { StatisticsService } from './statistics.service';
+import { EmotionalArcService } from './emotional-arc.service';
 import { Story, StoryType, StoryStatus, PrivacyLevel } from '../entities/story.entity';
 import { StoryAccess, AccessLevel } from '../entities/story-access.entity';
 import { Note } from '../entities/note.entity';
@@ -70,12 +71,35 @@ class WritingStatistics {
   @Field({ nullable: true }) lastWriteDate?: Date;
 }
 
+@ObjectType()
+class EmotionalDataPoint {
+  @Field(() => Int) index!: number;
+  @Field() nodeId!: string;
+  @Field() title!: string;
+  @Field() mood!: string;
+  @Field(() => Float) score!: number;
+  @Field() nodeType!: string;
+  @Field() createdAt!: Date;
+}
+
+@ObjectType()
+class EmotionalArc {
+  @Field(() => [EmotionalDataPoint]) dataPoints!: EmotionalDataPoint[];
+  @Field() overallMood!: string;
+  @Field(() => Float) overallScore!: number;
+  @Field(() => Float) emotionalRange!: number;
+  @Field(() => [EmotionalDataPoint]) peaks!: EmotionalDataPoint[];
+  @Field(() => [EmotionalDataPoint]) valleys!: EmotionalDataPoint[];
+  @Field() trend!: string;
+}
+
 @Resolver(() => Story)
 @UseGuards(GqlAuthGuard)
 export class StoryResolver {
   constructor(
     private readonly storyService: StoryService,
     private readonly statisticsService: StatisticsService,
+    private readonly emotionalArcService: EmotionalArcService,
   ) {}
 
   @Query(() => [Story])
@@ -158,5 +182,10 @@ export class StoryResolver {
   @Query(() => WritingStatistics)
   async getWritingStatistics(@CurrentUser() user: any, @Args('storyId') storyId: string) {
     return this.statisticsService.getWritingStatistics(user.id, storyId);
+  }
+
+  @Query(() => EmotionalArc)
+  async getEmotionalArc(@CurrentUser() user: any, @Args('storyId') storyId: string) {
+    return this.emotionalArcService.getEmotionalArc(user.id, storyId);
   }
 }

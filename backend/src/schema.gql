@@ -73,6 +73,26 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type EmotionalArc {
+  dataPoints: [EmotionalDataPoint!]!
+  emotionalRange: Float!
+  overallMood: String!
+  overallScore: Float!
+  peaks: [EmotionalDataPoint!]!
+  trend: String!
+  valleys: [EmotionalDataPoint!]!
+}
+
+type EmotionalDataPoint {
+  createdAt: DateTime!
+  index: Int!
+  mood: String!
+  nodeId: String!
+  nodeType: String!
+  score: Float!
+  title: String!
+}
+
 type LongestNodeInfo {
   id: String!
   title: String!
@@ -205,6 +225,7 @@ type Query {
   childCanvases(parentId: String!): [Canvas!]!
   getArchivedNotes(canvasId: String): [Note!]!
   getBookmarks(storyId: String!): [StoryEngagement!]!
+  getEmotionalArc(storyId: String!): EmotionalArc!
   getNoteVersions(noteId: String!): [NoteVersion!]!
   getNotes(canvasId: String, tagIds: [String!]): [Note!]!
   getProfile: String!

@@ -156,3 +156,17 @@ export const GET_WRITING_STATISTICS = gql`
     }
   }
 `;
+
+export const GET_EMOTIONAL_ARC = gql`
+  query GetEmotionalArc($storyId: String!) {
+    getEmotionalArc(storyId: $storyId) {
+      dataPoints { index nodeId title mood score nodeType createdAt }
+      overallMood
+      overallScore
+      emotionalRange
+      peaks { index nodeId title mood score nodeType }
+      valleys { index nodeId title mood score nodeType }
+      trend
+    }
+  }
+`;
