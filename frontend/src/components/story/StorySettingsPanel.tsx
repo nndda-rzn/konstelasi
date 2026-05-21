@@ -1,15 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Lock, Globe, Users, Trash2, Save } from 'lucide-react';
+import { X, Lock, Globe, Users, Trash2, Save, AlertTriangle } from 'lucide-react';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { GET_STORY_ACCESS, GRANT_STORY_ACCESS, REVOKE_STORY_ACCESS } from '@/graphql/story';
+import { GET_STORY_ACCESS, GRANT_STORY_ACCESS, REVOKE_STORY_ACCESS, DELETE_STORY } from '@/graphql/story';
 import { notify } from '@/lib/toast';
 
 interface StorySettingsPanelProps {
   story: any;
   onClose: () => void;
   onUpdate: (input: any) => Promise<void>;
+  onDelete?: () => void;
 }
 
 const PRIVACY_OPTIONS = [
@@ -24,7 +25,7 @@ const STATUS_OPTIONS = [
   { value: 'ARCHIVED', label: 'Archived', color: 'gray' },
 ];
 
-export default function StorySettingsPanel({ story, onClose, onUpdate }: StorySettingsPanelProps) {
+export default function StorySettingsPanel({ story, onClose, onUpdate, onDelete }: StorySettingsPanelProps) {
   const [title, setTitle] = useState(story.title || '');
   const [subtitle, setSubtitle] = useState(story.subtitle || '');
   const [description, setDescription] = useState(story.description || '');
@@ -32,6 +33,9 @@ export default function StorySettingsPanel({ story, onClose, onUpdate }: StorySe
   const [status, setStatus] = useState(story.status?.toUpperCase() || 'DRAFT');
   const [inviteEmail, setInviteEmail] = useState('');
   const [saving, setSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const [deleteStoryMutation] = useMutation<any>(DELETE_STORY);
 
   const { data: accessData, refetch: refetchAccess } = useQuery<any>(GET_STORY_ACCESS, {
     variables: { storyId: story.id },
@@ -168,12 +172,46 @@ export default function StorySettingsPanel({ story, onClose, onUpdate }: StorySe
       </div>
 
       {/* Save Button */}
-      <div className="px-5 py-4 border-t border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+      <div className="px-5 py-4 border-t border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10 space-y-2">
         <button onClick={handleSave} disabled={saving}
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#FF8FA3] hover:bg-[#FF8FA3]/90 text-white text-sm font-medium transition-all disabled:opacity-50">
           <Save className="w-4 h-4" />
           {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
         </button>
+
+        {!showDeleteConfirm ? (
+          <button onClick={() => setShowDeleteConfirm(true)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-red-200 dark:border-red-900/30 text-red-500 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/10 transition-all">
+            <Trash2 className="w-4 h-4" />
+            Hapus Story
+          </button>
+        ) : (
+          <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="w-4 h-4 text-red-500" />
+              <span className="text-xs font-semibold text-red-600 dark:text-red-400">Yakin hapus story ini?</span>
+            </div>
+            <p className="text-[10px] text-red-500/70 mb-3">Semua data story akan dihapus permanen dan tidak bisa dikembalikan.</p>
+            <div className="flex gap-2">
+              <button onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-3 py-1.5 rounded-lg text-xs text-[#5A3E4C]/60 hover:bg-white dark:hover:bg-[#2a2438] transition-all">
+                Batal
+              </button>
+              <button onClick={async () => {
+                try {
+                  await deleteStoryMutation({ variables: { id: story.id } });
+                  notify.success('Story berhasil dihapus');
+                  onDelete?.();
+                } catch (err) {
+                  notify.error('Gagal menghapus story');
+                }
+              }}
+                className="flex-1 px-3 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-medium transition-all">
+                Hapus
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

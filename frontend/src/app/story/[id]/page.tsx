@@ -249,6 +249,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
               await updateStory({ variables: { input: { id: storyId, ...input } } });
               refetch();
             }}
+            onDelete={() => router.push('/story')}
           />
         )}
 
