@@ -5,27 +5,27 @@ import { Handle, Position, NodeResizer } from '@xyflow/react';
 import { MapPin, Clock, Heart, MessageCircle, Star, Lightbulb, Calendar, Image, Quote, PenTool, Lock } from 'lucide-react';
 
 const NODE_TYPE_CONFIG: Record<string, { icon: any; label: string; color: string; bgGradient: string }> = {
-  scene: { icon: MapPin, label: 'Scene', color: '#FF8FA3', bgGradient: 'from-[#FF8FA3]/10 to-[#FFB4A2]/5' },
-  memory: { icon: Star, label: 'Memory', color: '#C7CEEA', bgGradient: 'from-[#C7CEEA]/10 to-[#B5EAD7]/5' },
-  character: { icon: Heart, label: 'Character', color: '#E0BBE4', bgGradient: 'from-[#E0BBE4]/10 to-[#C7CEEA]/5' },
-  dialogue: { icon: MessageCircle, label: 'Dialogue', color: '#B5EAD7', bgGradient: 'from-[#B5EAD7]/10 to-[#C7CEEA]/5' },
-  moment: { icon: Lightbulb, label: 'Moment', color: '#FFD6A5', bgGradient: 'from-[#FFD6A5]/10 to-[#FFB4A2]/5' },
-  feeling: { icon: Heart, label: 'Feeling', color: '#FF6B9D', bgGradient: 'from-[#FF6B9D]/10 to-[#FF8FA3]/5' },
-  timeline_event: { icon: Calendar, label: 'Event', color: '#87CEEB', bgGradient: 'from-[#87CEEB]/10 to-[#B5EAD7]/5' },
-  media: { icon: Image, label: 'Media', color: '#DDA0DD', bgGradient: 'from-[#DDA0DD]/10 to-[#E0BBE4]/5' },
-  quote: { icon: Quote, label: 'Quote', color: '#F0E68C', bgGradient: 'from-[#F0E68C]/10 to-[#FFD6A5]/5' },
-  reflection: { icon: PenTool, label: 'Reflection', color: '#98D8C8', bgGradient: 'from-[#98D8C8]/10 to-[#B5EAD7]/5' },
+  scene: { icon: MapPin, label: 'Scene', color: '#FF6B8B', bgGradient: 'from-[#FF6B8B]/15 to-[#FF922B]/5' },
+  memory: { icon: Star, label: 'Memory', color: '#7C83FD', bgGradient: 'from-[#7C83FD]/15 to-[#4DABF7]/5' },
+  character: { icon: Heart, label: 'Character', color: '#C074DF', bgGradient: 'from-[#C074DF]/15 to-[#7C83FD]/5' },
+  dialogue: { icon: MessageCircle, label: 'Dialogue', color: '#38D9A9', bgGradient: 'from-[#38D9A9]/15 to-[#3BC9DB]/5' },
+  moment: { icon: Lightbulb, label: 'Moment', color: '#FF922B', bgGradient: 'from-[#FF922B]/15 to-[#FCC419]/5' },
+  feeling: { icon: Heart, label: 'Feeling', color: '#F03E3E', bgGradient: 'from-[#F03E3E]/15 to-[#FF6B8B]/5' },
+  timeline_event: { icon: Calendar, label: 'Event', color: '#4DABF7', bgGradient: 'from-[#4DABF7]/15 to-[#3BC9DB]/5' },
+  media: { icon: Image, label: 'Media', color: '#CC5DE8', bgGradient: 'from-[#CC5DE8]/15 to-[#C074DF]/5' },
+  quote: { icon: Quote, label: 'Quote', color: '#FCC419', bgGradient: 'from-[#FCC419]/15 to-[#FF922B]/5' },
+  reflection: { icon: PenTool, label: 'Reflection', color: '#3BC9DB', bgGradient: 'from-[#3BC9DB]/15 to-[#38D9A9]/5' },
 };
 
 const EMOTION_COLORS: Record<string, string> = {
-  happy: '#FFD6A5',
-  sad: '#C7CEEA',
-  excited: '#FF8FA3',
-  peaceful: '#B5EAD7',
-  romantic: '#E0BBE4',
-  melancholic: '#87CEEB',
-  nostalgic: '#DDA0DD',
-  hopeful: '#98D8C8',
+  happy: '#FF922B',
+  sad: '#7C83FD',
+  excited: '#FF6B8B',
+  peaceful: '#38D9A9',
+  romantic: '#C074DF',
+  melancholic: '#4DABF7',
+  nostalgic: '#CC5DE8',
+  hopeful: '#3BC9DB',
 };
 
 function StoryNode({ data, selected }: any) {

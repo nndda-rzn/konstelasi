@@ -4,13 +4,13 @@ import { memo, useState } from 'react';
 import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath } from '@xyflow/react';
 
 const EDGE_COLORS: Record<string, string> = {
-  narrative: '#FF8FA3',
-  causal: '#FFD6A5',
-  character: '#E0BBE4',
-  thematic: '#C7CEEA',
-  emotional: '#FF6B9D',
-  temporal: '#87CEEB',
-  default: '#FFB4A2',
+  narrative: '#FF6B8B',
+  causal: '#FF922B',
+  character: '#C074DF',
+  thematic: '#7C83FD',
+  emotional: '#F03E3E',
+  temporal: '#4DABF7',
+  default: '#FF6B8B',
 };
 
 function StoryEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, selected }: any) {

@@ -4,27 +4,27 @@ import { useState } from 'react';
 import { X, MapPin, Star, Heart, MessageCircle, Lightbulb, Calendar, Image, Quote, PenTool } from 'lucide-react';
 
 const NODE_TYPES = [
-  { value: 'scene', label: 'Scene', icon: MapPin, color: '#FF8FA3', desc: 'Lokasi & waktu kejadian' },
-  { value: 'memory', label: 'Memory', icon: Star, color: '#C7CEEA', desc: 'Kenangan spesial' },
-  { value: 'character', label: 'Character', icon: Heart, color: '#E0BBE4', desc: 'Profil seseorang' },
-  { value: 'dialogue', label: 'Dialogue', icon: MessageCircle, color: '#B5EAD7', desc: 'Percakapan/kutipan' },
-  { value: 'moment', label: 'Moment', icon: Lightbulb, color: '#FFD6A5', desc: 'Momen penting' },
-  { value: 'feeling', label: 'Feeling', icon: Heart, color: '#FF6B9D', desc: 'Perasaan/emosi' },
-  { value: 'timeline_event', label: 'Event', icon: Calendar, color: '#87CEEB', desc: 'Kejadian bertanggal' },
-  { value: 'media', label: 'Media', icon: Image, color: '#DDA0DD', desc: 'Foto/video/audio' },
-  { value: 'quote', label: 'Quote', icon: Quote, color: '#F0E68C', desc: 'Kutipan bermakna' },
-  { value: 'reflection', label: 'Reflection', icon: PenTool, color: '#98D8C8', desc: 'Pemikiran pribadi' },
+  { value: 'scene', label: 'Scene', icon: MapPin, color: '#FF6B8B', desc: 'Lokasi & waktu kejadian' },
+  { value: 'memory', label: 'Memory', icon: Star, color: '#7C83FD', desc: 'Kenangan spesial' },
+  { value: 'character', label: 'Character', icon: Heart, color: '#C074DF', desc: 'Profil seseorang' },
+  { value: 'dialogue', label: 'Dialogue', icon: MessageCircle, color: '#38D9A9', desc: 'Percakapan/kutipan' },
+  { value: 'moment', label: 'Moment', icon: Lightbulb, color: '#FF922B', desc: 'Momen penting' },
+  { value: 'feeling', label: 'Feeling', icon: Heart, color: '#F03E3E', desc: 'Perasaan/emosi' },
+  { value: 'timeline_event', label: 'Event', icon: Calendar, color: '#4DABF7', desc: 'Kejadian bertanggal' },
+  { value: 'media', label: 'Media', icon: Image, color: '#CC5DE8', desc: 'Foto/video/audio' },
+  { value: 'quote', label: 'Quote', icon: Quote, color: '#FCC419', desc: 'Kutipan bermakna' },
+  { value: 'reflection', label: 'Reflection', icon: PenTool, color: '#3BC9DB', desc: 'Pemikiran pribadi' },
 ];
 
 const EMOTIONS = [
-  { value: 'happy', label: 'Happy', color: '#FFD6A5' },
-  { value: 'sad', label: 'Sad', color: '#C7CEEA' },
-  { value: 'excited', label: 'Excited', color: '#FF8FA3' },
-  { value: 'peaceful', label: 'Peaceful', color: '#B5EAD7' },
-  { value: 'romantic', label: 'Romantic', color: '#E0BBE4' },
-  { value: 'melancholic', label: 'Melancholic', color: '#87CEEB' },
-  { value: 'nostalgic', label: 'Nostalgic', color: '#DDA0DD' },
-  { value: 'hopeful', label: 'Hopeful', color: '#98D8C8' },
+  { value: 'happy', label: 'Happy', color: '#FF922B' },
+  { value: 'sad', label: 'Sad', color: '#7C83FD' },
+  { value: 'excited', label: 'Excited', color: '#FF6B8B' },
+  { value: 'peaceful', label: 'Peaceful', color: '#38D9A9' },
+  { value: 'romantic', label: 'Romantic', color: '#C074DF' },
+  { value: 'melancholic', label: 'Melancholic', color: '#4DABF7' },
+  { value: 'nostalgic', label: 'Nostalgic', color: '#CC5DE8' },
+  { value: 'hopeful', label: 'Hopeful', color: '#3BC9DB' },
 ];
 
 interface NodeTypeSelectorProps {

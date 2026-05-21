@@ -10,9 +10,9 @@ const NODE_ICONS: Record<string, any> = {
 };
 
 const NODE_COLORS: Record<string, string> = {
-  scene: '#FF8FA3', memory: '#C7CEEA', character: '#E0BBE4', dialogue: '#B5EAD7',
-  moment: '#FFD6A5', feeling: '#FF6B9D', timeline_event: '#87CEEB', media: '#DDA0DD',
-  quote: '#F0E68C', reflection: '#98D8C8',
+  scene: '#FF6B8B', memory: '#7C83FD', character: '#C074DF', dialogue: '#38D9A9',
+  moment: '#FF922B', feeling: '#F03E3E', timeline_event: '#4DABF7', media: '#CC5DE8',
+  quote: '#FCC419', reflection: '#3BC9DB',
 };
 
 interface StoryOutlineViewProps {

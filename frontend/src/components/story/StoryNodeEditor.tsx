@@ -9,27 +9,27 @@ import { notify } from '@/lib/toast';
 import TiptapEditor from '@/components/canvas/TiptapEditor';
 
 const NODE_TYPE_OPTIONS = [
-  { value: 'scene', label: 'Scene', color: '#FF8FA3' },
-  { value: 'memory', label: 'Memory', color: '#C7CEEA' },
-  { value: 'character', label: 'Character', color: '#E0BBE4' },
-  { value: 'dialogue', label: 'Dialogue', color: '#B5EAD7' },
-  { value: 'moment', label: 'Moment', color: '#FFD6A5' },
-  { value: 'feeling', label: 'Feeling', color: '#FF6B9D' },
-  { value: 'timeline_event', label: 'Event', color: '#87CEEB' },
-  { value: 'media', label: 'Media', color: '#DDA0DD' },
-  { value: 'quote', label: 'Quote', color: '#F0E68C' },
-  { value: 'reflection', label: 'Reflection', color: '#98D8C8' },
+  { value: 'scene', label: 'Scene', color: '#FF6B8B' },
+  { value: 'memory', label: 'Memory', color: '#7C83FD' },
+  { value: 'character', label: 'Character', color: '#C074DF' },
+  { value: 'dialogue', label: 'Dialogue', color: '#38D9A9' },
+  { value: 'moment', label: 'Moment', color: '#FF922B' },
+  { value: 'feeling', label: 'Feeling', color: '#F03E3E' },
+  { value: 'timeline_event', label: 'Event', color: '#4DABF7' },
+  { value: 'media', label: 'Media', color: '#CC5DE8' },
+  { value: 'quote', label: 'Quote', color: '#FCC419' },
+  { value: 'reflection', label: 'Reflection', color: '#3BC9DB' },
 ];
 
 const EMOTIONS = [
-  { value: 'happy', label: 'Happy', color: '#FFD6A5' },
-  { value: 'sad', label: 'Sad', color: '#C7CEEA' },
-  { value: 'excited', label: 'Excited', color: '#FF8FA3' },
-  { value: 'peaceful', label: 'Peaceful', color: '#B5EAD7' },
-  { value: 'romantic', label: 'Romantic', color: '#E0BBE4' },
-  { value: 'melancholic', label: 'Melancholic', color: '#87CEEB' },
-  { value: 'nostalgic', label: 'Nostalgic', color: '#DDA0DD' },
-  { value: 'hopeful', label: 'Hopeful', color: '#98D8C8' },
+  { value: 'happy', label: 'Happy', color: '#FF922B' },
+  { value: 'sad', label: 'Sad', color: '#7C83FD' },
+  { value: 'excited', label: 'Excited', color: '#FF6B8B' },
+  { value: 'peaceful', label: 'Peaceful', color: '#38D9A9' },
+  { value: 'romantic', label: 'Romantic', color: '#C074DF' },
+  { value: 'melancholic', label: 'Melancholic', color: '#4DABF7' },
+  { value: 'nostalgic', label: 'Nostalgic', color: '#CC5DE8' },
+  { value: 'hopeful', label: 'Hopeful', color: '#3BC9DB' },
 ];
 
 interface StoryNodeEditorProps {

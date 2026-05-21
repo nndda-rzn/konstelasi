@@ -5,11 +5,11 @@ import { X, Eye, Users, Clock, Bookmark, Award } from 'lucide-react';
 import { GET_STORY_ANALYTICS } from '@/graphql/story';
 
 const BADGE_LABELS: Record<string, { label: string; color: string }> = {
-  moved: { label: 'Moved', color: '#FF8FA3' },
-  favorite: { label: 'Favorite', color: '#FFD6A5' },
-  bookmarked: { label: 'Bookmarked', color: '#C7CEEA' },
-  thought_provoking: { label: 'Thought-provoking', color: '#B5EAD7' },
-  memorable: { label: 'Memorable', color: '#E0BBE4' },
+  moved: { label: 'Moved', color: '#FF6B8B' },
+  favorite: { label: 'Favorite', color: '#FF922B' },
+  bookmarked: { label: 'Bookmarked', color: '#7C83FD' },
+  thought_provoking: { label: 'Thought-provoking', color: '#38D9A9' },
+  memorable: { label: 'Memorable', color: '#C074DF' },
 };
 
 interface StoryAnalyticsPanelProps {
