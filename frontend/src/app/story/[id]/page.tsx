@@ -29,8 +29,7 @@ import StoryGalleryView from '@/components/story/StoryGalleryView';
 import StoryOutlineView from '@/components/story/StoryOutlineView';
 import StoryAnalyticsPanel from '@/components/story/StoryAnalyticsPanel';
 import StoryExportPanel from '@/components/story/StoryExportPanel';
-import NoteEditorSidebar from '@/components/canvas/NoteEditorSidebar';
-import { UPDATE_NOTE_CONTENT } from '@/graphql/mutations';
+import StoryNodeEditor from '@/components/story/StoryNodeEditor';
 
 const nodeTypes = { storyNode: StoryNode };
 const edgeTypes = { storyEdge: StoryEdge };
@@ -306,7 +305,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
 
         {/* Note Editor Sidebar */}
         {selectedNote && (
-          <NoteEditorSidebar
+          <StoryNodeEditor
             note={selectedNote}
             onClose={() => { setSelectedNote(null); refetch(); }}
             onUpdateCache={handleUpdateCache}
