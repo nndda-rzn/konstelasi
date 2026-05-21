@@ -11,6 +11,7 @@ import { NoteVersion } from './entities/note-version.entity';
 import { Story } from './entities/story.entity';
 import { StoryAccess } from './entities/story-access.entity';
 import { StoryEngagement } from './entities/story-engagement.entity';
+import { StoryVersion } from './entities/story-version.entity';
 import * as dotenv from 'dotenv';
 
 // Load environment variables if not already loaded
@@ -19,10 +20,13 @@ dotenv.config();
 export default defineConfig({
   driver: PostgreSqlDriver,
   clientUrl: process.env.DATABASE_URL,
-  entities: [User, Note, NoteImage, NoteLink, Tag, Canvas, WritingStreak, NoteVersion, Story, StoryAccess, StoryEngagement],
+  entities: [User, Note, NoteImage, NoteLink, Tag, Canvas, WritingStreak, NoteVersion, Story, StoryAccess, StoryEngagement, StoryVersion],
   extensions: [Migrator],
   migrations: {
     path: './src/migrations',
+  },
+  schemaGenerator: {
+    disableForeignKeys: false,
   },
   allowGlobalContext: true,
   debug: process.env.NODE_ENV !== 'production',

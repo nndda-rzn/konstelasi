@@ -48,7 +48,6 @@ export class StoryService {
     const story = await this.em.findOneOrFail(Story, { id: storyId, user: { id: userId } });
     const nodes = await this.em.find(Note, { story: { id: storyId } }, {
       populate: ['images', 'tags', 'outgoingEdges', 'outgoingEdges.source', 'outgoingEdges.target', 'incomingEdges', 'incomingEdges.source', 'incomingEdges.target'] as any,
-      refresh: true,
     });
     (story as any).nodes = nodes;
     return story;

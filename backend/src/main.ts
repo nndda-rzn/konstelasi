@@ -1,10 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { EntityManager } from '@mikro-orm/core';
+import { EntityManager, MikroORM } from '@mikro-orm/core';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
+
+  // Auto-sync database schema (add new columns/tables)
+  const orm = app.get(MikroORM);
+  const generator = orm.getSchemaGenerator();
+  try {
+    await generator.updateSchema({ safe: true, dropTables: false });
+  } catch (e) {
+    console.log('Schema sync skipped:', e.message);
+  }
 
   // Create Guest User and Bypass Supabase Storage RLS
   const em = app.get(EntityManager);
