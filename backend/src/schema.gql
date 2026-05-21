@@ -150,12 +150,14 @@ type Mutation {
   createNote(input: CreateNoteInput!): Note!
   createNoteLink(input: CreateNoteLinkInput!): NoteLink!
   createStory(input: CreateStoryInput!): Story!
+  createStoryVersion(label: String, notes: String, storyId: String!): StoryVersion!
   createTag(color: String, description: String, name: String!): Tag!
   deleteCanvas(id: String!): Boolean!
   deleteNote(id: String!): Boolean!
   deleteNoteImage(id: String!): Boolean!
   deleteNoteLink(id: String!): Boolean!
   deleteStory(id: String!): Boolean!
+  deleteStoryVersion(versionId: String!): Boolean!
   deleteTag(id: String!): Boolean!
   grantStoryAccess(email: String!, level: AccessLevel! = VIEW, storyId: String!): StoryAccess!
   moveCanvas(id: String!, parentId: String): Canvas!
@@ -164,6 +166,7 @@ type Mutation {
   removeNodeFromStory(noteId: String!): Note!
   removeTagFromNote(noteId: String!, tagId: String!): Boolean!
   restoreNoteVersion(versionId: String!): Note!
+  restoreStoryVersion(versionId: String!): Boolean!
   revokeStoryAccess(accessId: String!, storyId: String!): Boolean!
   toggleBookmark(nodeId: String, storyId: String!): Boolean!
   toggleNodeLock(noteId: String!): Note!
@@ -271,6 +274,8 @@ type Query {
   getStory(id: String!): Story!
   getStoryAccess(storyId: String!): [StoryAccess!]!
   getStoryAnalytics(storyId: String!): StoryAnalytics!
+  getStoryVersion(versionId: String!): StoryVersion!
+  getStoryVersions(storyId: String!): [StoryVersion!]!
   getWritingStatistics(storyId: String!): WritingStatistics!
   getWritingStreak: WritingStreak!
   rootCanvases: [Canvas!]!
@@ -341,6 +346,17 @@ enum StoryType {
   CUSTOM
   LOVE_STORY
   MEMORY_COLLECTION
+}
+
+type StoryVersion {
+  createdAt: DateTime!
+  id: String!
+  label: String
+  nodeCount: Int!
+  notes: String
+  snapshot: String!
+  version: Int!
+  wordCount: Int!
 }
 
 type Tag {

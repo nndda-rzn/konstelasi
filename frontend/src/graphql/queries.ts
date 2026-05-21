@@ -188,3 +188,17 @@ export const GET_MEMORY_TIMELINE = gql`
     }
   }
 `;
+
+export const GET_STORY_VERSIONS = gql`
+  query GetStoryVersions($storyId: String!) {
+    getStoryVersions(storyId: $storyId) {
+      id
+      version
+      label
+      notes
+      nodeCount
+      wordCount
+      createdAt
+    }
+  }
+`;

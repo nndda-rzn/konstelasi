@@ -4,6 +4,8 @@ import { StoryService } from './story.service';
 import { StatisticsService } from './statistics.service';
 import { EmotionalArcService } from './emotional-arc.service';
 import { MemoryTimelineService } from './memory-timeline.service';
+import { VersionService } from './version.service';
+import { StoryVersion } from '../entities/story-version.entity';
 import { Story, StoryType, StoryStatus, PrivacyLevel } from '../entities/story.entity';
 import { StoryAccess, AccessLevel } from '../entities/story-access.entity';
 import { Note } from '../entities/note.entity';
@@ -140,6 +142,7 @@ export class StoryResolver {
     private readonly statisticsService: StatisticsService,
     private readonly emotionalArcService: EmotionalArcService,
     private readonly memoryTimelineService: MemoryTimelineService,
+    private readonly versionService: VersionService,
   ) {}
 
   @Query(() => [Story])
@@ -232,5 +235,35 @@ export class StoryResolver {
   @Query(() => MemoryTimeline)
   async getMemoryTimeline(@CurrentUser() user: any, @Args('storyId') storyId: string) {
     return this.memoryTimelineService.getMemoryTimeline(user.id, storyId);
+  }
+
+  @Query(() => [StoryVersion])
+  async getStoryVersions(@CurrentUser() user: any, @Args('storyId') storyId: string) {
+    return this.versionService.getVersions(user.id, storyId);
+  }
+
+  @Query(() => StoryVersion)
+  async getStoryVersion(@CurrentUser() user: any, @Args('versionId') versionId: string) {
+    return this.versionService.getVersion(user.id, versionId);
+  }
+
+  @Mutation(() => StoryVersion)
+  async createStoryVersion(
+    @CurrentUser() user: any,
+    @Args('storyId') storyId: string,
+    @Args('label', { nullable: true }) label?: string,
+    @Args('notes', { nullable: true }) notes?: string,
+  ) {
+    return this.versionService.createVersion(user.id, storyId, label, notes);
+  }
+
+  @Mutation(() => Boolean)
+  async restoreStoryVersion(@CurrentUser() user: any, @Args('versionId') versionId: string) {
+    return this.versionService.restoreVersion(user.id, versionId);
+  }
+
+  @Mutation(() => Boolean)
+  async deleteStoryVersion(@CurrentUser() user: any, @Args('versionId') versionId: string) {
+    return this.versionService.deleteVersion(user.id, versionId);
   }
 }
