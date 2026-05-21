@@ -1,22 +1,22 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24&height=200&section=header&text=Konstelasi&fontSize=80&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Visual%20Node-Based%20Diary&descSize=20&descAlignY=58" alt="Konstelasi Banner" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24&height=200&section=header&text=Konstelasi&fontSize=80&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Personal%20Storytelling%20%26%20Visual%20Diary%20Platform&descSize=18&descAlignY=58" alt="Konstelasi Banner" />
 
 <p>
-  <i>Tulis pikiran Anda sebagai bintang-bintang, dan hubungkan mereka menjadi konstelasi ide.</i>
+  <i>Tulis cerita Anda sebagai bintang-bintang, dan hubungkan mereka menjadi konstelasi kenangan.</i>
 </p>
 
 <p>
-  <a href="https://github.com/annda-ky/konstelasi/stargazers"><img src="https://img.shields.io/github/stars/annda-ky/konstelasi?style=for-the-badge&logo=starship&color=FF8FA3&logoColor=white&labelColor=302D41" alt="Stars"/></a>
-  <a href="https://github.com/annda-ky/konstelasi/network/members"><img src="https://img.shields.io/github/forks/annda-ky/konstelasi?style=for-the-badge&logo=git&color=B5EAD7&logoColor=white&labelColor=302D41" alt="Forks"/></a>
-  <a href="https://github.com/annda-ky/konstelasi/issues"><img src="https://img.shields.io/github/issues/annda-ky/konstelasi?style=for-the-badge&logo=gitbook&color=FFB4A2&logoColor=white&labelColor=302D41" alt="Issues"/></a>
-  <a href="https://github.com/annda-ky/konstelasi/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-C7CEEA?style=for-the-badge&logo=opensourceinitiative&logoColor=white&labelColor=302D41" alt="License"/></a>
+  <a href="https://github.com/nndda-rzn/konstelasi/stargazers"><img src="https://img.shields.io/github/stars/nndda-rzn/konstelasi?style=for-the-badge&logo=starship&color=FF6B8B&logoColor=white&labelColor=302D41" alt="Stars"/></a>
+  <a href="https://github.com/nndda-rzn/konstelasi/network/members"><img src="https://img.shields.io/github/forks/nndda-rzn/konstelasi?style=for-the-badge&logo=git&color=38D9A9&logoColor=white&labelColor=302D41" alt="Forks"/></a>
+  <a href="https://github.com/nndda-rzn/konstelasi/issues"><img src="https://img.shields.io/github/issues/nndda-rzn/konstelasi?style=for-the-badge&logo=gitbook&color=FF922B&logoColor=white&labelColor=302D41" alt="Issues"/></a>
+  <a href="https://github.com/nndda-rzn/konstelasi/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-7C83FD?style=for-the-badge&logo=opensourceinitiative&logoColor=white&labelColor=302D41" alt="License"/></a>
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/Status-Active_Development-FF8FA3?style=flat-square&labelColor=302D41" />
-  <img src="https://img.shields.io/badge/Version-2.0.0-B5EAD7?style=flat-square&labelColor=302D41" />
-  <img src="https://img.shields.io/badge/Made_with-♥-FF8FA3?style=flat-square&labelColor=302D41" />
+  <img src="https://img.shields.io/badge/Status-Active_Development-38D9A9?style=flat-square&labelColor=302D41" />
+  <img src="https://img.shields.io/badge/Version-3.0.0-7C83FD?style=flat-square&labelColor=302D41" />
+  <img src="https://img.shields.io/badge/Made_with-Love-FF6B8B?style=flat-square&labelColor=302D41" />
 </p>
 
 </div>
@@ -35,7 +35,8 @@
   <img src="https://img.shields.io/badge/React_Flow-FF6B35?style=for-the-badge&logo=react&logoColor=white" />
   <img src="https://img.shields.io/badge/Apollo_Client-311C87?style=for-the-badge&logo=apollographql&logoColor=white" />
   <img src="https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />
-  <img src="https://img.shields.io/badge/TipTap-2D2D2D?style=for-the-badge&logo=tipTap&logoColor=white" />
+  <img src="https://img.shields.io/badge/TipTap-2D2D2D?style=for-the-badge&logo=tiptap&logoColor=white" />
+  <img src="https://img.shields.io/badge/Recharts-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white" />
 </p>
 
 ### Backend
@@ -43,7 +44,7 @@
   <img src="https://img.shields.io/badge/NestJS_11-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" />
   <img src="https://img.shields.io/badge/GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white" />
   <img src="https://img.shields.io/badge/Apollo_Server-311C87?style=for-the-badge&logo=apollographql&logoColor=white" />
-  <img src="https://img.shields.io/badge/MikroORM-5C5C5C?style=for-the-badge&logo=mikrootp&logoColor=white" />
+  <img src="https://img.shields.io/badge/MikroORM-5C5C5C?style=for-the-badge&logo=database&logoColor=white" />
   <img src="https://img.shields.io/badge/PostgreSQL_15-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" />
   <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" />
 </p>
@@ -54,35 +55,96 @@
 
 ## Tentang Proyek
 
-**Konstelasi** adalah aplikasi diary digital yang menampilkan catatan-catatan Anda sebagai **node visual** di atas kanvas tanpa batas (*infinite canvas*). Setiap catatan adalah bintang, dan setiap koneksi antar-catatan adalah garis konstelasi yang bisa diberi label semantik.
+**Konstelasi** adalah platform personal storytelling yang menampilkan cerita dan catatan Anda sebagai **node visual** di atas kanvas tanpa batas. Dirancang untuk menceritakan kisah tentang orang-orang spesial dalam hidup Anda melalui connected bubbles, emotional tracking, dan rich narrative tools.
 
-### Fitur Inti
+> Setiap catatan adalah bintang. Setiap koneksi adalah garis konstelasi. Setiap cerita adalah galaksi.
+
+---
+
+## Features
+
+### Core Canvas System
 
 | Fitur | Deskripsi |
 |:------|:----------|
-| **Infinite Canvas** | Kanvas tanpa batas dengan drag & drop untuk menyusun catatan |
+| **Infinite Canvas** | Kanvas tanpa batas dengan drag & drop |
 | **Edge Semantik** | Hubungkan catatan dengan garis berlabel custom |
-| **Pewarnaan Node** | 8 tema warna glassmorphism untuk kategorisasi |
-| **Rich Text Editor** | Editor berbasis TipTap dengan dukungan gambar |
+| **Rich Text Editor** | Editor TipTap dengan code blocks, task lists, links |
 | **Global Search** | Pencarian real-time dengan visual spotlight |
-| **Canvas Export** | Ekspor seluruh kanvas ke PNG kualitas tinggi |
-| **Keyboard Shortcuts** | Ctrl+F search, Delete untuk hapus |
-| **Authentication** | Register/Login via Supabase Auth |
-| **Multi-View** | Canvas View, Thread View, Timeline View, List View |
+| **Canvas Export** | Ekspor kanvas ke PNG kualitas tinggi |
+| **Multi-Canvas** | Nested canvases dengan hierarki tree view |
 | **Tag System** | Many-to-many tagging dengan color coding |
-| **Mood System** | 6 tipe mood untuk kategorisasi emosional |
-| **Stats Panel** | Analytics dashboard dengan distribusi mood & tag |
+| **Mood System** | 8 mood types untuk kategorisasi emosional |
+| **Archive** | Soft delete dengan kemampuan restore |
+| **Writing Streak** | Track streak menulis harian |
+| **Authentication** | Supabase Auth + JWT |
 
-### Fitur Terbaru — v2.0.0
+---
+
+### Story System (v3.0)
+
+<div align="center">
+<p>
+  <img src="https://img.shields.io/badge/10_Node_Types-FF6B8B?style=flat-square&labelColor=302D41" />
+  <img src="https://img.shields.io/badge/6_Edge_Types-7C83FD?style=flat-square&labelColor=302D41" />
+  <img src="https://img.shields.io/badge/5_View_Modes-38D9A9?style=flat-square&labelColor=302D41" />
+  <img src="https://img.shields.io/badge/7_Analysis_Panels-FF922B?style=flat-square&labelColor=302D41" />
+  <img src="https://img.shields.io/badge/3_Export_Formats-C074DF?style=flat-square&labelColor=302D41" />
+</p>
+</div>
+
+#### Node Types
+| Type | Color | Deskripsi |
+|:-----|:------|:----------|
+| Scene | `#FF6B8B` | Lokasi & waktu kejadian |
+| Memory | `#7C83FD` | Kenangan spesial |
+| Character | `#C074DF` | Profil seseorang |
+| Dialogue | `#38D9A9` | Percakapan/kutipan |
+| Moment | `#FF922B` | Momen penting |
+| Feeling | `#F03E3E` | Perasaan/emosi |
+| Event | `#4DABF7` | Kejadian bertanggal |
+| Media | `#CC5DE8` | Foto/video/audio |
+| Quote | `#FCC419` | Kutipan bermakna |
+| Reflection | `#3BC9DB` | Pemikiran pribadi |
+
+#### View Modes
+| Mode | Deskripsi |
+|:-----|:----------|
+| **Canvas** | Interactive node-link graph visualization |
+| **Reading** | Sequential reading dengan navigasi |
+| **Timeline** | Chronological vertical timeline |
+| **Outline** | Hierarchical tree grouped by type |
+| **Gallery** | Masonry grid of all images |
+
+#### Analysis & Insights Panels
+
+| Panel | Icon | Deskripsi |
+|:------|:-----|:----------|
+| **Analytics** | BarChart3 | Engagement stats (views, bookmarks, badges) |
+| **Writing Stats** | PenTool | Word count, writing streak, mood breakdown |
+| **Emotional Arc** | Heart | Recharts visualization of emotional journey |
+| **Memory Timeline** | Hourglass | Dual timeline (event date vs write date) |
+| **Version History** | GitBranch | Save/restore story snapshots |
+| **Character Profile** | User | Deep dive karakter + mention tracking |
+| **Export** | Download | Markdown, HTML, JSON export |
+
+#### Story Features Detail
 
 | Fitur | Deskripsi |
 |:------|:----------|
-| **Archive Feature** | Soft delete catatan & canvas dengan kemampuan restore |
-| **Writing Streak** | Track streak menulis harian dengan flame indicator |
-| **Markdown Support** | Code blocks dengan syntax highlighting, task lists, links |
-| **Nested Canvases** | Hierarki canvas dengan tree view & sub-canvas |
-| **Mood Badge** | Badge mood dengan text & warna di pojok bubble |
-| **Real-time Updates** | Perubahan mood langsung ter-render tanpa refresh |
+| **10 Node Types** | Scene, Memory, Character, Dialogue, Moment, Feeling, Event, Media, Quote, Reflection |
+| **6 Edge Types** | Narrative, Causal, Character, Thematic, Emotional, Temporal |
+| **8 Emotions** | Happy, Sad, Excited, Peaceful, Romantic, Melancholic, Nostalgic, Hopeful |
+| **Auto-Save** | 800ms debounce auto-save dengan status indicator |
+| **Node Locking** | Prevent accidental edits pada node penting |
+| **Node Resizing** | Flexible resize dengan drag handles |
+| **Event Date Tracking** | Kapan kejadian terjadi vs kapan ditulis |
+| **Event Location** | Lokasi kejadian untuk memory mapping |
+| **Story Versioning** | Unlimited snapshots dengan restore capability |
+| **Emotional Scoring** | -1 to 1 scoring dengan trend analysis (rising/falling/stable) |
+| **Character Mentions** | Auto-detect character appearances across nodes |
+| **Privacy Levels** | Private, Friends Only, Public |
+| **Access Control** | Grant/revoke access dengan View/Edit levels |
 
 ---
 
@@ -90,27 +152,40 @@
 
 ```
 konstelasi/
-├── backend/                    # NestJS + GraphQL + MikroORM
+├── backend/                         # NestJS + GraphQL + MikroORM
 │   ├── src/
-│   │   ├── auth/              # JWT authentication
-│   │   ├── canvas/            # Canvas + nested canvas logic
-│   │   ├── notes/             # Notes CRUD + archive
-│   │   ├── streak/            # Writing streak tracking
-│   │   ├── tag/               # Tagging system
-│   │   ├── entities/          # MikroORM entities
-│   │   └── migrations/        # SQL migrations
+│   │   ├── auth/                   # JWT authentication (Passport)
+│   │   ├── canvas/                 # Canvas + nested canvas logic
+│   │   ├── notes/                  # Notes CRUD + archive + versioning
+│   │   ├── story/                  # Story system
+│   │   │   ├── story.service.ts        # Story CRUD & node management
+│   │   │   ├── statistics.service.ts   # Writing statistics
+│   │   │   ├── emotional-arc.service.ts # Emotional journey analysis
+│   │   │   ├── memory-timeline.service.ts # Dual timeline
+│   │   │   ├── version.service.ts      # Story versioning
+│   │   │   ├── character.service.ts    # Character profiling
+│   │   │   └── engagement.service.ts   # Views, bookmarks, badges
+│   │   ├── streak/                 # Writing streak tracking
+│   │   ├── tag/                    # Tagging system
+│   │   ├── entities/               # MikroORM entities
+│   │   └── migrations/             # SQL migrations
 │   └── package.json
 │
-├── frontend/                   # Next.js 16 + React Flow + Apollo
+├── frontend/                        # Next.js 16 + React Flow + Apollo
 │   ├── src/
-│   │   ├── app/               # Next.js app router
-│   │   ├── components/canvas/ # Canvas components
-│   │   ├── context/           # React contexts
-│   │   ├── graphql/           # Queries & mutations
-│   │   └── lib/               # Utilities
+│   │   ├── app/                    # Next.js app router
+│   │   │   ├── canvas/             # Main canvas page
+│   │   │   └── story/              # Story pages
+│   │   │       ├── page.tsx            # Story dashboard
+│   │   │       └── [id]/page.tsx       # Story detail + canvas
+│   │   ├── components/
+│   │   │   ├── canvas/             # Canvas components
+│   │   │   └── story/              # Story components (16 files)
+│   │   ├── graphql/                # Queries & mutations
+│   │   └── lib/                    # Utilities & Apollo client
 │   └── package.json
 │
-├── database_setup.sql          # Initial database schema
+├── database_setup.sql               # Initial database schema
 └── README.md
 ```
 
@@ -118,12 +193,13 @@ konstelasi/
 
 | Layer | Teknologi |
 |:------|:----------|
-| **Frontend** | Next.js 16, React 19, React Flow 12, Apollo Client 4, TipTap 3, Tailwind CSS 4 |
+| **Frontend** | Next.js 16, React 19, React Flow 12, Apollo Client 4, TipTap 3, Tailwind CSS 4, Recharts 2 |
 | **Backend** | NestJS 11, GraphQL (Apollo Server 5), MikroORM 6, Passport JWT |
 | **Database** | PostgreSQL 15 (via Supabase) |
 | **Auth** | Supabase Auth + Passport JWT Strategy |
 | **Storage** | Supabase Storage (gambar catatan) |
 | **Editor** | TipTap dengan extensions: Code Block Lowlight, Task List, Link |
+| **Charts** | Recharts (Area Chart, Line Chart) |
 
 ---
 
@@ -131,26 +207,23 @@ konstelasi/
 
 ### Prasyarat
 
-- **Node.js** ≥ 18
-- **npm** ≥ 9
+- **Node.js** >= 18
+- **npm** >= 9
 - Akun **Supabase** ([daftar gratis](https://supabase.com))
 
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/annda-ky/konstelasi.git
+git clone https://github.com/nndda-rzn/konstelasi.git
 cd konstelasi
 ```
 
 ### 2. Setup Database
 
-Jalankan SQL berikut di Supabase SQL Editor secara berurutan:
+Jalankan SQL berikut di Supabase SQL Editor:
 
 ```bash
-# Initial schema
 database_setup.sql
-
-# Migration untuk fitur baru (Archive, Streak, Nested Canvases)
 backend/src/migrations/001_add_archive_streak_nested.sql
 ```
 
@@ -197,47 +270,41 @@ Frontend berjalan di `http://localhost:3000`
 
 ---
 
-## Screenshots
-
-<div align="center">
-
-> Screenshot akan ditambahkan segera.
-
-</div>
-
----
-
 ## Roadmap
+
+### Completed
 
 - [x] Infinite Canvas dengan React Flow
 - [x] Rich Text Editor dengan TipTap
 - [x] Tag System dengan color coding
 - [x] Search dengan visual spotlight
 - [x] Canvas Export ke PNG
-- [x] Multi-canvas support
-- [x] Mood System dengan badges
+- [x] Multi-canvas support (nested)
+- [x] Mood System dengan 8 emotions
 - [x] Archive Feature (soft delete + restore)
 - [x] Writing Streak tracking
 - [x] Markdown Support (code blocks, task lists)
-- [x] Nested Canvases (hierarki)
-- [ ] Real-time Collaboration
-- [ ] AI-Powered Auto-Tagging
-- [ ] Dark Mode
-- [ ] Mobile Apps (React Native)
-- [ ] Public Sharing & Templates
+- [x] Story System dengan 10 node types
+- [x] 5 View Modes (Canvas, Reading, Timeline, Outline, Gallery)
+- [x] 6 Edge Types dengan visual styling
+- [x] Story Analytics & Engagement tracking
+- [x] Story Export (Markdown, HTML, JSON)
+- [x] Access Control & Privacy levels
+- [x] Personal Writing Statistics
+- [x] Emotional Arc Visualization (Recharts)
+- [x] Memory/Moment Timeline (dual timeline)
+- [x] Story Versioning with Timestamps
+- [x] Character Deep Dive Profile
 
----
+### Planned
 
-## Dokumentasi Lanjutan
-
-- [Backend README](./backend/README.md) — Detail arsitektur API, entities, dan GraphQL schema
-- [Frontend README](./frontend/README.md) — Detail komponen UI, state management, dan fitur
-
----
-
-## Kontribusi
-
-Pull requests sangat diterima. Untuk perubahan besar, harap buka issue terlebih dahulu untuk mendiskusikan apa yang ingin Anda ubah.
+- [ ] AI-Powered Story Suggestions
+- [ ] Story Templates & Scaffolding
+- [ ] Advanced Search & Filtering
+- [ ] Distraction-Free Writing Mode
+- [ ] Custom Story Themes & Styling
+- [ ] Mobile Responsive Design
+- [ ] PWA Support
 
 ---
 
@@ -251,8 +318,9 @@ Proyek ini adalah proyek pribadi. Lihat [LICENSE](./LICENSE) untuk detail.
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24&height=120&section=footer" />
 
-**Dibuat dengan ♥ menggunakan NestJS, Next.js, dan React Flow**
+**Built with love using NestJS, Next.js, React Flow & Recharts**
 
-<sub>© 2026 Konstelasi — Visual Diary untuk Pikiran Anda</sub>
+<sub>© 2026 Konstelasi — Personal Storytelling Platform</sub>
 
 </div>
+
