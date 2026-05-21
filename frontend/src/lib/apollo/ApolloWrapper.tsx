@@ -25,7 +25,24 @@ const authLink = setContext(async (_, { headers }) => {
 
 const client = new ApolloClient({
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          getStories: {
+            merge(_existing, incoming) {
+              return incoming;
+            },
+          },
+          getStory: {
+            merge(_existing, incoming) {
+              return incoming;
+            },
+          },
+        },
+      },
+    },
+  }),
 });
 
 export function ApolloWrapper({ children }: { children: React.ReactNode }) {
