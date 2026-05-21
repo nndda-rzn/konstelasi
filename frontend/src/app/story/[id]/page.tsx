@@ -13,7 +13,7 @@ import {
   addEdge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOpen, Image, List, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOpen, Image, List, BarChart3, Download } from 'lucide-react';
 import { ApolloWrapper } from '@/lib/apollo/ApolloWrapper';
 import { Providers } from '@/lib/Providers';
 import { GET_STORY, UPDATE_STORY, ADD_NODE_TO_STORY } from '@/graphql/story';
@@ -28,6 +28,7 @@ import StoryReadingView from '@/components/story/StoryReadingView';
 import StoryGalleryView from '@/components/story/StoryGalleryView';
 import StoryOutlineView from '@/components/story/StoryOutlineView';
 import StoryAnalyticsPanel from '@/components/story/StoryAnalyticsPanel';
+import StoryExportPanel from '@/components/story/StoryExportPanel';
 
 const nodeTypes = { storyNode: StoryNode };
 const edgeTypes = { storyEdge: StoryEdge };
@@ -41,6 +42,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   const [showNodeSelector, setShowNodeSelector] = useState(false);
   const [viewMode, setViewMode] = useState<'canvas' | 'timeline' | 'reading' | 'gallery' | 'outline'>('canvas');
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showExport, setShowExport] = useState(false);
 
   const { data, loading, refetch } = useQuery<any>(GET_STORY, {
     variables: { id: storyId },
@@ -199,6 +201,9 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           <button onClick={() => setShowAnalytics(!showAnalytics)} className={`p-2 rounded-lg transition-all ${showAnalytics ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
             <BarChart3 className="w-4 h-4" />
           </button>
+          <button onClick={() => setShowExport(!showExport)} className={`p-2 rounded-lg transition-all ${showExport ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
+            <Download className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -256,6 +261,16 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             storyId={storyId}
             isOpen={showAnalytics}
             onClose={() => setShowAnalytics(false)}
+          />
+        )}
+
+        {/* Export Panel */}
+        {showExport && story && (
+          <StoryExportPanel
+            story={story}
+            nodes={story.nodes || []}
+            isOpen={showExport}
+            onClose={() => setShowExport(false)}
           />
         )}
       </div>
