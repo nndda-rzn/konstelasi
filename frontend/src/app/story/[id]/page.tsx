@@ -13,7 +13,7 @@ import {
   addEdge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOpen, Image, List, BarChart3, Download } from 'lucide-react';
+import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOpen, Image, List, BarChart3, Download, PenTool } from 'lucide-react';
 import { ApolloWrapper } from '@/lib/apollo/ApolloWrapper';
 import { Providers } from '@/lib/Providers';
 import { GET_STORY, UPDATE_STORY, ADD_NODE_TO_STORY } from '@/graphql/story';
@@ -30,6 +30,7 @@ import StoryOutlineView from '@/components/story/StoryOutlineView';
 import StoryAnalyticsPanel from '@/components/story/StoryAnalyticsPanel';
 import StoryExportPanel from '@/components/story/StoryExportPanel';
 import StoryNodeEditor from '@/components/story/StoryNodeEditor';
+import WritingStatsPanel from '@/components/story/WritingStatsPanel';
 
 const nodeTypes = { storyNode: StoryNode };
 const edgeTypes = { storyEdge: StoryEdge };
@@ -44,6 +45,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   const [viewMode, setViewMode] = useState<'canvas' | 'timeline' | 'reading' | 'gallery' | 'outline'>('canvas');
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showWritingStats, setShowWritingStats] = useState(false);
   const [selectedNote, setSelectedNote] = useState<any>(null);
 
   const { data, loading, refetch } = useQuery<any>(GET_STORY, {
@@ -228,6 +230,9 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           <button onClick={() => setShowAnalytics(!showAnalytics)} className={`p-2 rounded-lg transition-all ${showAnalytics ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
             <BarChart3 className="w-4 h-4" />
           </button>
+          <button onClick={() => setShowWritingStats(!showWritingStats)} className={`p-2 rounded-lg transition-all ${showWritingStats ? 'bg-[#7C83FD]/10 text-[#7C83FD]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
+            <PenTool className="w-4 h-4" />
+          </button>
           <button onClick={() => setShowExport(!showExport)} className={`p-2 rounded-lg transition-all ${showExport ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
             <Download className="w-4 h-4" />
           </button>
@@ -291,6 +296,15 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             isOpen={showAnalytics}
             onClose={() => setShowAnalytics(false)}
             nodes={story?.nodes || []}
+          />
+        )}
+
+        {/* Writing Stats Panel */}
+        {showWritingStats && (
+          <WritingStatsPanel
+            storyId={storyId}
+            isOpen={showWritingStats}
+            onClose={() => setShowWritingStats(false)}
           />
         )}
 

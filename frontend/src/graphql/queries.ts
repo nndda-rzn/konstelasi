@@ -136,3 +136,23 @@ export const GET_NOTE_VERSIONS = gql`
     }
   }
 `;
+
+export const GET_WRITING_STATISTICS = gql`
+  query GetWritingStatistics($storyId: String!) {
+    getWritingStatistics(storyId: $storyId) {
+      totalNodes
+      totalWords
+      totalCharacters
+      avgWordsPerNode
+      readingTimeMinutes
+      writingDays
+      maxWritingStreak
+      nodeTypeBreakdown { type count }
+      moodBreakdown { mood count }
+      mostCommonMood
+      longestNode { id title wordCount }
+      firstWriteDate
+      lastWriteDate
+    }
+  }
+`;

@@ -1,12 +1,13 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { StoryService } from './story.service';
+import { StatisticsService } from './statistics.service';
 import { Story, StoryType, StoryStatus, PrivacyLevel } from '../entities/story.entity';
 import { StoryAccess, AccessLevel } from '../entities/story-access.entity';
 import { Note } from '../entities/note.entity';
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, ObjectType, Int, Float } from '@nestjs/graphql';
 
 @InputType()
 export class CreateStoryInput {
@@ -33,10 +34,49 @@ export class UpdateStoryInput {
   @Field({ nullable: true }) authorNote?: string;
 }
 
+@ObjectType()
+class NodeTypeCount {
+  @Field() type!: string;
+  @Field(() => Int) count!: number;
+}
+
+@ObjectType()
+class MoodCount {
+  @Field() mood!: string;
+  @Field(() => Int) count!: number;
+}
+
+@ObjectType()
+class LongestNodeInfo {
+  @Field() id!: string;
+  @Field() title!: string;
+  @Field(() => Int) wordCount!: number;
+}
+
+@ObjectType()
+class WritingStatistics {
+  @Field(() => Int) totalNodes!: number;
+  @Field(() => Int) totalWords!: number;
+  @Field(() => Int) totalCharacters!: number;
+  @Field(() => Int) avgWordsPerNode!: number;
+  @Field(() => Int) readingTimeMinutes!: number;
+  @Field(() => Int) writingDays!: number;
+  @Field(() => Int) maxWritingStreak!: number;
+  @Field(() => [NodeTypeCount]) nodeTypeBreakdown!: NodeTypeCount[];
+  @Field(() => [MoodCount]) moodBreakdown!: MoodCount[];
+  @Field({ nullable: true }) mostCommonMood?: string;
+  @Field(() => LongestNodeInfo) longestNode!: LongestNodeInfo;
+  @Field({ nullable: true }) firstWriteDate?: Date;
+  @Field({ nullable: true }) lastWriteDate?: Date;
+}
+
 @Resolver(() => Story)
 @UseGuards(GqlAuthGuard)
 export class StoryResolver {
-  constructor(private readonly storyService: StoryService) {}
+  constructor(
+    private readonly storyService: StoryService,
+    private readonly statisticsService: StatisticsService,
+  ) {}
 
   @Query(() => [Story])
   async getStories(@CurrentUser() user: any) {
@@ -113,5 +153,10 @@ export class StoryResolver {
   @Mutation(() => Note)
   async toggleNodeLock(@CurrentUser() user: any, @Args('noteId') noteId: string) {
     return this.storyService.toggleNodeLock(user.id, noteId);
+  }
+
+  @Query(() => WritingStatistics)
+  async getWritingStatistics(@CurrentUser() user: any, @Args('storyId') storyId: string) {
+    return this.statisticsService.getWritingStatistics(user.id, storyId);
   }
 }

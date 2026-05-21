@@ -73,6 +73,17 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type LongestNodeInfo {
+  id: String!
+  title: String!
+  wordCount: Int!
+}
+
+type MoodCount {
+  count: Int!
+  mood: String!
+}
+
 type Mutation {
   addBadge(badgeType: String!, nodeId: String!, storyId: String!): Boolean!
   addNodeToStory(metadata: String, nodeType: String, noteId: String!, storyId: String!): Note!
@@ -111,6 +122,11 @@ type Mutation {
   updateNoteSize(input: UpdateNoteSizeInput!): Note!
   updateStory(input: UpdateStoryInput!): Story!
   updateTag(color: String, description: String, id: String!, name: String): Tag!
+}
+
+type NodeTypeCount {
+  count: Int!
+  type: String!
 }
 
 type Note {
@@ -197,6 +213,7 @@ type Query {
   getStory(id: String!): Story!
   getStoryAccess(storyId: String!): [StoryAccess!]!
   getStoryAnalytics(storyId: String!): StoryAnalytics!
+  getWritingStatistics(storyId: String!): WritingStatistics!
   getWritingStreak: WritingStreak!
   rootCanvases: [Canvas!]!
   tag(id: String!): Tag!
@@ -327,6 +344,22 @@ type User {
   id: String!
   images: [NoteImage]
   notes: [Note]
+}
+
+type WritingStatistics {
+  avgWordsPerNode: Int!
+  firstWriteDate: DateTime
+  lastWriteDate: DateTime
+  longestNode: LongestNodeInfo!
+  maxWritingStreak: Int!
+  moodBreakdown: [MoodCount!]!
+  mostCommonMood: String
+  nodeTypeBreakdown: [NodeTypeCount!]!
+  readingTimeMinutes: Int!
+  totalCharacters: Int!
+  totalNodes: Int!
+  totalWords: Int!
+  writingDays: Int!
 }
 
 type WritingStreak {
