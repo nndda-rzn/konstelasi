@@ -86,7 +86,9 @@ export class NotesService {
   }
 
   async updateContent(userId: string, input: UpdateNoteContentInput): Promise<Note> {
-    const note = await this.em.findOneOrFail(Note, { id: input.id, user: { id: userId } });
+    const note = await this.em.findOneOrFail(Note, { id: input.id, user: { id: userId } }, {
+      populate: ['tags', 'images'] as any,
+    });
     
     // Save current state as version before updating
     if (input.content !== undefined && input.content !== note.content) {
