@@ -202,3 +202,20 @@ export const GET_STORY_VERSIONS = gql`
     }
   }
 `;
+
+export const GET_CHARACTER_PROFILE = gql`
+  query GetCharacterProfile($storyId: String!) {
+    getCharacterProfile(storyId: $storyId) {
+      characters {
+        nodeId name description mood
+        totalMentions totalWords
+        moodDistribution { mood count }
+        nodeTypesAppearing { type count }
+        appearances { nodeId title nodeType mood createdAt }
+        firstAppearance lastAppearance
+      }
+      totalCharacters
+      mostMentioned { name mentions }
+    }
+  }
+`;

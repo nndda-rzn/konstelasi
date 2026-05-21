@@ -5,6 +5,7 @@ import { StatisticsService } from './statistics.service';
 import { EmotionalArcService } from './emotional-arc.service';
 import { MemoryTimelineService } from './memory-timeline.service';
 import { VersionService } from './version.service';
+import { CharacterService } from './character.service';
 import { StoryVersion } from '../entities/story-version.entity';
 import { Story, StoryType, StoryStatus, PrivacyLevel } from '../entities/story.entity';
 import { StoryAccess, AccessLevel } from '../entities/story-access.entity';
@@ -134,6 +135,43 @@ class MemoryTimeline {
   @Field(() => [MonthlyCount]) monthlyDistribution!: MonthlyCount[];
 }
 
+@ObjectType()
+class CharacterAppearance {
+  @Field() nodeId!: string;
+  @Field() title!: string;
+  @Field() nodeType!: string;
+  @Field({ nullable: true }) mood?: string;
+  @Field() createdAt!: Date;
+}
+
+@ObjectType()
+class CharacterInfo {
+  @Field() nodeId!: string;
+  @Field() name!: string;
+  @Field() description!: string;
+  @Field({ nullable: true }) mood?: string;
+  @Field(() => Int) totalMentions!: number;
+  @Field(() => Int) totalWords!: number;
+  @Field(() => [MoodCount]) moodDistribution!: MoodCount[];
+  @Field(() => [NodeTypeCount]) nodeTypesAppearing!: NodeTypeCount[];
+  @Field(() => [CharacterAppearance]) appearances!: CharacterAppearance[];
+  @Field() firstAppearance!: Date;
+  @Field() lastAppearance!: Date;
+}
+
+@ObjectType()
+class MostMentionedCharacter {
+  @Field() name!: string;
+  @Field(() => Int) mentions!: number;
+}
+
+@ObjectType()
+class CharacterProfile {
+  @Field(() => [CharacterInfo]) characters!: CharacterInfo[];
+  @Field(() => Int) totalCharacters!: number;
+  @Field(() => MostMentionedCharacter, { nullable: true }) mostMentioned?: MostMentionedCharacter;
+}
+
 @Resolver(() => Story)
 @UseGuards(GqlAuthGuard)
 export class StoryResolver {
@@ -143,6 +181,7 @@ export class StoryResolver {
     private readonly emotionalArcService: EmotionalArcService,
     private readonly memoryTimelineService: MemoryTimelineService,
     private readonly versionService: VersionService,
+    private readonly characterService: CharacterService,
   ) {}
 
   @Query(() => [Story])
@@ -265,5 +304,10 @@ export class StoryResolver {
   @Mutation(() => Boolean)
   async deleteStoryVersion(@CurrentUser() user: any, @Args('versionId') versionId: string) {
     return this.versionService.deleteVersion(user.id, versionId);
+  }
+
+  @Query(() => CharacterProfile)
+  async getCharacterProfile(@CurrentUser() user: any, @Args('storyId') storyId: string) {
+    return this.characterService.getCharacterProfile(user.id, storyId);
   }
 }

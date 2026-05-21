@@ -43,6 +43,34 @@ type Canvas {
   user: User!
 }
 
+type CharacterAppearance {
+  createdAt: DateTime!
+  mood: String
+  nodeId: String!
+  nodeType: String!
+  title: String!
+}
+
+type CharacterInfo {
+  appearances: [CharacterAppearance!]!
+  description: String!
+  firstAppearance: DateTime!
+  lastAppearance: DateTime!
+  mood: String
+  moodDistribution: [MoodCount!]!
+  name: String!
+  nodeId: String!
+  nodeTypesAppearing: [NodeTypeCount!]!
+  totalMentions: Int!
+  totalWords: Int!
+}
+
+type CharacterProfile {
+  characters: [CharacterInfo!]!
+  mostMentioned: MostMentionedCharacter
+  totalCharacters: Int!
+}
+
 input CreateNoteInput {
   canvasId: String
   positionX: Float
@@ -136,6 +164,11 @@ type MonthlyCount {
 type MoodCount {
   count: Int!
   mood: String!
+}
+
+type MostMentionedCharacter {
+  mentions: Int!
+  name: String!
 }
 
 type Mutation {
@@ -264,6 +297,7 @@ type Query {
   childCanvases(parentId: String!): [Canvas!]!
   getArchivedNotes(canvasId: String): [Note!]!
   getBookmarks(storyId: String!): [StoryEngagement!]!
+  getCharacterProfile(storyId: String!): CharacterProfile!
   getEmotionalArc(storyId: String!): EmotionalArc!
   getMemoryTimeline(storyId: String!): MemoryTimeline!
   getNoteVersions(noteId: String!): [NoteVersion!]!

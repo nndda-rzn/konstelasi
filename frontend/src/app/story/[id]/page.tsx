@@ -13,7 +13,7 @@ import {
   addEdge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOpen, Image, List, BarChart3, Download, PenTool, Heart, Hourglass, GitBranch } from 'lucide-react';
+import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOpen, Image, List, BarChart3, Download, PenTool, Heart, Hourglass, GitBranch, User } from 'lucide-react';
 import { ApolloWrapper } from '@/lib/apollo/ApolloWrapper';
 import { Providers } from '@/lib/Providers';
 import { GET_STORY, UPDATE_STORY, ADD_NODE_TO_STORY } from '@/graphql/story';
@@ -34,6 +34,7 @@ import WritingStatsPanel from '@/components/story/WritingStatsPanel';
 import EmotionalArcPanel from '@/components/story/EmotionalArcPanel';
 import MemoryTimelinePanel from '@/components/story/MemoryTimelinePanel';
 import VersionHistoryPanel from '@/components/story/VersionHistoryPanel';
+import CharacterProfilePanel from '@/components/story/CharacterProfilePanel';
 
 const nodeTypes = { storyNode: StoryNode };
 const edgeTypes = { storyEdge: StoryEdge };
@@ -52,6 +53,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   const [showEmotionalArc, setShowEmotionalArc] = useState(false);
   const [showMemoryTimeline, setShowMemoryTimeline] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [showCharacterProfile, setShowCharacterProfile] = useState(false);
   const [selectedNote, setSelectedNote] = useState<any>(null);
 
   const { data, loading, refetch } = useQuery<any>(GET_STORY, {
@@ -248,6 +250,9 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           <button onClick={() => setShowVersionHistory(!showVersionHistory)} className={`p-2 rounded-lg transition-all ${showVersionHistory ? 'bg-[#38D9A9]/10 text-[#38D9A9]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
             <GitBranch className="w-4 h-4" />
           </button>
+          <button onClick={() => setShowCharacterProfile(!showCharacterProfile)} className={`p-2 rounded-lg transition-all ${showCharacterProfile ? 'bg-[#C074DF]/10 text-[#C074DF]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
+            <User className="w-4 h-4" />
+          </button>
           <button onClick={() => setShowExport(!showExport)} className={`p-2 rounded-lg transition-all ${showExport ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
             <Download className="w-4 h-4" />
           </button>
@@ -348,6 +353,15 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             isOpen={showVersionHistory}
             onClose={() => setShowVersionHistory(false)}
             onRestore={() => refetch()}
+          />
+        )}
+
+        {/* Character Profile Panel */}
+        {showCharacterProfile && (
+          <CharacterProfilePanel
+            storyId={storyId}
+            isOpen={showCharacterProfile}
+            onClose={() => setShowCharacterProfile(false)}
           />
         )}
 
