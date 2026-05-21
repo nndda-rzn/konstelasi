@@ -151,7 +151,9 @@ export class StoryService {
   // Story Nodes
   async addNodeToStory(userId: string, storyId: string, noteId: string, nodeType?: string, metadata?: string): Promise<Note> {
     await this.em.findOneOrFail(Story, { id: storyId, user: { id: userId } });
-    const note = await this.em.findOneOrFail(Note, { id: noteId, user: { id: userId } });
+    const note = await this.em.findOneOrFail(Note, { id: noteId, user: { id: userId } }, {
+      populate: ['tags', 'images'] as any,
+    });
     note.story = this.em.getReference(Story, storyId);
     if (nodeType) note.storyNodeType = nodeType;
     if (metadata) note.storyMetadata = metadata;
@@ -160,7 +162,9 @@ export class StoryService {
   }
 
   async removeNodeFromStory(userId: string, noteId: string): Promise<Note> {
-    const note = await this.em.findOneOrFail(Note, { id: noteId, user: { id: userId } });
+    const note = await this.em.findOneOrFail(Note, { id: noteId, user: { id: userId } }, {
+      populate: ['tags', 'images'] as any,
+    });
     (note as any).story = null;
     note.storyNodeType = undefined;
     note.storyMetadata = undefined;
@@ -169,7 +173,9 @@ export class StoryService {
   }
 
   async toggleNodeLock(userId: string, noteId: string): Promise<Note> {
-    const note = await this.em.findOneOrFail(Note, { id: noteId, user: { id: userId } });
+    const note = await this.em.findOneOrFail(Note, { id: noteId, user: { id: userId } }, {
+      populate: ['tags', 'images'] as any,
+    });
     note.isLocked = !note.isLocked;
     await this.em.flush();
     return note;
