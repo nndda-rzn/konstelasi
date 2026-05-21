@@ -120,11 +120,8 @@ function StoryCanvas({ params }: { params: { id: string } }) {
         variables: {
           input: {
             title,
-            content: '',
             positionX: position.x,
             positionY: position.y,
-            canvasId: null,
-            mood: emotion || undefined,
           },
         },
       });
