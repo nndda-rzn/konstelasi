@@ -74,7 +74,10 @@ export class NotesService {
     // Record writing activity for streak
     await this.streakService.recordWriteActivity(userId);
     
-    return note;
+    // Re-fetch with populated collections to avoid "not initialized" errors
+    return this.em.findOneOrFail(Note, { id: note.id }, {
+      populate: ['tags', 'images'] as any,
+    });
   }
 
   async updatePosition(userId: string, input: UpdateNotePositionInput): Promise<Note> {
