@@ -22,6 +22,27 @@
   --toast-warning: #FFD6A5;
 }
 
+.dark {
+  --background: #1a1625;
+  --foreground: #e2d9f3;
+  --card-bg: rgba(30, 25, 45, 0.85);
+  --card-border: rgba(255, 143, 163, 0.15);
+  --accent: #FF8FA3;
+  --accent-soft: rgba(255, 143, 163, 0.1);
+  --peach: #FFB4A2;
+  --peach-soft: rgba(255, 180, 162, 0.1);
+
+  /* Toast — Dark */
+  --toast-bg: #2a2438;
+  --toast-text: #e2d9f3;
+  --toast-border: rgba(255, 143, 163, 0.2);
+  --toast-shadow: rgba(0, 0, 0, 0.3);
+  --toast-success: #B5EAD7;
+  --toast-error: #FF6B9D;
+  --toast-info: #C7CEEA;
+  --toast-warning: #FFD6A5;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -69,6 +90,16 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 143, 163, 0.5);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: rgba(255, 180, 162, 0.02);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 143, 163, 0.2);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 143, 163, 0.4);
 }
 
 /* ── Animations ── */
@@ -186,6 +217,10 @@ body {
   background-color: #FFFAF7 !important;
 }
 
+.dark .react-flow__background {
+  background-color: #1a1625 !important;
+}
+
 .react-flow__controls {
   background: rgba(255, 255, 255, 0.8) !important;
   border: 1px solid rgba(255, 180, 162, 0.2) !important;
@@ -194,11 +229,23 @@ body {
   backdrop-filter: blur(12px) !important;
 }
 
+.dark .react-flow__controls {
+  background: rgba(30, 25, 45, 0.8) !important;
+  border: 1px solid rgba(255, 143, 163, 0.15) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
 .react-flow__controls button {
   background: transparent !important;
   border-bottom: 1px solid rgba(255, 180, 162, 0.15) !important;
   fill: rgba(90, 62, 76, 0.5) !important;
   color: rgba(90, 62, 76, 0.5) !important;
+}
+
+.dark .react-flow__controls button {
+  border-bottom: 1px solid rgba(255, 143, 163, 0.1) !important;
+  fill: rgba(226, 217, 243, 0.5) !important;
+  color: rgba(226, 217, 243, 0.5) !important;
 }
 
 .react-flow__controls button:hover {
@@ -211,6 +258,12 @@ body {
   border: 1px solid rgba(255, 180, 162, 0.2) !important;
   border-radius: 12px !important;
   box-shadow: 0 8px 32px rgba(255, 143, 163, 0.1) !important;
+}
+
+.dark .react-flow__minimap {
+  background: rgba(30, 25, 45, 0.8) !important;
+  border: 1px solid rgba(255, 143, 163, 0.1) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
 }
 
 .react-flow__edge-path {
@@ -250,6 +303,17 @@ body {
   --tw-prose-counters: #9B8A91;
   --tw-prose-quotes: #5A3E4C;
   --tw-prose-quote-borders: rgba(255, 143, 163, 0.4);
+}
+
+.dark .prose-dark {
+  --tw-prose-body: #e2d9f3;
+  --tw-prose-headings: #f0e8ff;
+  --tw-prose-bold: #f0e8ff;
+  --tw-prose-links: #FF8FA3;
+  --tw-prose-bullets: #a89bb5;
+  --tw-prose-counters: #a89bb5;
+  --tw-prose-quotes: #e2d9f3;
+  --tw-prose-quote-borders: rgba(255, 143, 163, 0.3);
 }
 
 /* ── Toast Styles (Peach Blossom) ── */

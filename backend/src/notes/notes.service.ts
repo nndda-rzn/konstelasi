@@ -3,6 +3,7 @@ import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { Note } from '../entities/note.entity';
 import { NoteLink } from '../entities/note-link.entity';
 import { NoteImage } from '../entities/note-image.entity';
+import { NoteVersion } from '../entities/note-version.entity';
 import { User } from '../entities/user.entity';
 import { Tag } from '../entities/tag.entity';
 import { Canvas } from '../entities/canvas.entity';
@@ -86,6 +87,23 @@ export class NotesService {
 
   async updateContent(userId: string, input: UpdateNoteContentInput): Promise<Note> {
     const note = await this.em.findOneOrFail(Note, { id: input.id, user: { id: userId } });
+    
+    // Save current state as version before updating
+    if (input.content !== undefined && input.content !== note.content) {
+      const lastVersion = await this.em.findOne(NoteVersion, { note }, { orderBy: { version: 'DESC' } });
+      const nextVersion = (lastVersion?.version || 0) + 1;
+      const version = this.em.create(NoteVersion, {
+        note,
+        title: note.title,
+        content: note.content,
+        color: note.color,
+        mood: (note as any).mood,
+        version: nextVersion,
+        createdAt: new Date(),
+      });
+      await this.em.persistAndFlush(version);
+    }
+
     if (input.title !== undefined) note.title = input.title;
     if (input.content !== undefined) note.content = input.content;
     if (input.color !== undefined) note.color = input.color;
@@ -103,6 +121,25 @@ export class NotesService {
     const note = await this.em.findOneOrFail(Note, { id: input.id, user: { id: userId } });
     note.width = input.width;
     note.height = input.height;
+    await this.em.flush();
+    return note;
+  }
+
+  // Note Versioning
+  async getNoteVersions(userId: string, noteId: string): Promise<NoteVersion[]> {
+    await this.em.findOneOrFail(Note, { id: noteId, user: { id: userId } });
+    return this.em.find(NoteVersion, { note: { id: noteId } }, { orderBy: { version: 'DESC' }, limit: 20 });
+  }
+
+  async restoreVersion(userId: string, versionId: string): Promise<Note> {
+    const version = await this.em.findOneOrFail(NoteVersion, { id: versionId }, { populate: ['note'] });
+    const note = await this.em.findOneOrFail(Note, { id: version.note.id, user: { id: userId } });
+    
+    if (version.title !== undefined) note.title = version.title!;
+    if (version.content !== undefined) note.content = version.content;
+    if (version.color !== undefined) note.color = version.color;
+    if (version.mood !== undefined) (note as any).mood = version.mood;
+    
     await this.em.flush();
     return note;
   }

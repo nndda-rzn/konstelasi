@@ -7,6 +7,7 @@ import { NoteLink } from './entities/note-link.entity';
 import { Tag } from './entities/tag.entity';
 import { Canvas } from './entities/canvas.entity';
 import { WritingStreak } from './entities/writing-streak.entity';
+import { NoteVersion } from './entities/note-version.entity';
 import * as dotenv from 'dotenv';
 
 // Load environment variables if not already loaded
@@ -15,7 +16,7 @@ dotenv.config();
 export default defineConfig({
   driver: PostgreSqlDriver,
   clientUrl: process.env.DATABASE_URL,
-  entities: [User, Note, NoteImage, NoteLink, Tag, Canvas, WritingStreak],
+  entities: [User, Note, NoteImage, NoteLink, Tag, Canvas, WritingStreak, NoteVersion],
   extensions: [Migrator],
   migrations: {
     path: './src/migrations',

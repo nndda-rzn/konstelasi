@@ -23,7 +23,7 @@ import NoteNode from './NoteNode';
 import SemanticEdge from './SemanticEdge';
 import NoteEditorSidebar from './NoteEditorSidebar';
 import TimelineView from './TimelineView';
-import { Loader2, LogOut, Sparkles, Search, Download, LayoutTemplate, List, Tag as TagIcon, Clock, BarChart3, Archive } from 'lucide-react';
+import { Loader2, LogOut, Sparkles, Search, Download, LayoutTemplate, List, Tag as TagIcon, Clock, BarChart3, Archive, Moon, Sun } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toPng } from 'html-to-image';
@@ -34,6 +34,10 @@ import SearchPanel from './SearchPanel';
 import StatsPanel from './StatsPanel';
 import ArchivePanel from './ArchivePanel';
 import StreakWidget from './StreakWidget';
+import { useTheme } from '@/context/ThemeContext';
+import ExportPanel from './ExportPanel';
+import CalendarPanel from './CalendarPanel';
+import AdvancedAnalyticsPanel from './AdvancedAnalyticsPanel';
 
 const nodeTypes = {
   default: NoteNode,
@@ -50,6 +54,7 @@ export default function DiaryCanvas() {
   const supabase = createClient();
   const { selectedCanvasId } = useCanvas();
   const { selectedTagFilters } = useTags();
+  const { theme, toggleTheme } = useTheme();
   const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
   const [selectedNote, setSelectedNote] = useState<any>(null);
@@ -59,6 +64,8 @@ export default function DiaryCanvas() {
   const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [showStatsPanel, setShowStatsPanel] = useState(false);
   const [showArchivePanel, setShowArchivePanel] = useState(false);
+  const [showExportPanel, setShowExportPanel] = useState(false);
+  const [showCalendarPanel, setShowCalendarPanel] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const { data, loading, error, refetch } = useQuery<any>(GET_NOTES, {
@@ -534,9 +541,9 @@ export default function DiaryCanvas() {
           </div>
 
           <button 
-            onClick={downloadImage}
-            title="Export Canvas to PNG"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/60 hover:bg-white/80 border border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C] transition-all duration-300"
+            onClick={() => setShowExportPanel(!showExportPanel)}
+            title="Export"
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 ${showExportPanel ? 'bg-[#FF8FA3]/10 border-[#FF8FA3]/30 text-[#FF8FA3]' : 'bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C]'}`}
           >
             <Download className="w-4 h-4" />
             <span className="text-sm font-medium hidden sm:inline">Export</span>
@@ -563,11 +570,27 @@ export default function DiaryCanvas() {
           </button>
 
           <button 
+            onClick={() => setShowCalendarPanel(!showCalendarPanel)}
+            title="Kalender"
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 ${showCalendarPanel ? 'bg-[#FF8FA3]/10 border-[#FF8FA3]/30 text-[#FF8FA3]' : 'bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C]'}`}
+          >
+            <Clock className="w-4 h-4" />
+          </button>
+
+          <button 
             onClick={() => setShowArchivePanel(!showArchivePanel)}
             title="Arsip"
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 ${showArchivePanel ? 'bg-[#FF8FA3]/10 border-[#FF8FA3]/30 text-[#FF8FA3]' : 'bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C]'}`}
           >
             <Archive className="w-4 h-4" />
+          </button>
+
+          <button 
+            onClick={toggleTheme}
+            title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C] dark:bg-[#2a2438]/60 dark:hover:bg-[#2a2438]/80 dark:border-[#FF8FA3]/15 dark:text-[#e2d9f3]/70"
+          >
+            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
           </button>
 
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 border border-[#FFB4A2]/15 shadow-inner text-xs font-medium text-[#5A3E4C]/50 backdrop-blur-md">
@@ -718,7 +741,8 @@ export default function DiaryCanvas() {
 
       {/* ── Stats Panel ── */}
       {showStatsPanel && data?.getNotes && (
-        <StatsPanel
+        <AdvancedAnalyticsPanel
+          isOpen={showStatsPanel}
           notes={data.getNotes}
           onClose={() => setShowStatsPanel(false)}
         />
@@ -730,6 +754,25 @@ export default function DiaryCanvas() {
         onClose={() => setShowArchivePanel(false)}
         onRestoreSuccess={() => refetch()}
       />
+
+      {/* ── Export Panel ── */}
+      {showExportPanel && data?.getNotes && (
+        <ExportPanel
+          isOpen={showExportPanel}
+          onClose={() => setShowExportPanel(false)}
+          notes={data.getNotes}
+        />
+      )}
+
+      {/* ── Calendar Panel ── */}
+      {showCalendarPanel && data?.getNotes && (
+        <CalendarPanel
+          isOpen={showCalendarPanel}
+          onClose={() => setShowCalendarPanel(false)}
+          notes={data.getNotes}
+          onNoteClick={(noteId) => { handleNodeDoubleClick(noteId); setShowCalendarPanel(false); }}
+        />
+      )}
     </div>
   );
 }

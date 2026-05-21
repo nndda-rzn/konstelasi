@@ -122,3 +122,17 @@ export const GET_ROOT_CANVASES = gql`
     }
   }
 `;
+
+export const GET_NOTE_VERSIONS = gql`
+  query GetNoteVersions($noteId: String!) {
+    getNoteVersions(noteId: $noteId) {
+      id
+      title
+      content
+      color
+      mood
+      version
+      createdAt
+    }
+  }
+`;

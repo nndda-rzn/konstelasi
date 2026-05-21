@@ -71,6 +71,7 @@ type Mutation {
   moveCanvas(id: String!, parentId: String): Canvas!
   recordWriteActivity: WritingStreak!
   removeTagFromNote(noteId: String!, tagId: String!): Boolean!
+  restoreNoteVersion(versionId: String!): Note!
   unarchiveCanvas(id: String!): Canvas!
   unarchiveNote(id: String!): Note!
   updateCanvas(description: String, id: String!, name: String): Canvas!
@@ -129,12 +130,24 @@ type NoteLink {
   type: String!
 }
 
+type NoteVersion {
+  color: String
+  content: String
+  createdAt: DateTime!
+  id: String!
+  mood: String
+  note: Note!
+  title: String
+  version: Int!
+}
+
 type Query {
   archivedCanvases: [Canvas!]!
   canvas(id: String!): Canvas!
   canvases: [Canvas!]!
   childCanvases(parentId: String!): [Canvas!]!
   getArchivedNotes(canvasId: String): [Note!]!
+  getNoteVersions(noteId: String!): [NoteVersion!]!
   getNotes(canvasId: String, tagIds: [String!]): [Note!]!
   getProfile: String!
   getWritingStreak: WritingStreak!

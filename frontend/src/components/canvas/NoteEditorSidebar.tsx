@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Trash2, ImagePlus, Loader2, Tag as TagIcon, Archive } from 'lucide-react';
+import { X, Trash2, ImagePlus, Loader2, Tag as TagIcon, Archive, History, Pencil } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useMutation } from '@apollo/client/react';
 import { UPDATE_NOTE_CONTENT, DELETE_NOTE, ADD_NOTE_IMAGE, DELETE_NOTE_IMAGE, ARCHIVE_NOTE } from '@/graphql/mutations';
 import TiptapEditor from './TiptapEditor';
+import VersionPanel from './VersionPanel';
+import DrawingCanvas from './DrawingCanvas';
 import { notify, toast } from '@/lib/toast';
 import { useTags } from '@/context/TagContext';
 
@@ -25,7 +27,8 @@ export default function NoteEditorSidebar({ note, onClose, onDeleteSuccess, onUp
   const [noteTags, setNoteTags] = useState<any[]>(note?.tags || []);
   const [noteType, setNoteType] = useState<string>(note?.type || 'text');
   const [mood, setMood] = useState<string>(note?.mood || '');
-  
+  const [showVersions, setShowVersions] = useState(false);
+  const [showDrawing, setShowDrawing] = useState(false);  
   const supabase = createClient();
   const { tags, assignTagsToNote, removeTagFromNote } = useTags();
   const [updateNoteContent] = useMutation<any>(UPDATE_NOTE_CONTENT);
@@ -190,6 +193,7 @@ export default function NoteEditorSidebar({ note, onClose, onDeleteSuccess, onUp
   if (!note) return null;
 
   return (
+    <>
     <div className="absolute top-0 right-0 h-full w-[400px] bg-white/95 backdrop-blur-2xl shadow-2xl shadow-pink-200/30 border-l border-[#FFB4A2]/15 z-50 flex flex-col pt-16 animate-slide-in-right">
       {/* Accent line */}
       <div className="absolute top-16 left-0 w-px h-full bg-gradient-to-b from-[#FF8FA3]/40 via-[#FFB4A2]/10 to-transparent" />
@@ -198,6 +202,20 @@ export default function NoteEditorSidebar({ note, onClose, onDeleteSuccess, onUp
       <div className="flex items-center justify-between p-5 border-b border-[#FFB4A2]/15">
         <h2 className="text-lg font-bold bg-gradient-to-r from-[#FF8FA3] to-[#FFB4A2] bg-clip-text text-transparent">Edit Note</h2>
         <div className="flex gap-1.5">
+          <button 
+            onClick={() => setShowVersions(!showVersions)} 
+            className={`p-2 rounded-lg transition-all ${showVersions ? 'text-[#FF8FA3] bg-[#FF8FA3]/10' : 'text-[#5A3E4C]/30 hover:text-[#5A3E4C]/60 hover:bg-[#FFB4A2]/10'}`}
+            title="Riwayat Versi"
+          >
+            <History className="w-4 h-4" />
+          </button>
+          <button 
+            onClick={() => setShowDrawing(true)} 
+            className="p-2 text-[#5A3E4C]/30 hover:text-[#5A3E4C]/60 hover:bg-[#FFB4A2]/10 rounded-lg transition-all"
+            title="Drawing Canvas"
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
           <button 
             onClick={handleArchiveNote} 
             className="p-2 text-[#5A3E4C]/30 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all" 
@@ -242,6 +260,14 @@ export default function NoteEditorSidebar({ note, onClose, onDeleteSuccess, onUp
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/60 animate-pulse" />
             Auto-saved
           </p>
+          {showVersions && (
+            <VersionPanel
+              noteId={note.id}
+              isOpen={showVersions}
+              onClose={() => setShowVersions(false)}
+              onRestore={() => { setShowVersions(false); onClose(); }}
+            />
+          )}
         </div>
 
         {/* ── Mood ── */}
@@ -405,5 +431,12 @@ export default function NoteEditorSidebar({ note, onClose, onDeleteSuccess, onUp
         )}
       </div>
     </div>
+
+    {/* Drawing Canvas Modal */}
+    <DrawingCanvas
+      isOpen={showDrawing}
+      onClose={() => setShowDrawing(false)}
+    />
+    </>
   );
 }

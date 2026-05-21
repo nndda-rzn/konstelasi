@@ -174,3 +174,16 @@ export const MOVE_CANVAS = gql`
     }
   }
 `;
+
+// Note Versioning
+export const RESTORE_NOTE_VERSION = gql`
+  mutation RestoreNoteVersion($versionId: String!) {
+    restoreNoteVersion(versionId: $versionId) {
+      id
+      title
+      content
+      color
+      mood
+    }
+  }
+`;

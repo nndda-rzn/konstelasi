@@ -30,3 +30,18 @@ CREATE INDEX IF NOT EXISTS "idx_note_is_archived" ON "note" ("is_archived");
 CREATE INDEX IF NOT EXISTS "idx_canvas_is_archived" ON "canvas" ("is_archived");
 CREATE INDEX IF NOT EXISTS "idx_canvas_parent_id" ON "canvas" ("parent_id");
 CREATE INDEX IF NOT EXISTS "idx_writing_streak_user_id" ON "writing_streak" ("user_id");
+
+-- 5. Create Note Version table
+CREATE TABLE IF NOT EXISTS "note_version" (
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  "note_id" uuid NOT NULL REFERENCES "note"("id") ON DELETE CASCADE,
+  "title" varchar(255),
+  "content" text,
+  "color" varchar(50),
+  "mood" varchar(50),
+  "version" integer DEFAULT 1,
+  "created_at" timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS "idx_note_version_note_id" ON "note_version" ("note_id");
+CREATE INDEX IF NOT EXISTS "idx_note_version_version" ON "note_version" ("note_id", "version" DESC);

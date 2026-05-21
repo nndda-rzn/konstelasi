@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 import { ApolloWrapper } from "@/lib/apollo/ApolloWrapper";
 import { ToasterProvider } from "@/lib/toast/ToasterProvider";
 import { Providers } from "@/lib/Providers";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export default function RootLayout({
   children,
@@ -32,11 +33,13 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#FFFAF7] text-[#5A3E4C]">
-        <ApolloWrapper>
-          <Providers>{children}</Providers>
-        </ApolloWrapper>
-        <ToasterProvider />
+      <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300">
+        <ThemeProvider>
+          <ApolloWrapper>
+            <Providers>{children}</Providers>
+          </ApolloWrapper>
+          <ToasterProvider />
+        </ThemeProvider>
       </body>
     </html>
   );

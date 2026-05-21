@@ -4,6 +4,7 @@ import { NotesService } from './notes.service';
 import { Note } from '../entities/note.entity';
 import { NoteLink } from '../entities/note-link.entity';
 import { NoteImage } from '../entities/note-image.entity';
+import { NoteVersion } from '../entities/note-version.entity';
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { CreateNoteInput, UpdateNotePositionInput, UpdateNoteContentInput, CreateNoteLinkInput, AddNoteImageInput, UpdateNoteLinkInput, UpdateNoteSizeInput, BatchUpdateNoteInput } from './dto/note.input';
@@ -133,5 +134,22 @@ export class NotesResolver {
     @Args('id') id: string,
   ) {
     return this.notesService.unarchiveNote(user.id, id);
+  }
+
+  // Note Versioning
+  @Query(() => [NoteVersion])
+  async getNoteVersions(
+    @CurrentUser() user: any,
+    @Args('noteId') noteId: string,
+  ) {
+    return this.notesService.getNoteVersions(user.id, noteId);
+  }
+
+  @Mutation(() => Note)
+  async restoreNoteVersion(
+    @CurrentUser() user: any,
+    @Args('versionId') versionId: string,
+  ) {
+    return this.notesService.restoreVersion(user.id, versionId);
   }
 }
