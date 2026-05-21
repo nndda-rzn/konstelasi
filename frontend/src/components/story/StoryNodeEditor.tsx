@@ -124,7 +124,9 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
       const { data: publicUrlData } = supabase.storage.from('notes_images').getPublicUrl(filePath);
       const { data } = await addNoteImage({ variables: { input: { noteId: note.id, imageUrl: publicUrlData.publicUrl, caption: '' } } });
       if (data?.addNoteImage) {
-        setImages([...images, data.addNoteImage]);
+        const newImages = [...images, data.addNoteImage];
+        setImages(newImages);
+        onUpdateCache(note.id, title, content, newImages);
         notify.success('Gambar berhasil diunggah');
       }
     } catch (err: any) {
@@ -138,7 +140,9 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
   const handleRemoveImage = async (imageId: string) => {
     try {
       await deleteNoteImage({ variables: { id: imageId } });
-      setImages(images.filter(img => img.id !== imageId));
+      const newImages = images.filter((img: any) => img.id !== imageId);
+      setImages(newImages);
+      onUpdateCache(note.id, title, content, newImages);
       notify.success('Gambar dihapus');
     } catch (err: any) {
       notify.error('Gagal menghapus gambar');
