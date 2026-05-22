@@ -68,7 +68,7 @@ function StoryNode({ data, selected }: any) {
           <div className="p-1 rounded-md" style={{ backgroundColor: `${config.color}20` }}>
             <Icon className="w-3 h-3" style={{ color: config.color }} />
           </div>
-          <span className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: config.color }}>
+          <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: config.color }}>
             {config.label}
           </span>
           {isLocked && <Lock className="w-2.5 h-2.5 text-[#5A3E4C]/30 ml-auto" />}
@@ -84,7 +84,7 @@ function StoryNode({ data, selected }: any) {
         {/* Content Preview */}
         {data.content && (
           <div className="px-3 pb-2">
-            <p className="text-[10px] text-[#5A3E4C]/60 dark:text-[#e2d9f3]/40 line-clamp-2 leading-relaxed"
+            <p className="text-[11px] text-[#5A3E4C]/70 dark:text-[#e2d9f3]/50 line-clamp-2 leading-relaxed"
               dangerouslySetInnerHTML={{ __html: data.content.replace(/<[^>]+>/g, '').slice(0, 80) }}
             />
           </div>
@@ -94,13 +94,13 @@ function StoryNode({ data, selected }: any) {
         {metadata.sceneLocation && (
           <div className="px-3 pb-2 flex items-center gap-1">
             <MapPin className="w-2.5 h-2.5 text-[#FF8FA3]/60" />
-            <span className="text-[9px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">{metadata.sceneLocation}</span>
+            <span className="text-[10px] text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40">{metadata.sceneLocation}</span>
           </div>
         )}
         {metadata.sceneTime && (
           <div className="px-3 pb-2 flex items-center gap-1">
             <Clock className="w-2.5 h-2.5 text-[#87CEEB]/60" />
-            <span className="text-[9px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">{metadata.sceneTime}</span>
+            <span className="text-[10px] text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40">{metadata.sceneTime}</span>
           </div>
         )}
 
@@ -116,7 +116,7 @@ function StoryNode({ data, selected }: any) {
         {/* Emotion badge */}
         {emotion && (
           <div className="px-3 pb-2.5">
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-medium"
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium"
               style={{ backgroundColor: `${emotionColor}20`, color: emotionColor }}>
               <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: emotionColor }} />
               {emotion}

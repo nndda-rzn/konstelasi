@@ -244,13 +244,13 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
 
         {/* Content Editor */}
         <div>
-          <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-2">Konten</label>
+          <label className="block text-[11px] uppercase tracking-wider text-[#5A3E4C]/50 font-semibold mb-2">Konten</label>
           <TiptapEditor content={content} onChange={setContent} />
         </div>
 
         {/* Emotion */}
         <div>
-          <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-2">Emosi</label>
+          <label className="block text-[11px] uppercase tracking-wider text-[#5A3E4C]/50 font-semibold mb-2">Emosi</label>
           <div className="flex flex-wrap gap-1.5">
             {EMOTIONS.map(em => (
               <button key={em.value} onClick={() => setMood(mood === em.value ? '' : em.value)}
@@ -264,7 +264,7 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
 
         {/* Event Date & Location (for Memory Timeline) */}
         <div>
-          <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-2">Kapan & Dimana</label>
+          <label className="block text-[11px] uppercase tracking-wider text-[#5A3E4C]/50 font-semibold mb-2">Kapan & Dimana</label>
           <div className="flex gap-2">
             <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#CC5DE8]/5 border border-[#CC5DE8]/10">
               <Calendar className="w-3.5 h-3.5 text-[#CC5DE8]/60" />
@@ -282,7 +282,7 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
 
         {/* Media / Images */}
         <div>
-          <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-2">Media</label>
+          <label className="block text-[11px] uppercase tracking-wider text-[#5A3E4C]/50 font-semibold mb-2">Media</label>
           {images.length > 0 && (
             <div className="grid grid-cols-3 gap-2 mb-2">
               {images.map((img: any) => (
@@ -306,7 +306,7 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
         {/* Auto-save indicator */}
         <div className="flex items-center gap-1.5 pt-2">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/60 animate-pulse" />
-          <span className="text-[10px] text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20">Auto-saved</span>
+          <span className="text-[11px] text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40">Auto-saved</span>
         </div>
       </div>
     </div>
