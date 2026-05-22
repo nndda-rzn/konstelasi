@@ -10,10 +10,10 @@ import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/context/ThemeContext';
 
 const NAV_ITEMS = [
-  { href: '/canvas',     label: 'Canvas',      icon: LayoutGrid },
-  { href: '/story',      label: 'Stories',     icon: BookOpen   },
-  { href: '/gallery',    label: 'Gallery',     icon: ImageIcon  },
-  { href: '/photobooth', label: 'Photo Booth', icon: Camera     },
+  { href: '/canvas',     label: 'Canvas',      desc: 'Ruang utama',     icon: LayoutGrid },
+  { href: '/story',      label: 'Stories',     desc: 'Kumpulan cerita', icon: BookOpen   },
+  { href: '/gallery',    label: 'Gallery',     desc: 'Koleksi foto',    icon: ImageIcon  },
+  { href: '/photobooth', label: 'Photo Booth', desc: 'Ambil momen',     icon: Camera     },
 ];
 
 export default function GlobalSidebar() {
@@ -59,7 +59,7 @@ export default function GlobalSidebar() {
 
         {/* Navigation */}
         <nav className="relative flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          {NAV_ITEMS.map(({ href, label, desc, icon: Icon }) => {
             const active = isActive(href);
             return (
               <Link
@@ -83,15 +83,18 @@ export default function GlobalSidebar() {
                       : 'text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20 group-hover:text-[#E63946]/50'
                   }`}
                 />
-                <span
-                  className={`text-[13px] transition-colors duration-150 ${
+                <div className="min-w-0 flex-1">
+                  <span className={`text-[13px] transition-colors duration-150 block leading-tight ${
                     active
                       ? 'font-semibold text-[#E63946] dark:text-[#FF6B7A]'
                       : 'font-medium text-[#5A3E4C]/50 dark:text-[#e2d9f3]/35 group-hover:text-[#4A2F3C] dark:group-hover:text-[#e2d9f3]/65'
-                  }`}
-                >
-                  {label}
-                </span>
+                  }`}>
+                    {label}
+                  </span>
+                  <span className="text-[10px] text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20 block mt-0.5 leading-none">
+                    {desc}
+                  </span>
+                </div>
               </Link>
             );
           })}
@@ -110,7 +113,7 @@ export default function GlobalSidebar() {
               : <Sun  className="h-4 w-4 shrink-0 text-[#e2d9f3]/20 group-hover:text-[#E63946]/50 transition-colors" />
             }
             <span className="text-[13px] font-medium text-[#5A3E4C]/50 dark:text-[#e2d9f3]/35 group-hover:text-[#4A2F3C] dark:group-hover:text-[#e2d9f3]/65 transition-colors">
-              {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+              {theme === 'light' ? 'Mode Gelap' : 'Mode Terang'}
             </span>
           </button>
 
