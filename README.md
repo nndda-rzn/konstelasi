@@ -1,22 +1,23 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24&height=200&section=header&text=Konstelasi&fontSize=80&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Personal%20Storytelling%20%26%20Visual%20Diary%20Platform&descSize=18&descAlignY=58" alt="Konstelasi Banner" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=0,2,4&height=200&section=header&text=Konstelasi&fontSize=80&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Personal%20Storytelling%20%26%20Visual%20Diary%20Platform&descSize=18&descAlignY=58" alt="Konstelasi Banner" />
 
 <p>
   <i>Tulis cerita Anda sebagai bintang-bintang, dan hubungkan mereka menjadi konstelasi kenangan.</i>
 </p>
 
 <p>
-  <a href="https://github.com/nndda-rzn/konstelasi/stargazers"><img src="https://img.shields.io/github/stars/nndda-rzn/konstelasi?style=for-the-badge&logo=starship&color=FF6B8B&logoColor=white&labelColor=302D41" alt="Stars"/></a>
+  <a href="https://github.com/nndda-rzn/konstelasi/stargazers"><img src="https://img.shields.io/github/stars/nndda-rzn/konstelasi?style=for-the-badge&logo=starship&color=E63946&logoColor=white&labelColor=302D41" alt="Stars"/></a>
   <a href="https://github.com/nndda-rzn/konstelasi/network/members"><img src="https://img.shields.io/github/forks/nndda-rzn/konstelasi?style=for-the-badge&logo=git&color=38D9A9&logoColor=white&labelColor=302D41" alt="Forks"/></a>
-  <a href="https://github.com/nndda-rzn/konstelasi/issues"><img src="https://img.shields.io/github/issues/nndda-rzn/konstelasi?style=for-the-badge&logo=gitbook&color=FF922B&logoColor=white&labelColor=302D41" alt="Issues"/></a>
-  <a href="https://github.com/nndda-rzn/konstelasi/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-7C83FD?style=for-the-badge&logo=opensourceinitiative&logoColor=white&labelColor=302D41" alt="License"/></a>
+  <a href="https://github.com/nndda-rzn/konstelasi/issues"><img src="https://img.shields.io/github/issues/nndda-rzn/konstelasi?style=for-the-badge&logo=gitbook&color=FF6B7A&logoColor=white&labelColor=302D41" alt="Issues"/></a>
+  <a href="https://github.com/nndda-rzn/konstelasi/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-FFB8C0?style=for-the-badge&logo=opensourceinitiative&logoColor=white&labelColor=302D41" alt="License"/></a>
 </p>
 
 <p>
   <img src="https://img.shields.io/badge/Status-Active_Development-38D9A9?style=flat-square&labelColor=302D41" />
-  <img src="https://img.shields.io/badge/Version-3.1.0-7C83FD?style=flat-square&labelColor=302D41" />
-  <img src="https://img.shields.io/badge/Made_with-Love-FF6B8B?style=flat-square&labelColor=302D41" />
+  <img src="https://img.shields.io/badge/Version-3.2.0-E63946?style=flat-square&labelColor=302D41" />
+  <img src="https://img.shields.io/badge/Theme-Red_Candy-D62828?style=flat-square&labelColor=302D41" />
+  <img src="https://img.shields.io/badge/Made_with-Love-E63946?style=flat-square&labelColor=302D41" />
 </p>
 
 </div>
@@ -149,6 +150,31 @@
 | **Media Upload** | Upload gambar via Supabase Storage per node |
 | **Focus/Zen Mode** | Full-screen immersive writing overlay |
 | **Insights Drawer** | Unified dropdown menu untuk semua analysis panels |
+
+---
+
+### Red Candy Theme (v3.2)
+
+<div align="center">
+<p>
+  <img src="https://img.shields.io/badge/Candy_Cream-FFE5E8?style=flat-square&labelColor=FFE5E8" />
+  <img src="https://img.shields.io/badge/Candy_Soft-FFB8C0?style=flat-square&labelColor=FFB8C0" />
+  <img src="https://img.shields.io/badge/Candy_Pink-FF6B7A?style=flat-square&labelColor=FF6B7A" />
+  <img src="https://img.shields.io/badge/Candy_Red-E63946?style=flat-square&labelColor=E63946" />
+  <img src="https://img.shields.io/badge/Cherry-D62828?style=flat-square&labelColor=D62828" />
+  <img src="https://img.shields.io/badge/Berry-9D0208?style=flat-square&labelColor=9D0208" />
+</p>
+</div>
+
+| Gradient | Style | Use Case |
+|:---------|:------|:---------|
+| `bg-candy-primary` | `#FF6B7A → #E63946 → #D62828` | CTA buttons, hero elements |
+| `bg-candy-soft` | `#FFE5E8 → #FFB8C0` | Card backgrounds, surfaces |
+| `bg-candy-accent-line` | `#FFB8C0 → #E63946 → #9D0208` | Node accent lines, dividers |
+| `bg-candy-glow` | Radial red glow | Hover effects |
+| `bg-candy-shimmer` | Animated shimmer | Loading states |
+| `shadow-candy` | Red candy shadow | Elevated elements |
+| `text-candy` | Gradient text | Headings, highlights |
 
 ---
 
@@ -308,6 +334,8 @@ Frontend berjalan di `http://localhost:3000`
 - [x] Focus/Zen Mode (full-screen immersive editor)
 - [x] Typography & Readability improvements
 - [x] Schema Auto-Sync on startup
+- [x] Red Candy Theme + Gradient System
+- [x] Custom CSS gradient utilities (candy-primary, candy-soft, etc)
 
 ### Planned
 
@@ -330,11 +358,11 @@ Proyek ini adalah proyek pribadi. Lihat [LICENSE](./LICENSE) untuk detail.
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24&height=120&section=footer" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=0,2,4&height=120&section=footer" />
 
 **Built with love using NestJS, Next.js, React Flow & Recharts**
 
-<sub>© 2026 Konstelasi — Personal Storytelling Platform</sub>
+<sub>© 2026 Konstelasi — Personal Storytelling Platform | Red Candy Theme</sub>
 
 </div>
 
