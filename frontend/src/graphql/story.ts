@@ -14,6 +14,7 @@ export const GET_STORIES = gql`
       privacyLevel
       theme
       authorNote
+      scrapbookTheme
       isArchived
       createdAt
       updatedAt
@@ -34,6 +35,7 @@ export const GET_STORY = gql`
       privacyLevel
       theme
       authorNote
+      scrapbookTheme
       nodes {
         id
         title
@@ -48,6 +50,8 @@ export const GET_STORY = gql`
         storyNodeType
         storyMetadata
         isLocked
+        unlockDate
+        isTimeLocked
         eventDate
         eventLocation
         images { id imageUrl caption }
@@ -58,6 +62,24 @@ export const GET_STORY = gql`
       }
       createdAt
       updatedAt
+    }
+  }
+`;
+
+export const GET_ON_THIS_DAY_MEMORIES = gql`
+  query GetOnThisDayMemories {
+    getOnThisDayMemories {
+      nodeId
+      title
+      content
+      storyId
+      storyTitle
+      nodeType
+      mood
+      eventDate
+      yearsAgo
+      unlockDate
+      isTimeLocked
     }
   }
 `;
@@ -75,6 +97,7 @@ export const GET_PUBLIC_STORY = gql`
       privacyLevel
       theme
       authorNote
+      scrapbookTheme
       user { id email }
       nodes {
         id
@@ -90,6 +113,10 @@ export const GET_PUBLIC_STORY = gql`
         storyNodeType
         storyMetadata
         isLocked
+        unlockDate
+        isTimeLocked
+        eventDate
+        eventLocation
         images { id imageUrl caption }
         tags { id name color }
         outgoingEdges { id source { id } target { id } sourceHandle targetHandle label color }
@@ -142,6 +169,7 @@ export const UPDATE_STORY = gql`
       privacyLevel
       theme
       authorNote
+      scrapbookTheme
       updatedAt
     }
   }

@@ -40,6 +40,46 @@ import InsightsDrawer from '@/components/story/InsightsDrawer';
 const nodeTypes = { storyNode: StoryNode };
 const edgeTypes = { storyEdge: StoryEdge };
 
+const DEFAULT_SCRAPBOOK_THEME = {
+  background: 'red_candy',
+  font: 'default',
+};
+
+const SCRAPBOOK_PAGE_CLASSES: Record<string, string> = {
+  red_candy: 'bg-[var(--background)]',
+  warm_paper: 'bg-[#FFF8EA] dark:bg-[#1c1710]',
+  rose_album: 'bg-[#FFF0F3] dark:bg-[#24161b]',
+  night_letter: 'bg-[#F7F2FF] dark:bg-[#15111f]',
+};
+
+const SCRAPBOOK_CANVAS_CLASSES: Record<string, string> = {
+  red_candy: 'bg-[#FFFAF7] dark:bg-[#1a1625]',
+  warm_paper: 'bg-[#FFF8EA] dark:bg-[#1c1710]',
+  rose_album: 'bg-[#FFF0F3] dark:bg-[#24161b]',
+  night_letter: 'bg-[#F7F2FF] dark:bg-[#15111f]',
+};
+
+const SCRAPBOOK_GRID_COLORS: Record<string, string> = {
+  red_candy: '#FFB8C0',
+  warm_paper: '#D9B979',
+  rose_album: '#FF9FB0',
+  night_letter: '#6D5F8F',
+};
+
+function parseScrapbookTheme(value?: string) {
+  try {
+    return { ...DEFAULT_SCRAPBOOK_THEME, ...(value ? JSON.parse(value) : {}) };
+  } catch {
+    return DEFAULT_SCRAPBOOK_THEME;
+  }
+}
+
+function getScrapbookFontClass(font?: string) {
+  if (font === 'handwriting') return 'font-scrapbook-handwriting';
+  if (font === 'serif') return 'font-scrapbook-serif';
+  return '';
+}
+
 function StoryCanvas({ params }: { params: { id: string } }) {
   const router = useRouter();
   const storyId = params.id;
@@ -64,6 +104,11 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   const [addNodeToStory] = useMutation<any>(ADD_NODE_TO_STORY);
 
   const story = data?.getStory;
+  const scrapbookTheme = parseScrapbookTheme(story?.scrapbookTheme);
+  const scrapbookPageClass = SCRAPBOOK_PAGE_CLASSES[scrapbookTheme.background] || SCRAPBOOK_PAGE_CLASSES.red_candy;
+  const scrapbookCanvasClass = SCRAPBOOK_CANVAS_CLASSES[scrapbookTheme.background] || SCRAPBOOK_CANVAS_CLASSES.red_candy;
+  const scrapbookGridColor = SCRAPBOOK_GRID_COLORS[scrapbookTheme.background] || SCRAPBOOK_GRID_COLORS.red_candy;
+  const scrapbookFontClass = getScrapbookFontClass(scrapbookTheme.font);
 
   // Transform story nodes to React Flow nodes
   useEffect(() => {
@@ -79,6 +124,10 @@ function StoryCanvas({ params }: { params: { id: string } }) {
         storyNodeType: note.storyNodeType,
         storyMetadata: note.storyMetadata,
         isLocked: note.isLocked,
+        unlockDate: note.unlockDate,
+        isTimeLocked: note.isTimeLocked,
+        eventDate: note.eventDate,
+        eventLocation: note.eventLocation,
         images: note.images || [],
         tags: note.tags || [],
       },
@@ -159,7 +208,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   }, [story]);
 
   // Update cache when editing
-  const handleUpdateCache = (nodeId: string, newTitle?: string, newContent?: string, newImages?: any[], color?: string, mood?: string) => {
+  const handleUpdateCache = (nodeId: string, newTitle?: string, newContent?: string, newImages?: any[], color?: string, mood?: string, extra?: any) => {
     setNodes((nds: any) => nds.map((n: any) => {
       if (n.id === nodeId) {
         return {
@@ -171,6 +220,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             images: newImages ?? n.data.images,
             color: color ?? n.data.color,
             mood: mood ?? n.data.mood,
+            ...extra,
           },
         };
       }
@@ -191,7 +241,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[var(--background)]">
+    <div className={`h-screen flex flex-col ${scrapbookPageClass}`}>
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10 bg-white/80 dark:bg-[#1a1625]/80 backdrop-blur-xl z-10">
         <div className="flex items-center gap-3">
@@ -199,7 +249,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             <ArrowLeft className="w-4 h-4 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
           </button>
           <div>
-            <h1 className="text-sm font-bold text-[#4A2F3C] dark:text-[#e2d9f3]">{story?.title || 'Loading...'}</h1>
+            <h1 className={`text-sm font-bold text-[#4A2F3C] dark:text-[#e2d9f3] ${scrapbookFontClass}`}>{story?.title || 'Loading...'}</h1>
             {story?.subtitle && <p className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">{story.subtitle}</p>}
           </div>
           <div className="flex items-center gap-1.5 ml-3">
@@ -255,9 +305,9 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
             fitView
-            className="bg-[#FFFAF7] dark:bg-[#1a1625]"
+            className={scrapbookCanvasClass}
           >
-            <Background color="#FFB8C0" gap={24} size={1} />
+            <Background color={scrapbookGridColor} gap={24} size={1} />
             <Controls />
             <MiniMap />
           </ReactFlow>
@@ -268,7 +318,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
         )}
 
         {viewMode === 'reading' && (
-          <StoryReadingView nodes={story?.nodes || []} storyTitle={story?.title || ''} storySubtitle={story?.subtitle} />
+          <StoryReadingView nodes={story?.nodes || []} storyTitle={story?.title || ''} storySubtitle={story?.subtitle} scrapbookFontClass={scrapbookFontClass} scrapbookBackgroundClass={scrapbookCanvasClass} />
         )}
 
         {viewMode === 'gallery' && (

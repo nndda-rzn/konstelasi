@@ -23,6 +23,7 @@ export class CreateStoryInput {
   @Field(() => StoryType, { nullable: true }) storyType?: StoryType;
   @Field({ nullable: true }) theme?: string;
   @Field({ nullable: true }) authorNote?: string;
+  @Field({ nullable: true }) scrapbookTheme?: string;
 }
 
 @InputType()
@@ -37,6 +38,7 @@ export class UpdateStoryInput {
   @Field(() => PrivacyLevel, { nullable: true }) privacyLevel?: PrivacyLevel;
   @Field({ nullable: true }) theme?: string;
   @Field({ nullable: true }) authorNote?: string;
+  @Field({ nullable: true }) scrapbookTheme?: string;
 }
 
 @ObjectType()
@@ -119,6 +121,21 @@ class MemoryInfo {
 }
 
 @ObjectType()
+class OnThisDayMemory {
+  @Field() nodeId!: string;
+  @Field() title!: string;
+  @Field({ nullable: true }) content?: string;
+  @Field() storyId!: string;
+  @Field() storyTitle!: string;
+  @Field({ nullable: true }) nodeType?: string;
+  @Field({ nullable: true }) mood?: string;
+  @Field() eventDate!: Date;
+  @Field(() => Int) yearsAgo!: number;
+  @Field({ nullable: true }) unlockDate?: Date;
+  @Field(() => Boolean) isTimeLocked!: boolean;
+}
+
+@ObjectType()
 class MonthlyCount {
   @Field() month!: string;
   @Field(() => Int) count!: number;
@@ -192,6 +209,11 @@ export class StoryResolver {
   @Query(() => Story)
   async getStory(@CurrentUser() user: any, @Args('id') id: string) {
     return this.storyService.getStory(user.id, id);
+  }
+
+  @Query(() => [OnThisDayMemory])
+  async getOnThisDayMemories(@CurrentUser() user: any) {
+    return this.storyService.getOnThisDayMemories(user.id);
   }
 
   @Query(() => Story, { nullable: true })

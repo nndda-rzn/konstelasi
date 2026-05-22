@@ -72,6 +72,10 @@ export class Story {
   @Property({ nullable: true })
   authorNote?: string;
 
+  @Field(() => String, { nullable: true })
+  @Property({ type: 'text', nullable: true })
+  scrapbookTheme?: string;
+
   @Field(() => User)
   @ManyToOne(() => User, { deleteRule: 'cascade' })
   user!: User;

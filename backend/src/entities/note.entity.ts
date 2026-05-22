@@ -104,6 +104,15 @@ export class Note {
   @Property({ default: false })
   isLocked: boolean = false;
 
+  @Field(() => Date, { nullable: true })
+  @Property({ nullable: true })
+  unlockDate?: Date;
+
+  @Field(() => Boolean)
+  get isTimeLocked(): boolean {
+    return Boolean(this.unlockDate && this.unlockDate.getTime() > Date.now());
+  }
+
   // Tag relationship (Many-to-many)
   @Field(() => [Tag], { nullable: 'itemsAndList' })
   @ManyToMany(() => Tag, tag => tag.notes, { owner: true })

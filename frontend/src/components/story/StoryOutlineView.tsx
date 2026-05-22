@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ChevronRight, ChevronDown, MapPin, Star, Heart, MessageCircle, Lightbulb, Calendar, Image, Quote, PenTool } from 'lucide-react';
+import { ChevronRight, ChevronDown, MapPin, Star, Heart, MessageCircle, Lightbulb, Calendar, Image, Quote, PenTool, Lock } from 'lucide-react';
 
 const NODE_ICONS: Record<string, any> = {
   scene: MapPin, memory: Star, character: Heart, dialogue: MessageCircle,
@@ -14,6 +14,10 @@ const NODE_COLORS: Record<string, string> = {
   moment: '#FF922B', feeling: '#F03E3E', timeline_event: '#4DABF7', media: '#CC5DE8',
   quote: '#FCC419', reflection: '#3BC9DB',
 };
+
+function isNodeTimeLocked(node: any) {
+  return Boolean(node?.isTimeLocked || (node?.unlockDate && new Date(node.unlockDate).getTime() > Date.now()));
+}
 
 interface StoryOutlineViewProps {
   nodes: any[];
@@ -99,8 +103,13 @@ export default function StoryOutlineView({ nodes, onNodeClick }: StoryOutlineVie
                       className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-[#FFB4A2]/5 dark:hover:bg-[#E63946]/5 transition-all ${i < items.length - 1 ? 'border-b border-[#FFB4A2]/5 dark:border-[#E63946]/5' : ''}`}>
                       <span className="text-[9px] text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20 w-4">{i + 1}</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-[#4A2F3C] dark:text-[#e2d9f3] truncate">{node.title || 'Untitled'}</p>
-                        {node.content && (
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs font-medium text-[#4A2F3C] dark:text-[#e2d9f3] truncate">{node.title || 'Untitled'}</p>
+                          {isNodeTimeLocked(node) && <Lock className="w-3 h-3 shrink-0 text-[#E63946]/60" />}
+                        </div>
+                        {isNodeTimeLocked(node) ? (
+                          <p className="text-[9px] text-[#E63946]/55 truncate mt-0.5">Time Capsule tersegel</p>
+                        ) : node.content && (
                           <p className="text-[9px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/25 truncate mt-0.5"
                             dangerouslySetInnerHTML={{ __html: node.content.replace(/<[^>]+>/g, '').slice(0, 60) }} />
                         )}

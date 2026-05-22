@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Parent, ResolveField } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { NotesService } from './notes.service';
 import { Note } from '../entities/note.entity';
@@ -13,6 +13,23 @@ import { CreateNoteInput, UpdateNotePositionInput, UpdateNoteContentInput, Creat
 @UseGuards(GqlAuthGuard)
 export class NotesResolver {
   constructor(private readonly notesService: NotesService) {}
+
+  private isTimeLocked(note: Note): boolean {
+    return Boolean(note.unlockDate && note.unlockDate.getTime() > Date.now());
+  }
+
+  @ResolveField(() => String, { name: 'content', nullable: true })
+  resolveContent(@Parent() note: Note): string | null {
+    if (this.isTimeLocked(note)) return null;
+    return note.content || null;
+  }
+
+  @ResolveField(() => [NoteImage], { name: 'images', nullable: 'itemsAndList' })
+  async resolveImages(@Parent() note: Note): Promise<NoteImage[]> {
+    if (this.isTimeLocked(note)) return [];
+    if (!note.images.isInitialized()) await note.images.init();
+    return note.images.getItems();
+  }
 
   @Query(() => [Note])
   async getNotes(

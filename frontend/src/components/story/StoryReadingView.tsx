@@ -1,15 +1,35 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, BookOpen, MapPin, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, MapPin, Clock, Lock, Hourglass } from 'lucide-react';
 
 interface StoryReadingViewProps {
   nodes: any[];
   storyTitle: string;
   storySubtitle?: string;
+  scrapbookFontClass?: string;
+  scrapbookBackgroundClass?: string;
 }
 
-export default function StoryReadingView({ nodes, storyTitle, storySubtitle }: StoryReadingViewProps) {
+function isNodeTimeLocked(node: any) {
+  return Boolean(node?.isTimeLocked || (node?.unlockDate && new Date(node.unlockDate).getTime() > Date.now()));
+}
+
+function formatUnlockDate(value?: string) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleString('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+export default function StoryReadingView({ nodes, storyTitle, storySubtitle, scrapbookFontClass = '', scrapbookBackgroundClass = 'bg-[#FFFAF7] dark:bg-[#1a1625]' }: StoryReadingViewProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const sortedNodes = useMemo(() => {
@@ -25,6 +45,8 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle }: S
   }
 
   const currentNode = sortedNodes[currentIndex];
+  const timeLocked = isNodeTimeLocked(currentNode);
+  const unlockLabel = formatUnlockDate(currentNode.unlockDate);
   let metadata: any = {};
   try { if (currentNode.storyMetadata) metadata = JSON.parse(currentNode.storyMetadata); } catch {}
 
@@ -32,7 +54,7 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle }: S
   const goPrev = () => setCurrentIndex(Math.max(currentIndex - 1, 0));
 
   return (
-    <div className="h-full flex flex-col bg-[#FFFAF7] dark:bg-[#1a1625]">
+    <div className={`h-full flex flex-col ${scrapbookBackgroundClass}`}>
       {/* Reading Header */}
       <div className="flex items-center justify-between px-8 py-4 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10">
         <div className="flex items-center gap-2">
@@ -46,7 +68,7 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle }: S
 
       {/* Reading Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="max-w-xl mx-auto px-8 py-12">
+        <div className={`max-w-xl mx-auto px-8 py-12 ${scrapbookFontClass}`}>
           {/* Node type badge */}
           <div className="flex items-center gap-2 mb-4">
             <span className="text-[9px] uppercase tracking-wider font-semibold text-[#E63946]">
@@ -70,7 +92,7 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle }: S
           </h1>
 
           {/* Images */}
-          {currentNode.images?.length > 0 && (
+          {!timeLocked && currentNode.images?.length > 0 && (
             <div className="mb-6 rounded-xl overflow-hidden">
               <img src={currentNode.images[0].imageUrl} alt="" className="w-full max-h-[300px] object-cover" />
               {currentNode.images.length > 1 && (
@@ -86,8 +108,24 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle }: S
           )}
 
           {/* Content */}
-          <div className="prose-dark prose prose-sm max-w-none text-[#5A3E4C] dark:text-[#e2d9f3]/80 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: currentNode.content || '<p class="text-[#5A3E4C]/30 italic">Belum ada konten...</p>' }} />
+          {timeLocked ? (
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-[#E63946]/5 to-[#FFB8C0]/10 border border-[#FFB8C0]/20 dark:border-[#E63946]/15 text-center">
+              <div className="w-12 h-12 mx-auto rounded-full bg-[#E63946]/10 flex items-center justify-center text-[#E63946] mb-3">
+                <Lock className="w-5 h-5" />
+              </div>
+              <div className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-[#E63946] mb-2">
+                <Hourglass className="w-3 h-3" />
+                Time Capsule
+              </div>
+              <p className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">Memory ini masih tersegel</p>
+              <p className="text-xs text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40 mt-2">
+                {unlockLabel ? `Akan terbuka pada ${unlockLabel}.` : 'Konten dan media disembunyikan sampai tanggal buka.'}
+              </p>
+            </div>
+          ) : (
+            <div className="prose-dark prose prose-sm max-w-none text-[#5A3E4C] dark:text-[#e2d9f3]/80 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: currentNode.content || '<p class="text-[#5A3E4C]/30 italic">Belum ada konten...</p>' }} />
+          )}
 
           {/* Mood */}
           {currentNode.mood && (

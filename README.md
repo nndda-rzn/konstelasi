@@ -15,7 +15,7 @@
 
 <p>
   <img src="https://img.shields.io/badge/Status-Active_Development-38D9A9?style=flat-square&labelColor=302D41" />
-  <img src="https://img.shields.io/badge/Version-3.2.0-E63946?style=flat-square&labelColor=302D41" />
+  <img src="https://img.shields.io/badge/Version-3.3.0-E63946?style=flat-square&labelColor=302D41" />
   <img src="https://img.shields.io/badge/Theme-Red_Candy-D62828?style=flat-square&labelColor=302D41" />
   <img src="https://img.shields.io/badge/Made_with-Love-E63946?style=flat-square&labelColor=302D41" />
 </p>
@@ -150,6 +150,19 @@
 | **Media Upload** | Upload gambar via Supabase Storage per node |
 | **Focus/Zen Mode** | Full-screen immersive writing overlay |
 | **Insights Drawer** | Unified dropdown menu untuk semua analysis panels |
+| **Time Capsule** | Seal story nodes sampai tanggal tertentu dengan backend masking untuk konten dan gambar |
+| **On This Day** | Dashboard `/story` menampilkan memory bertanggal sama dari tahun sebelumnya |
+| **Story Scrapbook** | Per-story aesthetic settings dengan background scrapbook dan opsi elegant handwriting |
+
+#### Nostalgia Features (v3.3)
+
+| Fitur | Deskripsi |
+|:------|:----------|
+| **Backend-Secured Time Capsule** | `unlockDate` menyegel konten dan media story node dari GraphQL sampai waktu buka |
+| **Locked Story Views** | Canvas, Reading, Timeline, Outline, dan Gallery menghormati status Time Capsule |
+| **On This Day Memories** | Query story-only untuk memory dengan `eventDate` pada hari/bulan yang sama di tahun lalu |
+| **Story Scrapbook Theme** | JSON theme per story untuk background, reading surface, grid color, dan typography |
+| **Elegant Handwriting** | Font utility `font-scrapbook-handwriting` untuk nuansa scrapbook personal |
 
 ---
 
@@ -365,4 +378,3 @@ Proyek ini adalah proyek pribadi. Lihat [LICENSE](./LICENSE) untuk detail.
 <sub>© 2026 Konstelasi — Personal Storytelling Platform | Red Candy Theme</sub>
 
 </div>
-

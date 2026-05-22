@@ -116,6 +116,10 @@ export class NotesService {
     if (input.mood !== undefined) (note as any).mood = input.mood;
     if (input.eventDate !== undefined) (note as any).eventDate = input.eventDate ? new Date(input.eventDate) : null;
     if (input.eventLocation !== undefined) (note as any).eventLocation = input.eventLocation || null;
+    if (input.unlockDate !== undefined) {
+      const unlockDate = input.unlockDate ? new Date(input.unlockDate) : null;
+      (note as any).unlockDate = unlockDate && !Number.isNaN(unlockDate.getTime()) ? unlockDate : null;
+    }
     await this.em.flush();
     
     // Record writing activity for streak

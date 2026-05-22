@@ -90,6 +90,7 @@ input CreateStoryInput {
   authorNote: String
   coverImage: String
   description: String
+  scrapbookTheme: String
   storyType: StoryType
   subtitle: String
   theme: String
@@ -234,6 +235,7 @@ type Note {
   incomingEdges: [NoteLink]
   isArchived: Boolean!
   isLocked: Boolean!
+  isTimeLocked: Boolean!
   mood: String
   outgoingEdges: [NoteLink]
   parent: Note
@@ -245,6 +247,7 @@ type Note {
   tags: [Tag]
   title: String!
   type: String!
+  unlockDate: DateTime
   updatedAt: DateTime!
   user: User!
   width: Float
@@ -284,6 +287,20 @@ type NoteVersion {
   version: Int!
 }
 
+type OnThisDayMemory {
+  content: String
+  eventDate: DateTime!
+  isTimeLocked: Boolean!
+  mood: String
+  nodeId: String!
+  nodeType: String
+  storyId: String!
+  storyTitle: String!
+  title: String!
+  unlockDate: DateTime
+  yearsAgo: Int!
+}
+
 enum PrivacyLevel {
   FRIENDS_ONLY
   PRIVATE
@@ -302,6 +319,7 @@ type Query {
   getMemoryTimeline(storyId: String!): MemoryTimeline!
   getNoteVersions(noteId: String!): [NoteVersion!]!
   getNotes(canvasId: String, tagIds: [String!]): [Note!]!
+  getOnThisDayMemories: [OnThisDayMemory!]!
   getProfile: String!
   getPublicStory(id: String!): Story
   getStories: [Story!]!
@@ -327,6 +345,7 @@ type Story {
   isArchived: Boolean!
   nodes: [Note]
   privacyLevel: PrivacyLevel!
+  scrapbookTheme: String
   status: StoryStatus!
   storyType: StoryType!
   subtitle: String
@@ -415,6 +434,7 @@ input UpdateNoteContentInput {
   tagIds: [String!]
   title: String
   type: String
+  unlockDate: String
 }
 
 input UpdateNoteLinkInput {
@@ -441,6 +461,7 @@ input UpdateStoryInput {
   description: String
   id: String!
   privacyLevel: PrivacyLevel
+  scrapbookTheme: String
   status: StoryStatus
   storyType: StoryType
   subtitle: String

@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { Handle, Position, NodeResizer } from '@xyflow/react';
-import { MapPin, Clock, Heart, MessageCircle, Star, Lightbulb, Calendar, Image, Quote, PenTool, Lock } from 'lucide-react';
+import { MapPin, Clock, Heart, MessageCircle, Star, Lightbulb, Calendar, Image, Quote, PenTool, Lock, Hourglass } from 'lucide-react';
 
 const NODE_TYPE_CONFIG: Record<string, { icon: any; label: string; color: string; bgGradient: string }> = {
   scene: { icon: MapPin, label: 'Scene', color: '#FF6B8B', bgGradient: 'from-[#FF6B8B]/15 to-[#FF922B]/5' },
@@ -28,13 +28,22 @@ const EMOTION_COLORS: Record<string, string> = {
   hopeful: '#3BC9DB',
 };
 
+function getUnlockLabel(value?: string) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 function StoryNode({ data, selected }: any) {
   const nodeType = data.storyNodeType || 'scene';
   const config = NODE_TYPE_CONFIG[nodeType] || NODE_TYPE_CONFIG.scene;
   const Icon = config.icon;
   const emotion = data.mood || '';
   const emotionColor = EMOTION_COLORS[emotion] || config.color;
-  const isLocked = data.isLocked;
+  const isTimeLocked = Boolean(data.isTimeLocked || (data.unlockDate && new Date(data.unlockDate).getTime() > Date.now()));
+  const isLocked = data.isLocked || isTimeLocked;
+  const unlockLabel = getUnlockLabel(data.unlockDate);
 
   // Parse metadata
   let metadata: any = {};
@@ -81,7 +90,17 @@ function StoryNode({ data, selected }: any) {
         </div>
 
         {/* Content Preview */}
-        {data.content && (
+        {isTimeLocked ? (
+          <div className="mx-3 mb-2 px-2.5 py-2 rounded-lg bg-white/70 dark:bg-[#1a1625]/45 border border-[#E63946]/10">
+            <div className="flex items-center gap-1.5 text-[10px] font-medium text-[#E63946]">
+              <Hourglass className="w-3 h-3" />
+              Time Capsule
+            </div>
+            <p className="mt-0.5 text-[9px] text-[#5A3E4C]/45 dark:text-[#e2d9f3]/35">
+              {unlockLabel ? `Terbuka ${unlockLabel}` : 'Konten tersegel'}
+            </p>
+          </div>
+        ) : data.content && (
           <div className="px-3 pb-2">
             <p className="text-[11px] text-[#5A3E4C]/70 dark:text-[#e2d9f3]/50 line-clamp-2 leading-relaxed"
               dangerouslySetInnerHTML={{ __html: data.content.replace(/<[^>]+>/g, '').slice(0, 80) }}
@@ -104,7 +123,7 @@ function StoryNode({ data, selected }: any) {
         )}
 
         {/* Image thumbnail */}
-        {data.images?.length > 0 && (
+        {!isTimeLocked && data.images?.length > 0 && (
           <div className="px-3 pb-2">
             <div className="w-full h-16 rounded-lg overflow-hidden">
               <img src={data.images[0].imageUrl} alt="" className="w-full h-full object-cover" />

@@ -26,6 +26,7 @@ export class VersionService {
       positionX: n.positionX,
       positionY: n.positionY,
       isLocked: n.isLocked,
+      unlockDate: (n as any).unlockDate,
       eventDate: (n as any).eventDate,
       eventLocation: (n as any).eventLocation,
       createdAt: n.createdAt,
@@ -92,6 +93,7 @@ export class VersionService {
         existing.positionX = snapNode.positionX;
         existing.positionY = snapNode.positionY;
         existing.isLocked = snapNode.isLocked;
+        (existing as any).unlockDate = snapNode.unlockDate ? new Date(snapNode.unlockDate) : null;
       }
     }
 

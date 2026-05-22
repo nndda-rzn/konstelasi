@@ -17,6 +17,7 @@ export class StoryService {
     storyType?: StoryType;
     theme?: string;
     authorNote?: string;
+    scrapbookTheme?: string;
   }): Promise<Story> {
     const user = await this.em.findOneOrFail(User, { id: userId });
     const story = this.em.create(Story, {
@@ -27,6 +28,7 @@ export class StoryService {
       storyType: input.storyType || StoryType.CUSTOM,
       theme: input.theme,
       authorNote: input.authorNote,
+      scrapbookTheme: input.scrapbookTheme,
       user,
       status: StoryStatus.DRAFT,
       privacyLevel: PrivacyLevel.PRIVATE,
@@ -42,6 +44,61 @@ export class StoryService {
     return this.em.find(Story, { user: { id: userId } }, {
       orderBy: { updatedAt: 'DESC' },
     });
+  }
+
+  async getOnThisDayMemories(userId: string): Promise<Array<{
+    nodeId: string;
+    title: string;
+    content?: string | null;
+    storyId: string;
+    storyTitle: string;
+    nodeType?: string | null;
+    mood?: string | null;
+    eventDate: Date;
+    yearsAgo: number;
+    unlockDate?: Date | null;
+    isTimeLocked: boolean;
+  }>> {
+    const today = new Date();
+    const notes = await this.em.find(Note, {
+      user: { id: userId },
+      isArchived: false,
+      story: { $ne: null },
+      eventDate: { $ne: null },
+    } as any, {
+      populate: ['story'] as any,
+      orderBy: { eventDate: 'DESC' },
+    });
+
+    return notes
+      .map(note => {
+        const eventDate = note.eventDate!;
+        const yearsAgo = today.getFullYear() - eventDate.getFullYear();
+        return { note, eventDate, yearsAgo };
+      })
+      .filter(({ eventDate, yearsAgo }) => (
+        yearsAgo > 0
+        && eventDate.getMonth() === today.getMonth()
+        && eventDate.getDate() === today.getDate()
+      ))
+      .slice(0, 8)
+      .map(({ note, eventDate, yearsAgo }) => {
+        const isTimeLocked = Boolean(note.unlockDate && note.unlockDate.getTime() > today.getTime());
+        const story = note.story as Story;
+        return {
+          nodeId: note.id,
+          title: note.title,
+          content: isTimeLocked ? null : note.content,
+          storyId: story.id,
+          storyTitle: story.title,
+          nodeType: note.storyNodeType,
+          mood: note.mood,
+          eventDate,
+          yearsAgo,
+          unlockDate: note.unlockDate,
+          isTimeLocked,
+        };
+      });
   }
 
   async getStory(userId: string, storyId: string): Promise<Story> {
@@ -89,6 +146,7 @@ export class StoryService {
     privacyLevel?: PrivacyLevel;
     theme?: string;
     authorNote?: string;
+    scrapbookTheme?: string;
   }): Promise<Story> {
     const story = await this.em.findOneOrFail(Story, { id: storyId, user: { id: userId } });
     if (input.title !== undefined) story.title = input.title;
@@ -100,6 +158,7 @@ export class StoryService {
     if (input.privacyLevel !== undefined) story.privacyLevel = input.privacyLevel;
     if (input.theme !== undefined) story.theme = input.theme;
     if (input.authorNote !== undefined) story.authorNote = input.authorNote;
+    if (input.scrapbookTheme !== undefined) story.scrapbookTheme = input.scrapbookTheme;
     await this.em.flush();
     return story;
   }

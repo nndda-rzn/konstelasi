@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { MapPin, Clock, Star, Heart, MessageCircle, Lightbulb, Calendar, Image, Quote, PenTool } from 'lucide-react';
+import { MapPin, Clock, Star, Heart, MessageCircle, Lightbulb, Calendar, Image, Quote, PenTool, Lock, Hourglass } from 'lucide-react';
 
 const NODE_ICONS: Record<string, any> = {
   scene: MapPin, memory: Star, character: Heart, dialogue: MessageCircle,
@@ -14,6 +14,17 @@ const NODE_COLORS: Record<string, string> = {
   moment: '#FF922B', feeling: '#F03E3E', timeline_event: '#4DABF7', media: '#CC5DE8',
   quote: '#FCC419', reflection: '#3BC9DB',
 };
+
+function isNodeTimeLocked(node: any) {
+  return Boolean(node?.isTimeLocked || (node?.unlockDate && new Date(node.unlockDate).getTime() > Date.now()));
+}
+
+function formatUnlockDate(value?: string) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
 interface StoryTimelineViewProps {
   nodes: any[];
@@ -43,6 +54,8 @@ export default function StoryTimelineView({ nodes, onNodeClick }: StoryTimelineV
           const nodeType = node.storyNodeType || 'scene';
           const Icon = NODE_ICONS[nodeType] || MapPin;
           const color = NODE_COLORS[nodeType] || '#E63946';
+          const timeLocked = isNodeTimeLocked(node);
+          const unlockLabel = formatUnlockDate(node.unlockDate);
           let metadata: any = {};
           try { if (node.storyMetadata) metadata = JSON.parse(node.storyMetadata); } catch {}
 
@@ -67,6 +80,7 @@ export default function StoryTimelineView({ nodes, onNodeClick }: StoryTimelineV
                   <span className="text-[9px] uppercase tracking-wider font-semibold" style={{ color }}>
                     {nodeType.replace('_', ' ')}
                   </span>
+                  {timeLocked && <Lock className="w-3 h-3 text-[#E63946]/60" />}
                   <span className="text-[9px] text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20 ml-auto">
                     {new Date(node.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </span>
@@ -78,7 +92,14 @@ export default function StoryTimelineView({ nodes, onNodeClick }: StoryTimelineV
                 </h3>
 
                 {/* Content preview */}
-                {node.content && (
+                {timeLocked ? (
+                  <div className="flex items-center gap-2 mb-2 px-2.5 py-2 rounded-lg bg-[#E63946]/5 border border-[#E63946]/10">
+                    <Hourglass className="w-3.5 h-3.5 text-[#E63946]/70" />
+                    <span className="text-[10px] text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40">
+                      {unlockLabel ? `Time Capsule terbuka ${unlockLabel}` : 'Time Capsule tersegel'}
+                    </span>
+                  </div>
+                ) : node.content && (
                   <p className="text-xs text-[#5A3E4C]/60 dark:text-[#e2d9f3]/40 line-clamp-2 mb-2"
                     dangerouslySetInnerHTML={{ __html: node.content.replace(/<[^>]+>/g, '').slice(0, 120) }} />
                 )}
@@ -95,7 +116,7 @@ export default function StoryTimelineView({ nodes, onNodeClick }: StoryTimelineV
                       <Clock className="w-2.5 h-2.5" /> {metadata.sceneTime}
                     </span>
                   )}
-                  {node.mood && (
+                  {!timeLocked && node.mood && (
                     <span className="px-1.5 py-0.5 rounded-full text-[8px] font-medium"
                       style={{ backgroundColor: `${color}15`, color }}>
                       {node.mood}
@@ -104,7 +125,7 @@ export default function StoryTimelineView({ nodes, onNodeClick }: StoryTimelineV
                 </div>
 
                 {/* Image thumbnail */}
-                {node.images?.length > 0 && (
+                {!timeLocked && node.images?.length > 0 && (
                   <div className="mt-2 flex gap-1.5">
                     {node.images.slice(0, 3).map((img: any) => (
                       <div key={img.id} className="w-12 h-12 rounded-lg overflow-hidden">

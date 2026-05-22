@@ -7,12 +7,17 @@ interface StoryGalleryViewProps {
   nodes: any[];
 }
 
+function isNodeTimeLocked(node: any) {
+  return Boolean(node?.isTimeLocked || (node?.unlockDate && new Date(node.unlockDate).getTime() > Date.now()));
+}
+
 export default function StoryGalleryView({ nodes }: StoryGalleryViewProps) {
   const [selectedImage, setSelectedImage] = useState<any>(null);
 
   const allImages = useMemo(() => {
     const images: any[] = [];
     nodes.forEach((node: any) => {
+      if (isNodeTimeLocked(node)) return;
       node.images?.forEach((img: any) => {
         images.push({
           ...img,

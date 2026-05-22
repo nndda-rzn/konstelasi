@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Trash2, Lock, Unlock, MapPin, Clock, Heart, Save, Loader2, Calendar, ImagePlus, Maximize2, Minimize2 } from 'lucide-react';
+import { X, Trash2, Lock, Unlock, MapPin, Clock, Heart, Save, Loader2, Calendar, ImagePlus, Maximize2, Minimize2, Hourglass } from 'lucide-react';
 import { useMutation } from '@apollo/client/react';
 import { UPDATE_NOTE_CONTENT, DELETE_NOTE, ADD_NOTE_IMAGE, DELETE_NOTE_IMAGE } from '@/graphql/mutations';
 import { TOGGLE_NODE_LOCK } from '@/graphql/story';
@@ -33,20 +33,43 @@ const EMOTIONS = [
   { value: 'hopeful', label: 'Hopeful', color: '#3BC9DB' },
 ];
 
+function toDateTimeInputValue(value?: string | null) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return localDate.toISOString().slice(0, 16);
+}
+
+function formatUnlockDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleString('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 interface StoryNodeEditorProps {
   note: any;
   onClose: () => void;
-  onUpdateCache: (nodeId: string, title?: string, content?: string, newImages?: any[], color?: string, mood?: string) => void;
+  onUpdateCache: (nodeId: string, title?: string, content?: string, newImages?: any[], color?: string, mood?: string, extra?: any) => void;
   onDeleteSuccess: () => void;
 }
 
 export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDeleteSuccess }: StoryNodeEditorProps) {
   const [title, setTitle] = useState(note?.title || '');
   const [content, setContent] = useState(note?.content || '');
+  const [contentMasked, setContentMasked] = useState(Boolean(note?.isTimeLocked && (note?.content === null || note?.content === undefined)));
   const [mood, setMood] = useState(note?.mood || '');
   const [isLocked, setIsLocked] = useState(note?.isLocked || false);
   const [eventDate, setEventDate] = useState(note?.eventDate ? note.eventDate.split('T')[0] : '');
   const [eventLocation, setEventLocation] = useState(note?.eventLocation || '');
+  const [unlockDate, setUnlockDate] = useState(toDateTimeInputValue(note?.unlockDate));
   const [images, setImages] = useState<any[]>(note?.images || []);
   const [uploading, setUploading] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
@@ -67,20 +90,27 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
   useEffect(() => {
     const handler = setTimeout(async () => {
       if (!note) return;
+      const nextUnlockDate = unlockDate ? new Date(unlockDate).toISOString() : null;
+      const nextIsTimeLocked = Boolean(nextUnlockDate && new Date(nextUnlockDate).getTime() > Date.now());
+      const input: any = {
+        id: note.id,
+        title,
+        mood: mood || undefined,
+        eventDate: eventDate || undefined,
+        eventLocation: eventLocation || undefined,
+        unlockDate: nextUnlockDate,
+      };
+      if (!contentMasked) input.content = content;
       try {
         await updateContent({
           variables: {
-            input: {
-              id: note.id,
-              title,
-              content,
-              mood: mood || undefined,
-              eventDate: eventDate || undefined,
-              eventLocation: eventLocation || undefined,
-            },
+            input,
           },
         });
-        onUpdateCache(note.id, title, content, undefined, undefined, mood);
+        onUpdateCache(note.id, title, contentMasked ? undefined : content, undefined, undefined, mood, {
+          unlockDate: nextUnlockDate,
+          isTimeLocked: nextIsTimeLocked,
+        });
       } catch (err: any) {
         // If note not found (deleted), close editor silently
         if (err?.message?.includes('not found') || err?.message?.includes('Not Found')) {
@@ -91,17 +121,19 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
       }
     }, 800);
     return () => clearTimeout(handler);
-  }, [title, content, mood, eventDate, eventLocation]);
+  }, [title, content, contentMasked, mood, eventDate, eventLocation, unlockDate]);
 
   // Reset state when note changes
   useEffect(() => {
     if (note) {
       setTitle(note.title || '');
       setContent(note.content || '');
+      setContentMasked(Boolean(note.isTimeLocked && (note.content === null || note.content === undefined)));
       setMood(note.mood || '');
       setIsLocked(note.isLocked || false);
       setEventDate(note.eventDate ? note.eventDate.split('T')[0] : '');
       setEventLocation(note.eventLocation || '');
+      setUnlockDate(toDateTimeInputValue(note.unlockDate));
       setImages(note.images || []);
       try { setMetadata(note.storyMetadata ? JSON.parse(note.storyMetadata) : {}); } catch { setMetadata({}); }
     }
@@ -174,6 +206,9 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
 
   const nodeType = note.storyNodeType || 'scene';
   const nodeColor = NODE_TYPE_OPTIONS.find(t => t.value === nodeType)?.color || '#E63946';
+  const isTimeLocked = Boolean(unlockDate && new Date(unlockDate).getTime() > Date.now());
+  const unlockLabel = unlockDate ? formatUnlockDate(unlockDate) : '';
+  const isContentSealed = isTimeLocked || contentMasked;
 
   return (
     <div className={`${focusMode ? 'fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm' : ''}`}>
@@ -214,6 +249,34 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
             className="w-full text-lg font-bold text-[#4A2F3C] dark:text-[#e2d9f3] bg-transparent border-none outline-none placeholder:text-[#5A3E4C]/20" />
         </div>
 
+        {/* Time Capsule */}
+        <div className="p-3 rounded-xl bg-gradient-to-br from-[#E63946]/5 to-[#FFB8C0]/10 border border-[#FFB8C0]/20 dark:border-[#E63946]/15">
+          <div className="flex items-start gap-3">
+            <div className={`p-2 rounded-lg ${isTimeLocked ? 'bg-[#E63946]/10 text-[#E63946]' : 'bg-[#FFB8C0]/15 text-[#5A3E4C]/40'}`}>
+              <Hourglass className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <label className="block text-[11px] uppercase tracking-wider text-[#5A3E4C]/50 font-semibold mb-1.5">Time Capsule</label>
+              <input
+                type="datetime-local"
+                value={unlockDate}
+                onChange={e => setUnlockDate(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-white/70 dark:bg-[#1a1625]/50 border border-[#FFB8C0]/20 dark:border-[#E63946]/15 text-xs text-[#4A2F3C] dark:text-[#e2d9f3] outline-none focus:border-[#E63946]/40"
+              />
+              <div className="flex items-center justify-between gap-2 mt-2">
+                <p className="text-[10px] text-[#5A3E4C]/45 dark:text-[#e2d9f3]/35">
+                  {isTimeLocked ? `Disegel sampai ${unlockLabel}` : 'Kosongkan tanggal untuk membuat memory tetap terbuka.'}
+                </p>
+                {unlockDate && (
+                  <button onClick={() => setUnlockDate('')} className="text-[10px] font-medium text-[#E63946]/70 hover:text-[#E63946] transition-colors">
+                    Buka sekarang
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Metadata (Scene-specific) */}
         {(nodeType === 'scene' || nodeType === 'timeline_event') && (
           <div className="flex gap-2">
@@ -245,7 +308,19 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
         {/* Content Editor */}
         <div>
           <label className="block text-[11px] uppercase tracking-wider text-[#5A3E4C]/50 font-semibold mb-2">Konten</label>
-          <TiptapEditor content={content} onChange={setContent} />
+          {isContentSealed ? (
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-[#1a1625]/5 dark:bg-white/5 border border-[#FFB8C0]/15 dark:border-[#E63946]/10">
+              <Lock className="w-4 h-4 text-[#E63946]/70" />
+              <div>
+                <p className="text-xs font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">{isTimeLocked ? 'Konten tersegel' : 'Konten perlu dimuat ulang'}</p>
+                <p className="text-[10px] text-[#5A3E4C]/45 dark:text-[#e2d9f3]/35 mt-0.5">
+                  {isTimeLocked ? 'Backend menyembunyikan isi memory ini sampai tanggal buka.' : 'Time Capsule sudah dibuka. Tutup dan buka kembali node untuk memuat konten asli sebelum mengedit.'}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <TiptapEditor content={content} onChange={setContent} />
+          )}
         </div>
 
         {/* Emotion */}
@@ -283,6 +358,15 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
         {/* Media / Images */}
         <div>
           <label className="block text-[11px] uppercase tracking-wider text-[#5A3E4C]/50 font-semibold mb-2">Media</label>
+          {isContentSealed ? (
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-[#1a1625]/5 dark:bg-white/5 border border-[#FFB8C0]/15 dark:border-[#E63946]/10">
+              <Lock className="w-4 h-4 text-[#E63946]/70" />
+              <p className="text-[10px] text-[#5A3E4C]/45 dark:text-[#e2d9f3]/35">
+                {isTimeLocked ? 'Gambar ikut tersegel sampai Time Capsule dibuka.' : 'Media perlu dimuat ulang setelah Time Capsule dibuka.'}
+              </p>
+            </div>
+          ) : (
+          <>
           {images.length > 0 && (
             <div className="grid grid-cols-3 gap-2 mb-2">
               {images.map((img: any) => (
@@ -301,6 +385,8 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
             <span className="text-[10px] text-[#5A3E4C]/40">{uploading ? 'Mengunggah...' : 'Tambah Gambar'}</span>
             <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
           </label>
+          </>
+          )}
         </div>
 
         {/* Auto-save indicator */}

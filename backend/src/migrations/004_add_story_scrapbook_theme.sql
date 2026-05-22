@@ -1,0 +1,1 @@
+ALTER TABLE story ADD COLUMN IF NOT EXISTS scrapbook_theme TEXT;

@@ -57,6 +57,9 @@ export class UpdateNoteContentInput {
   eventLocation?: string;
 
   @Field(() => String, { nullable: true })
+  unlockDate?: string;
+
+  @Field(() => String, { nullable: true })
   canvasId?: string;
 
   @Field(() => [String], { nullable: true })

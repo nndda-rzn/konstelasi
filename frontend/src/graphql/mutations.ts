@@ -15,8 +15,12 @@ export const CREATE_NOTE = gql`
       mood
       isArchived
       isLocked
+      unlockDate
+      isTimeLocked
       storyNodeType
       storyMetadata
+      eventDate
+      eventLocation
       createdAt
       canvas { id name }
       tags { id name color }
@@ -100,6 +104,10 @@ export const UPDATE_NOTE_CONTENT = gql`
       type
       isArchived
       isLocked
+      unlockDate
+      isTimeLocked
+      eventDate
+      eventLocation
       createdAt
       canvas { id name }
       tags { id name color }

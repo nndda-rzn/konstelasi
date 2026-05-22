@@ -402,3 +402,13 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* ── Story Scrapbook Font Utilities ── */
+.font-scrapbook-handwriting {
+  font-family: "Segoe Script", "Lucida Handwriting", "Brush Script MT", cursive;
+  letter-spacing: 0.01em;
+}
+
+.font-scrapbook-serif {
+  font-family: Georgia, "Times New Roman", serif;
+}
