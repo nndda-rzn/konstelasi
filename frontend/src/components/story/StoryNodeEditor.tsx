@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Trash2, Lock, Unlock, MapPin, Clock, Heart, Save, Loader2, Calendar, ImagePlus } from 'lucide-react';
+import { X, Trash2, Lock, Unlock, MapPin, Clock, Heart, Save, Loader2, Calendar, ImagePlus, Maximize2, Minimize2 } from 'lucide-react';
 import { useMutation } from '@apollo/client/react';
 import { UPDATE_NOTE_CONTENT, DELETE_NOTE, ADD_NOTE_IMAGE, DELETE_NOTE_IMAGE } from '@/graphql/mutations';
 import { TOGGLE_NODE_LOCK } from '@/graphql/story';
@@ -49,6 +49,7 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
   const [eventLocation, setEventLocation] = useState(note?.eventLocation || '');
   const [images, setImages] = useState<any[]>(note?.images || []);
   const [uploading, setUploading] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // Parse metadata
@@ -175,7 +176,8 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
   const nodeColor = NODE_TYPE_OPTIONS.find(t => t.value === nodeType)?.color || '#FF8FA3';
 
   return (
-    <div className="absolute top-0 right-0 h-full w-[420px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-2xl shadow-2xl border-l border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 z-50 flex flex-col overflow-hidden">
+    <div className={`${focusMode ? 'fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm' : ''}`}>
+    <div className={`${focusMode ? 'relative w-[700px] max-h-[90vh] rounded-2xl shadow-2xl' : 'absolute top-0 right-0 h-full w-[420px]'} bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-2xl shadow-2xl border-l border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 z-50 flex flex-col overflow-hidden`}>
       {/* Accent line */}
       <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: nodeColor }} />
 
@@ -188,6 +190,9 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
           </span>
         </div>
         <div className="flex items-center gap-1">
+          <button onClick={() => setFocusMode(!focusMode)} className="p-2 text-[#5A3E4C]/30 hover:text-[#7C83FD] hover:bg-[#7C83FD]/10 rounded-lg transition-all" title={focusMode ? 'Exit Focus' : 'Focus Mode'}>
+            {focusMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
           <button onClick={handleToggleLock} className={`p-2 rounded-lg transition-all ${isLocked ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/20' : 'text-[#5A3E4C]/30 hover:text-[#5A3E4C]/60 hover:bg-[#FFB4A2]/10'}`} title={isLocked ? 'Unlock' : 'Lock'}>
             {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
           </button>
@@ -304,6 +309,7 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
           <span className="text-[10px] text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20">Auto-saved</span>
         </div>
       </div>
+    </div>
     </div>
   );
 }
