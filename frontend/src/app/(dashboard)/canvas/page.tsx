@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function CanvasPage() {
   return (
-    <main className="w-full h-full overflow-hidden bg-slate-50 relative">
+    <main className="w-full h-screen overflow-hidden bg-slate-50 relative">
       <div className="hidden md:block w-full h-full">
          <DiaryCanvas />
       </div>

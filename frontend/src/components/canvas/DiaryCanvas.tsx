@@ -23,8 +23,7 @@ import NoteNode from './NoteNode';
 import SemanticEdge from './SemanticEdge';
 import NoteEditorSidebar from './NoteEditorSidebar';
 import TimelineView from './TimelineView';
-import { Loader2, LogOut, Sparkles, Search, Download, LayoutTemplate, List, Tag as TagIcon, Clock, BarChart3, Archive, Moon, Sun, BookOpen, Image as ImageIcon, Camera } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { Loader2, Sparkles, Search, Download, LayoutTemplate, List, Tag as TagIcon, Clock, BarChart3, Archive } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toPng } from 'html-to-image';
 import { useCanvas } from '@/context/CanvasContext';
@@ -34,7 +33,6 @@ import SearchPanel from './SearchPanel';
 import StatsPanel from './StatsPanel';
 import ArchivePanel from './ArchivePanel';
 import StreakWidget from './StreakWidget';
-import { useTheme } from '@/context/ThemeContext';
 import ExportPanel from './ExportPanel';
 import CalendarPanel from './CalendarPanel';
 import AdvancedAnalyticsPanel from './AdvancedAnalyticsPanel';
@@ -49,10 +47,8 @@ const edgeTypes = {
 
 export default function DiaryCanvas() {
   const router = useRouter();
-  const supabase = createClient();
   const { selectedCanvasId } = useCanvas();
   const { selectedTagFilters } = useTags();
-  const { theme, toggleTheme } = useTheme();
   const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
   const [selectedNote, setSelectedNote] = useState<any>(null);
@@ -474,12 +470,6 @@ export default function DiaryCanvas() {
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
-    router.refresh();
-  };
-
   if (loading) return (
     <div className="flex h-screen w-full items-center justify-center bg-[#FFFAF7]">
       <div className="flex flex-col items-center gap-4">
@@ -605,52 +595,12 @@ export default function DiaryCanvas() {
             <Archive className="w-4 h-4" />
           </button>
 
-          <button 
-            onClick={toggleTheme}
-            title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C] dark:bg-[#2a2438]/60 dark:hover:bg-[#2a2438]/80 dark:border-[#FF8FA3]/15 dark:text-[#e2d9f3]/70"
-          >
-            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          </button>
-
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 border border-[#FFB4A2]/15 shadow-inner text-xs font-medium text-[#5A3E4C]/50 backdrop-blur-md">
             <div className="w-1.5 h-1.5 rounded-full bg-[#FF8FA3] shadow-[0_0_8px_rgba(255,143,163,0.6)] animate-pulse" />
             Auto-saving
           </div>
 
           <StreakWidget />
-
-          <button 
-            onClick={() => router.push('/photobooth')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/60 hover:bg-white/80 border border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C] transition-all duration-300"
-          >
-            <Camera className="w-4 h-4" />
-            <span className="text-sm font-medium">Photo Booth</span>
-          </button>
-
-          <button 
-            onClick={() => router.push('/gallery')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/60 hover:bg-white/80 border border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C] transition-all duration-300"
-          >
-            <ImageIcon className="w-4 h-4" />
-            <span className="text-sm font-medium">Gallery</span>
-          </button>
-
-          <button 
-            onClick={() => router.push('/story')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/60 hover:bg-white/80 border border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C] transition-all duration-300"
-          >
-            <BookOpen className="w-4 h-4" />
-            <span className="text-sm font-medium">Stories</span>
-          </button>
-          
-          <button 
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/60 hover:bg-white/80 border border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C] transition-all duration-300"
-          >
-            <LogOut className="w-4 h-4" />
-            <span className="text-sm font-medium">Exit</span>
-          </button>
         </div>
       </div>
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft, Camera, RotateCcw, FlipHorizontal,
+  Camera, RotateCcw, FlipHorizontal,
   Download, Save, Loader2, Type, Palette, LayoutTemplate,
   Check, Sparkles, Image as ImageIcon,
 } from 'lucide-react';
@@ -212,9 +212,6 @@ function PhotoboothContent() {
       {/* Header */}
       <header className="sticky top-0 z-20 border-b border-[#E6B8A2]/15 bg-white/72 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-4">
-          <button onClick={() => router.push('/canvas')} className="rounded-xl p-2 transition-colors hover:bg-[#FFE5E8]/50">
-            <ArrowLeft className="h-5 w-5 text-[#5A3E4C]/60" />
-          </button>
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#E63946] to-[#9D0208]">
               <Camera className="h-4 w-4 text-white" />

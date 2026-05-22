@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@apollo/client/react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { ArrowLeft, X, ExternalLink, Filter, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { X, ExternalLink, Filter, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { ApolloWrapper } from '@/lib/apollo/ApolloWrapper';
 import { Providers } from '@/lib/Providers';
 import { GET_ALL_MEDIA } from '@/graphql/queries';
@@ -39,9 +39,6 @@ function GalleryContent() {
       <header className="sticky top-0 z-30 border-b border-[#E6B8A2]/15 bg-white/72 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
-            <button onClick={() => router.push('/canvas')} className="rounded-xl p-2 transition-colors hover:bg-[#FFE5E8]/50">
-              <ArrowLeft className="h-5 w-5 text-[#5A3E4C]/60" />
-            </button>
             <div>
               <h1 className="text-lg font-bold text-[#3F2A35]">Gallery</h1>
               <p className="text-xs text-[#5A3E4C]/50">{filteredImages.length} media</p>
