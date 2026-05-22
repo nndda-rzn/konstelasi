@@ -77,7 +77,7 @@ async function renderSingle(src: string, filter: FilterKey, stickers: StickerIte
   ctx.fillStyle = '#5A3E4C'; ctx.font = '24px "Segoe Script","Lucida Handwriting",cursive';
   ctx.textAlign = 'center'; ctx.fillText(d, cW / 2, S + P + 68);
   drawStickers(ctx, stickers, cW, cH);
-  return canvas.toDataURL('image/jpeg', 0.93);
+  return canvas.toDataURL('image/png');
 }
 
 async function renderStrip(photos: string[], filter: FilterKey, colorKey: string, stickers: StickerItem[], caption: string): Promise<string> {
@@ -101,7 +101,7 @@ async function renderStrip(photos: string[], filter: FilterKey, colorKey: string
   ctx.font = '12px "Segoe Script","Lucida Handwriting",cursive';
   ctx.fillText(d, cW / 2, cH - FOOT / 2 + 16);
   drawStickers(ctx, stickers, cW, cH);
-  return canvas.toDataURL('image/jpeg', 0.93);
+  return canvas.toDataURL('image/png');
 }
 
 async function renderGrid(photos: string[], filter: FilterKey, colorKey: string, cols: number, stickers: StickerItem[], caption: string): Promise<string> {
@@ -126,7 +126,7 @@ async function renderGrid(photos: string[], filter: FilterKey, colorKey: string,
   ctx.font = 'bold 16px "Segoe Script","Lucida Handwriting",cursive'; ctx.textAlign = 'center';
   ctx.fillText('Konstelasi  •  ' + d, cW / 2, cH - FOOT / 2 + 4);
   drawStickers(ctx, stickers, cW, cH);
-  return canvas.toDataURL('image/jpeg', 0.93);
+  return canvas.toDataURL('image/png');
 }
 
 function PhotoboothContent() {
@@ -176,7 +176,7 @@ function PhotoboothContent() {
   useEffect(() => {
     if (countdown !== 0 || !isCapturing) return;
     setCountdown(null);
-    const raw = webcamRef.current?.getScreenshot({ width: 720, height: 720 });
+    const raw = webcamRef.current?.getScreenshot({ width: 1080, height: 1080 });
     if (!raw) return;
     setStage('flash');
     setTimeout(() => {
@@ -291,7 +291,7 @@ function PhotoboothContent() {
           {(stage === 'setup' || stage === 'countdown' || stage === 'flash') && (
             <div className="flex flex-col gap-6">
               <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-3xl border border-white/60 bg-black shadow-[0_24px_80px_rgba(84,45,55,0.14)]" style={{ aspectRatio: '1/1' }}>
-                <Webcam ref={webcamRef} audio={false} screenshotFormat="image/jpeg" videoConstraints={{ facingMode, aspectRatio: 1, width: 720, height: 720 }} mirrored={facingMode === 'user'} className="h-full w-full object-cover" />
+                <Webcam ref={webcamRef} audio={false} screenshotFormat="image/png" videoConstraints={{ facingMode, aspectRatio: 1, width: 1080, height: 1080 }} mirrored={facingMode === 'user'} className="h-full w-full object-cover" />
                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:33.33%_33.33%]" />
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,transparent_60%,rgba(0,0,0,0.3)_100%)]" />
                 <AnimatePresence>{stage === 'countdown' && countdown !== null && countdown > 0 && (
