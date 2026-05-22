@@ -81,7 +81,7 @@ async function renderSingle(src: string, filter: FilterKey, stickers: StickerIte
 }
 
 async function renderStrip(photos: string[], filter: FilterKey, colorKey: string, stickers: StickerItem[], caption: string): Promise<string> {
-  const W = 580, H = 435, PAD = 28, GAP = 12, FOOT = 80;
+  const W = 580, H = 580, PAD = 28, GAP = 12, FOOT = 80;
   const cW = W + PAD * 2;
   const cH = H * photos.length + GAP * (photos.length - 1) + PAD * 2 + FOOT;
   const color = STRIP_COLORS.find(c => c.key === colorKey) || STRIP_COLORS[0];
@@ -176,7 +176,7 @@ function PhotoboothContent() {
   useEffect(() => {
     if (countdown !== 0 || !isCapturing) return;
     setCountdown(null);
-    const raw = webcamRef.current?.getScreenshot({ width: 720, height: 540 });
+    const raw = webcamRef.current?.getScreenshot({ width: 720, height: 720 });
     if (!raw) return;
     setStage('flash');
     setTimeout(() => {
@@ -290,8 +290,8 @@ function PhotoboothContent() {
           {/* SETUP & COUNTDOWN */}
           {(stage === 'setup' || stage === 'countdown' || stage === 'flash') && (
             <div className="flex flex-col gap-6">
-              <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-3xl border border-white/60 bg-black shadow-[0_24px_80px_rgba(84,45,55,0.14)]" style={{ aspectRatio: '4/3' }}>
-                <Webcam ref={webcamRef} audio={false} screenshotFormat="image/jpeg" videoConstraints={{ facingMode, aspectRatio: 4/3, width: 720, height: 540 }} mirrored={facingMode === 'user'} className="h-full w-full object-cover" />
+              <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-3xl border border-white/60 bg-black shadow-[0_24px_80px_rgba(84,45,55,0.14)]" style={{ aspectRatio: '1/1' }}>
+                <Webcam ref={webcamRef} audio={false} screenshotFormat="image/jpeg" videoConstraints={{ facingMode, aspectRatio: 1, width: 720, height: 720 }} mirrored={facingMode === 'user'} className="h-full w-full object-cover" />
                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:33.33%_33.33%]" />
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,transparent_60%,rgba(0,0,0,0.3)_100%)]" />
                 <AnimatePresence>{stage === 'countdown' && countdown !== null && countdown > 0 && (
