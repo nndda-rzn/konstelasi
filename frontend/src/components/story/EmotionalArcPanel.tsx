@@ -54,7 +54,7 @@ export default function EmotionalArcPanel({ storyId, isOpen, onClose }: Emotiona
     if (!active || !payload?.length) return null;
     const d = payload[0].payload;
     return (
-      <div className="bg-white dark:bg-[#2a2438] border border-[#FFB4A2]/20 dark:border-[#FF8FA3]/10 rounded-lg px-3 py-2 shadow-lg">
+      <div className="bg-white dark:bg-[#2a2438] border border-[#FFB8C0]/20 dark:border-[#E63946]/10 rounded-lg px-3 py-2 shadow-lg">
         <p className="text-xs font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">{d.name}</p>
         <p className="text-[10px] capitalize" style={{ color: d.fill }}>{d.mood}</p>
         <p className="text-[10px] text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40">Score: {d.score}</p>
@@ -63,14 +63,14 @@ export default function EmotionalArcPanel({ storyId, isOpen, onClose }: Emotiona
   };
 
   return (
-    <div className="absolute top-0 right-0 h-full w-[380px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
+    <div className="absolute top-0 right-0 h-full w-[380px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB8C0]/15 dark:border-[#E63946]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10">
         <div className="flex items-center gap-2">
           <Heart className="w-4 h-4 text-[#FF6B8B]" />
           <h3 className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">Emotional Arc</h3>
         </div>
-        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB4A2]/10 transition-colors">
+        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB8C0]/10 transition-colors">
           <X className="w-4 h-4 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
         </button>
       </div>

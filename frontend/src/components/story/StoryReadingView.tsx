@@ -34,9 +34,9 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle }: S
   return (
     <div className="h-full flex flex-col bg-[#FFFAF7] dark:bg-[#1a1625]">
       {/* Reading Header */}
-      <div className="flex items-center justify-between px-8 py-4 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+      <div className="flex items-center justify-between px-8 py-4 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10">
         <div className="flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-[#FF8FA3]" />
+          <BookOpen className="w-4 h-4 text-[#E63946]" />
           <span className="text-xs font-medium text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50">{storyTitle}</span>
         </div>
         <span className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">
@@ -49,7 +49,7 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle }: S
         <div className="max-w-xl mx-auto px-8 py-12">
           {/* Node type badge */}
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-[9px] uppercase tracking-wider font-semibold text-[#FF8FA3]">
+            <span className="text-[9px] uppercase tracking-wider font-semibold text-[#E63946]">
               {(currentNode.storyNodeType || 'scene').replace('_', ' ')}
             </span>
             {metadata.sceneLocation && (
@@ -91,7 +91,7 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle }: S
 
           {/* Mood */}
           {currentNode.mood && (
-            <div className="mt-8 pt-4 border-t border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+            <div className="mt-8 pt-4 border-t border-[#FFB8C0]/10 dark:border-[#E63946]/10">
               <span className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 italic">
                 Mood: {currentNode.mood}
               </span>
@@ -108,9 +108,9 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle }: S
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between px-8 py-4 border-t border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+      <div className="flex items-center justify-between px-8 py-4 border-t border-[#FFB8C0]/10 dark:border-[#E63946]/10">
         <button onClick={goPrev} disabled={currentIndex === 0}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50 hover:bg-[#FFB4A2]/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50 hover:bg-[#FFB8C0]/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
           <ChevronLeft className="w-4 h-4" /> Sebelumnya
         </button>
 
@@ -118,12 +118,12 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle }: S
         <div className="flex gap-1">
           {sortedNodes.map((_: any, i: number) => (
             <button key={i} onClick={() => setCurrentIndex(i)}
-              className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentIndex ? 'bg-[#FF8FA3] w-4' : 'bg-[#FFB4A2]/30 hover:bg-[#FFB4A2]/50'}`} />
+              className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentIndex ? 'bg-[#E63946] w-4' : 'bg-[#FFB8C0]/30 hover:bg-[#FFB8C0]/50'}`} />
           ))}
         </div>
 
         <button onClick={goNext} disabled={currentIndex === sortedNodes.length - 1}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50 hover:bg-[#FFB4A2]/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50 hover:bg-[#FFB8C0]/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
           Selanjutnya <ChevronRight className="w-4 h-4" />
         </button>
       </div>

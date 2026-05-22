@@ -37,12 +37,12 @@ export default function StoryTimelineView({ nodes, onNodeClick }: StoryTimelineV
     <div className="h-full overflow-y-auto p-8 custom-scrollbar">
       <div className="max-w-2xl mx-auto relative">
         {/* Timeline line */}
-        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#FF8FA3]/40 via-[#FFB4A2]/20 to-transparent" />
+        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#E63946]/40 via-[#FFB4A2]/20 to-transparent" />
 
         {sortedNodes.map((node: any, index: number) => {
           const nodeType = node.storyNodeType || 'scene';
           const Icon = NODE_ICONS[nodeType] || MapPin;
-          const color = NODE_COLORS[nodeType] || '#FF8FA3';
+          const color = NODE_COLORS[nodeType] || '#E63946';
           let metadata: any = {};
           try { if (node.storyMetadata) metadata = JSON.parse(node.storyMetadata); } catch {}
 
@@ -57,7 +57,7 @@ export default function StoryTimelineView({ nodes, onNodeClick }: StoryTimelineV
               {/* Card */}
               <button
                 onClick={() => onNodeClick?.(node.id)}
-                className="w-full text-left p-4 rounded-xl border border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 bg-white/80 dark:bg-[#2a2438]/80 hover:shadow-lg hover:shadow-[#FF8FA3]/5 transition-all group-hover:border-[#FF8FA3]/30"
+                className="w-full text-left p-4 rounded-xl border border-[#FFB4A2]/15 dark:border-[#E63946]/10 bg-white/80 dark:bg-[#2a2438]/80 hover:shadow-lg hover:shadow-[#E63946]/5 transition-all group-hover:border-[#E63946]/30"
               >
                 {/* Header */}
                 <div className="flex items-center gap-2 mb-2">

@@ -23,8 +23,8 @@ export default function InsightsDrawer({ isOpen, onClose, onSelectTab, activeTab
   if (!isOpen) return null;
 
   return (
-    <div className="absolute top-14 right-2 w-[180px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 shadow-2xl rounded-xl z-50 overflow-hidden">
-      <div className="px-3 py-2.5 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+    <div className="absolute top-14 right-2 w-[180px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border border-[#FFB8C0]/15 dark:border-[#E63946]/10 shadow-2xl rounded-xl z-50 overflow-hidden">
+      <div className="px-3 py-2.5 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10">
         <div className="flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-[#FF6B8B]" />
           <span className="text-[11px] font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">Story Insights</span>
@@ -40,8 +40,8 @@ export default function InsightsDrawer({ isOpen, onClose, onSelectTab, activeTab
               onClick={() => { onSelectTab(tab.id); onClose(); }}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium transition-all ${
                 isActive
-                  ? 'bg-[#FFB4A2]/10 dark:bg-[#FF8FA3]/10'
-                  : 'hover:bg-[#FFB4A2]/5 dark:hover:bg-[#FF8FA3]/5'
+                  ? 'bg-[#FFB8C0]/10 dark:bg-[#E63946]/10'
+                  : 'hover:bg-[#FFB8C0]/5 dark:hover:bg-[#E63946]/5'
               }`}
             >
               <Icon className="w-3.5 h-3.5" style={{ color: tab.color }} />

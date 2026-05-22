@@ -43,14 +43,14 @@ export default function MemoryTimelinePanel({ storyId, isOpen, onClose }: Memory
   };
 
   return (
-    <div className="absolute top-0 right-0 h-full w-[360px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
+    <div className="absolute top-0 right-0 h-full w-[360px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB8C0]/15 dark:border-[#E63946]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10">
         <div className="flex items-center gap-2">
           <Hourglass className="w-4 h-4 text-[#CC5DE8]" />
           <h3 className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">Memory Timeline</h3>
         </div>
-        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB4A2]/10 transition-colors">
+        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB8C0]/10 transition-colors">
           <X className="w-4 h-4 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
         </button>
       </div>
@@ -139,7 +139,7 @@ export default function MemoryTimelinePanel({ storyId, isOpen, onClose }: Memory
                   {timeline.timelineItems.map((item: any) => (
                     <div key={item.nodeId} className="relative pl-8">
                       <div className="absolute left-1.5 top-2 w-3 h-3 rounded-full border-2 border-white dark:border-[#2a2438]" style={{ backgroundColor: NODE_COLORS[item.nodeType] || '#94a3b8' }} />
-                      <div className="p-2.5 rounded-lg bg-white/50 dark:bg-white/5 border border-[#FFB4A2]/10 dark:border-[#FF8FA3]/5">
+                      <div className="p-2.5 rounded-lg bg-white/50 dark:bg-white/5 border border-[#FFB8C0]/10 dark:border-[#E63946]/5">
                         <div className="flex items-center gap-1.5 mb-0.5">
                           <span className="text-[9px] capitalize px-1.5 py-0.5 rounded-full font-medium" style={{ backgroundColor: `${NODE_COLORS[item.nodeType]}15`, color: NODE_COLORS[item.nodeType] }}>{item.nodeType.replace('_', ' ')}</span>
                           {item.mood && <span className="text-[9px] text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20 capitalize">{item.mood}</span>}

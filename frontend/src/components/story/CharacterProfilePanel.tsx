@@ -43,9 +43,9 @@ export default function CharacterProfilePanel({ storyId, isOpen, onClose }: Char
   };
 
   return (
-    <div className="absolute top-0 right-0 h-full w-[380px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
+    <div className="absolute top-0 right-0 h-full w-[380px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB8C0]/15 dark:border-[#E63946]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10">
         <div className="flex items-center gap-2">
           <User className="w-4 h-4 text-[#C074DF]" />
           <h3 className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">
@@ -54,11 +54,11 @@ export default function CharacterProfilePanel({ storyId, isOpen, onClose }: Char
         </div>
         <div className="flex items-center gap-1">
           {activeChar && (
-            <button onClick={() => setSelectedChar(null)} className="px-2 py-1 rounded-lg text-[10px] text-[#5A3E4C]/60 hover:bg-[#FFB4A2]/10 transition-colors">
+            <button onClick={() => setSelectedChar(null)} className="px-2 py-1 rounded-lg text-[10px] text-[#5A3E4C]/60 hover:bg-[#FFB8C0]/10 transition-colors">
               Kembali
             </button>
           )}
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB4A2]/10 transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB8C0]/10 transition-colors">
             <X className="w-4 h-4 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
           </button>
         </div>
@@ -98,7 +98,7 @@ export default function CharacterProfilePanel({ storyId, isOpen, onClose }: Char
                 <button
                   key={char.nodeId}
                   onClick={() => setSelectedChar(char.nodeId)}
-                  className="w-full text-left p-3 rounded-xl border border-[#FFB4A2]/10 dark:border-[#FF8FA3]/5 bg-white/50 dark:bg-white/5 hover:border-[#C074DF]/30 transition-all"
+                  className="w-full text-left p-3 rounded-xl border border-[#FFB8C0]/10 dark:border-[#E63946]/5 bg-white/50 dark:bg-white/5 hover:border-[#C074DF]/30 transition-all"
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-full bg-[#C074DF]/10 flex items-center justify-center">

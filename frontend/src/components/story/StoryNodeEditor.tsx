@@ -173,16 +173,16 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
   if (!note) return null;
 
   const nodeType = note.storyNodeType || 'scene';
-  const nodeColor = NODE_TYPE_OPTIONS.find(t => t.value === nodeType)?.color || '#FF8FA3';
+  const nodeColor = NODE_TYPE_OPTIONS.find(t => t.value === nodeType)?.color || '#E63946';
 
   return (
     <div className={`${focusMode ? 'fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm' : ''}`}>
-    <div className={`${focusMode ? 'relative w-[700px] max-h-[90vh] rounded-2xl shadow-2xl' : 'absolute top-0 right-0 h-full w-[420px]'} bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-2xl shadow-2xl border-l border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 z-50 flex flex-col overflow-hidden`}>
+    <div className={`${focusMode ? 'relative w-[700px] max-h-[90vh] rounded-2xl shadow-2xl' : 'absolute top-0 right-0 h-full w-[420px]'} bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-2xl shadow-2xl border-l border-[#FFB8C0]/15 dark:border-[#E63946]/10 z-50 flex flex-col overflow-hidden`}>
       {/* Accent line */}
       <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: nodeColor }} />
 
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 mt-1 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+      <div className="flex items-center justify-between px-5 py-4 mt-1 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: nodeColor }} />
           <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: nodeColor }}>
@@ -193,13 +193,13 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
           <button onClick={() => setFocusMode(!focusMode)} className="p-2 text-[#5A3E4C]/30 hover:text-[#7C83FD] hover:bg-[#7C83FD]/10 rounded-lg transition-all" title={focusMode ? 'Exit Focus' : 'Focus Mode'}>
             {focusMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
-          <button onClick={handleToggleLock} className={`p-2 rounded-lg transition-all ${isLocked ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/20' : 'text-[#5A3E4C]/30 hover:text-[#5A3E4C]/60 hover:bg-[#FFB4A2]/10'}`} title={isLocked ? 'Unlock' : 'Lock'}>
+          <button onClick={handleToggleLock} className={`p-2 rounded-lg transition-all ${isLocked ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/20' : 'text-[#5A3E4C]/30 hover:text-[#5A3E4C]/60 hover:bg-[#FFB8C0]/10'}`} title={isLocked ? 'Unlock' : 'Lock'}>
             {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
           </button>
           <button onClick={handleDelete} className="p-2 text-[#5A3E4C]/30 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all" title="Hapus">
             <Trash2 className="w-4 h-4" />
           </button>
-          <button onClick={onClose} className="p-2 text-[#5A3E4C]/30 hover:text-[#5A3E4C]/60 hover:bg-[#FFB4A2]/10 rounded-lg transition-all">
+          <button onClick={onClose} className="p-2 text-[#5A3E4C]/30 hover:text-[#5A3E4C]/60 hover:bg-[#FFB8C0]/10 rounded-lg transition-all">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -217,13 +217,13 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
         {/* Metadata (Scene-specific) */}
         {(nodeType === 'scene' || nodeType === 'timeline_event') && (
           <div className="flex gap-2">
-            <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FFB4A2]/5 dark:bg-[#FF8FA3]/5 border border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
-              <MapPin className="w-3.5 h-3.5 text-[#FF8FA3]/60" />
+            <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FFB8C0]/5 dark:bg-[#E63946]/5 border border-[#FFB8C0]/10 dark:border-[#E63946]/10">
+              <MapPin className="w-3.5 h-3.5 text-[#E63946]/60" />
               <input type="text" value={metadata.sceneLocation || ''} onChange={e => setMetadata({ ...metadata, sceneLocation: e.target.value })}
                 placeholder="Lokasi..."
                 className="flex-1 text-xs text-[#4A2F3C] dark:text-[#e2d9f3] bg-transparent outline-none placeholder:text-[#5A3E4C]/20" />
             </div>
-            <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FFB4A2]/5 dark:bg-[#FF8FA3]/5 border border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+            <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FFB8C0]/5 dark:bg-[#E63946]/5 border border-[#FFB8C0]/10 dark:border-[#E63946]/10">
               <Clock className="w-3.5 h-3.5 text-[#87CEEB]/60" />
               <input type="text" value={metadata.sceneTime || ''} onChange={e => setMetadata({ ...metadata, sceneTime: e.target.value })}
                 placeholder="Waktu..."
@@ -296,7 +296,7 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
               ))}
             </div>
           )}
-          <label className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-dashed border-[#FFB4A2]/30 hover:border-[#FF6B8B]/50 hover:bg-[#FF6B8B]/5 cursor-pointer transition-all">
+          <label className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-dashed border-[#FFB8C0]/30 hover:border-[#FF6B8B]/50 hover:bg-[#FF6B8B]/5 cursor-pointer transition-all">
             {uploading ? <Loader2 className="w-4 h-4 text-[#FF6B8B] animate-spin" /> : <ImagePlus className="w-4 h-4 text-[#FF6B8B]/60" />}
             <span className="text-[10px] text-[#5A3E4C]/40">{uploading ? 'Mengunggah...' : 'Tambah Gambar'}</span>
             <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />

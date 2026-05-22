@@ -185,7 +185,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   if (loading && !story) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-        <div className="w-6 h-6 border-2 border-[#FF8FA3] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#E63946] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -193,9 +193,9 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   return (
     <div className="h-screen flex flex-col bg-[var(--background)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10 bg-white/80 dark:bg-[#1a1625]/80 backdrop-blur-xl z-10">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10 bg-white/80 dark:bg-[#1a1625]/80 backdrop-blur-xl z-10">
         <div className="flex items-center gap-3">
-          <button onClick={() => router.push('/story')} className="p-2 rounded-lg hover:bg-[#FFB4A2]/10 transition-colors">
+          <button onClick={() => router.push('/story')} className="p-2 rounded-lg hover:bg-[#FFB8C0]/10 transition-colors">
             <ArrowLeft className="w-4 h-4 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
           </button>
           <div>
@@ -211,7 +211,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
         </div>
         <div className="flex items-center gap-2">
           {/* View Switcher */}
-          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#FFB4A2]/10 dark:bg-[#FF8FA3]/10">
+          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#FFB8C0]/10 dark:bg-[#E63946]/10">
             {[
               { mode: 'canvas', icon: LayoutGrid, label: 'Canvas' },
               { mode: 'timeline', icon: Clock, label: 'Timeline' },
@@ -220,23 +220,23 @@ function StoryCanvas({ params }: { params: { id: string } }) {
               { mode: 'outline', icon: List, label: 'Outline' },
             ].map(({ mode, icon: ModeIcon, label }) => (
               <button key={mode} onClick={() => setViewMode(mode as any)} title={label}
-                className={`p-1.5 rounded-md transition-all ${viewMode === mode ? 'bg-white dark:bg-[#2a2438] shadow-sm text-[#FF8FA3]' : 'text-[#5A3E4C]/40 dark:text-[#e2d9f3]/40 hover:text-[#5A3E4C]/70'}`}>
+                className={`p-1.5 rounded-md transition-all ${viewMode === mode ? 'bg-white dark:bg-[#2a2438] shadow-sm text-[#E63946]' : 'text-[#5A3E4C]/40 dark:text-[#e2d9f3]/40 hover:text-[#5A3E4C]/70'}`}>
                 <ModeIcon className="w-3.5 h-3.5" />
               </button>
             ))}
           </div>
 
-          <button onClick={() => setShowNodeSelector(true)} className="px-3 py-1.5 rounded-xl bg-[#FF8FA3]/10 hover:bg-[#FF8FA3]/20 text-[#FF8FA3] text-xs font-medium transition-all">
+          <button onClick={() => setShowNodeSelector(true)} className="px-3 py-1.5 rounded-xl bg-[#E63946]/10 hover:bg-[#E63946]/20 text-[#E63946] text-xs font-medium transition-all">
             + Add Scene
           </button>
-          <button onClick={() => setShowSettings(!showSettings)} className={`p-2 rounded-lg transition-all ${showSettings ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
+          <button onClick={() => setShowSettings(!showSettings)} className={`p-2 rounded-lg transition-all ${showSettings ? 'bg-[#E63946]/10 text-[#E63946]' : 'hover:bg-[#FFB8C0]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
             <Settings className="w-4 h-4" />
           </button>
-          <button onClick={() => setShowInsightsMenu(!showInsightsMenu)} className={`p-2 rounded-lg transition-all relative ${activeInsight ? 'bg-[#7C83FD]/10 text-[#7C83FD]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
+          <button onClick={() => setShowInsightsMenu(!showInsightsMenu)} className={`p-2 rounded-lg transition-all relative ${activeInsight ? 'bg-[#7C83FD]/10 text-[#7C83FD]' : 'hover:bg-[#FFB8C0]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
             <Sparkles className="w-4 h-4" />
             {activeInsight && <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#7C83FD]" />}
           </button>
-          <button onClick={() => setShowExport(!showExport)} className={`p-2 rounded-lg transition-all ${showExport ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
+          <button onClick={() => setShowExport(!showExport)} className={`p-2 rounded-lg transition-all ${showExport ? 'bg-[#E63946]/10 text-[#E63946]' : 'hover:bg-[#FFB8C0]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
             <Download className="w-4 h-4" />
           </button>
         </div>
@@ -257,7 +257,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             fitView
             className="bg-[#FFFAF7] dark:bg-[#1a1625]"
           >
-            <Background color="#FFB4A2" gap={24} size={1} />
+            <Background color="#FFB8C0" gap={24} size={1} />
             <Controls />
             <MiniMap />
           </ReactFlow>

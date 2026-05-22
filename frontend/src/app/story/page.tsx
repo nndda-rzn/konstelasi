@@ -8,12 +8,12 @@ import { Providers } from '@/lib/Providers';
 import { StoryProvider, useStory } from '@/context/StoryContext';
 
 const STORY_TYPES = [
-  { value: 'love_story', label: 'Love Story', icon: Heart, color: '#FF8FA3', desc: 'Cerita tentang perasaan & hubungan' },
+  { value: 'love_story', label: 'Love Story', icon: Heart, color: '#E63946', desc: 'Cerita tentang perasaan & hubungan' },
   { value: 'biography', label: 'Biography', icon: User, color: '#B5EAD7', desc: 'Kisah hidup seseorang' },
   { value: 'memory_collection', label: 'Memories', icon: Star, color: '#C7CEEA', desc: 'Koleksi momen & kenangan' },
   { value: 'adventure', label: 'Adventure', icon: Compass, color: '#FFD6A5', desc: 'Petualangan bersama' },
   { value: 'character_study', label: 'Character', icon: Sparkles, color: '#E0BBE4', desc: 'Mengenal seseorang lebih dalam' },
-  { value: 'custom', label: 'Custom', icon: BookOpen, color: '#FFB4A2', desc: 'Cerita bebas sesuka hati' },
+  { value: 'custom', label: 'Custom', icon: BookOpen, color: '#FFB8C0', desc: 'Cerita bebas sesuka hati' },
 ];
 
 const PRIVACY_OPTIONS = [
@@ -55,7 +55,7 @@ function StoryDashboard() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <button onClick={() => router.push('/canvas')} className="p-2 rounded-lg hover:bg-[#FFB4A2]/10 transition-colors">
+            <button onClick={() => router.push('/canvas')} className="p-2 rounded-lg hover:bg-[#FFB8C0]/10 transition-colors">
               <ArrowLeft className="w-5 h-5 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
             </button>
             <div>
@@ -65,7 +65,7 @@ function StoryDashboard() {
           </div>
           <button
             onClick={() => setShowWizard(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FF8FA3] hover:bg-[#FF8FA3]/90 text-white font-medium text-sm transition-all shadow-lg shadow-[#FF8FA3]/20"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#E63946] hover:bg-[#E63946]/90 text-white font-medium text-sm transition-all shadow-lg shadow-[#E63946]/20"
           >
             <Plus className="w-4 h-4" />
             Buat Story Baru
@@ -75,16 +75,16 @@ function StoryDashboard() {
         {/* Story Grid */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-6 h-6 border-2 border-[#FF8FA3] border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-[#E63946] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : stories.length === 0 ? (
           <div className="text-center py-20">
-            <BookOpen className="w-12 h-12 text-[#FFB4A2]/40 mx-auto mb-4" />
+            <BookOpen className="w-12 h-12 text-[#FFB8C0]/40 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-[#4A2F3C]/60 dark:text-[#e2d9f3]/50 mb-2">Belum ada story</h3>
             <p className="text-sm text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 mb-6">Mulai ceritakan kisah pertama Anda</p>
             <button
               onClick={() => setShowWizard(true)}
-              className="px-5 py-2.5 rounded-xl bg-[#FF8FA3]/10 hover:bg-[#FF8FA3]/20 text-[#FF8FA3] font-medium text-sm transition-all"
+              className="px-5 py-2.5 rounded-xl bg-[#E63946]/10 hover:bg-[#E63946]/20 text-[#E63946] font-medium text-sm transition-all"
             >
               Buat Story Pertama
             </button>
@@ -98,7 +98,7 @@ function StoryDashboard() {
                 <button
                   key={story.id}
                   onClick={() => router.push(`/story/${story.id}`)}
-                  className="text-left p-5 rounded-2xl border border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 bg-white/80 dark:bg-[#2a2438]/80 hover:shadow-lg hover:shadow-[#FF8FA3]/5 transition-all group"
+                  className="text-left p-5 rounded-2xl border border-[#FFB8C0]/15 dark:border-[#E63946]/10 bg-white/80 dark:bg-[#2a2438]/80 hover:shadow-lg hover:shadow-[#E63946]/5 transition-all group"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="p-2 rounded-lg" style={{ backgroundColor: `${typeInfo.color}20` }}>
@@ -113,7 +113,7 @@ function StoryDashboard() {
                       </span>
                     </div>
                   </div>
-                  <h3 className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3] mb-1 group-hover:text-[#FF8FA3] transition-colors">
+                  <h3 className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3] mb-1 group-hover:text-[#E63946] transition-colors">
                     {story.title}
                   </h3>
                   {story.subtitle && (
@@ -147,11 +147,11 @@ function StoryDashboard() {
 function StoryWizard({ formData, setFormData, wizardStep, setWizardStep, onClose, onCreate }: any) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="w-[520px] max-w-[90vw] bg-white dark:bg-[#2a2438] rounded-2xl border border-[#FFB4A2]/20 dark:border-[#FF8FA3]/10 shadow-2xl overflow-hidden">
+      <div className="w-[520px] max-w-[90vw] bg-white dark:bg-[#2a2438] rounded-2xl border border-[#FFB8C0]/20 dark:border-[#E63946]/10 shadow-2xl overflow-hidden">
         {/* Progress */}
         <div className="flex gap-1 px-6 pt-5">
           {[0, 1, 2].map(i => (
-            <div key={i} className={`flex-1 h-1 rounded-full transition-all ${i <= wizardStep ? 'bg-[#FF8FA3]' : 'bg-[#FFB4A2]/15'}`} />
+            <div key={i} className={`flex-1 h-1 rounded-full transition-all ${i <= wizardStep ? 'bg-[#E63946]' : 'bg-[#FFB8C0]/15'}`} />
           ))}
         </div>
 
@@ -168,7 +168,7 @@ function StoryWizard({ formData, setFormData, wizardStep, setWizardStep, onClose
                     <button
                       key={type.value}
                       onClick={() => setFormData({ ...formData, storyType: type.value })}
-                      className={`p-3.5 rounded-xl border text-left transition-all ${formData.storyType === type.value ? 'border-[#FF8FA3] bg-[#FF8FA3]/5 shadow-sm' : 'border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30'}`}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${formData.storyType === type.value ? 'border-[#E63946] bg-[#E63946]/5 shadow-sm' : 'border-[#FFB8C0]/15 hover:border-[#E63946]/30'}`}
                     >
                       <Icon className="w-5 h-5 mb-2" style={{ color: type.color }} />
                       <p className="text-xs font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">{type.label}</p>
@@ -193,7 +193,7 @@ function StoryWizard({ formData, setFormData, wizardStep, setWizardStep, onClose
                     value={formData.title}
                     onChange={e => setFormData({ ...formData, title: e.target.value })}
                     placeholder="Judul cerita Anda..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#FF8FA3]/50"
+                    className="w-full px-4 py-2.5 rounded-xl border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#E63946]/50"
                   />
                 </div>
                 <div>
@@ -203,7 +203,7 @@ function StoryWizard({ formData, setFormData, wizardStep, setWizardStep, onClose
                     value={formData.subtitle}
                     onChange={e => setFormData({ ...formData, subtitle: e.target.value })}
                     placeholder="Subtitle opsional..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#FF8FA3]/50"
+                    className="w-full px-4 py-2.5 rounded-xl border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#E63946]/50"
                   />
                 </div>
                 <div>
@@ -213,7 +213,7 @@ function StoryWizard({ formData, setFormData, wizardStep, setWizardStep, onClose
                     onChange={e => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Ceritakan sedikit tentang story ini..."
                     rows={3}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#FF8FA3]/50 resize-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#E63946]/50 resize-none"
                   />
                 </div>
               </div>
@@ -232,9 +232,9 @@ function StoryWizard({ formData, setFormData, wizardStep, setWizardStep, onClose
                     <button
                       key={opt.value}
                       onClick={() => setFormData({ ...formData, privacyLevel: opt.value })}
-                      className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-all ${formData.privacyLevel === opt.value ? 'border-[#FF8FA3] bg-[#FF8FA3]/5' : 'border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30'}`}
+                      className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-all ${formData.privacyLevel === opt.value ? 'border-[#E63946] bg-[#E63946]/5' : 'border-[#FFB8C0]/15 hover:border-[#E63946]/30'}`}
                     >
-                      <Icon className={`w-5 h-5 ${formData.privacyLevel === opt.value ? 'text-[#FF8FA3]' : 'text-[#5A3E4C]/40'}`} />
+                      <Icon className={`w-5 h-5 ${formData.privacyLevel === opt.value ? 'text-[#E63946]' : 'text-[#5A3E4C]/40'}`} />
                       <div>
                         <p className="text-sm font-medium text-[#4A2F3C] dark:text-[#e2d9f3]">{opt.label}</p>
                         <p className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">{opt.desc}</p>
@@ -248,7 +248,7 @@ function StoryWizard({ formData, setFormData, wizardStep, setWizardStep, onClose
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[#FFB8C0]/10 dark:border-[#E63946]/10">
           <button
             onClick={wizardStep === 0 ? onClose : () => setWizardStep(wizardStep - 1)}
             className="px-4 py-2 text-sm text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50 hover:text-[#5A3E4C] transition-colors"
@@ -258,7 +258,7 @@ function StoryWizard({ formData, setFormData, wizardStep, setWizardStep, onClose
           <button
             onClick={wizardStep === 2 ? onCreate : () => setWizardStep(wizardStep + 1)}
             disabled={wizardStep === 1 && !formData.title.trim()}
-            className="px-5 py-2 rounded-xl bg-[#FF8FA3] hover:bg-[#FF8FA3]/90 text-white text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-5 py-2 rounded-xl bg-[#E63946] hover:bg-[#E63946]/90 text-white text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {wizardStep === 2 ? 'Buat Story' : 'Lanjut'}
           </button>

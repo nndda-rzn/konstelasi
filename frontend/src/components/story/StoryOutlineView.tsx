@@ -59,7 +59,7 @@ export default function StoryOutlineView({ nodes, onNodeClick }: StoryOutlineVie
     <div className="h-full overflow-y-auto p-6 custom-scrollbar">
       <div className="max-w-2xl mx-auto space-y-2">
         {/* Summary */}
-        <div className="mb-6 p-4 rounded-xl bg-[#FF8FA3]/5 dark:bg-[#FF8FA3]/10 border border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10">
+        <div className="mb-6 p-4 rounded-xl bg-[#E63946]/5 dark:bg-[#E63946]/10 border border-[#FFB4A2]/15 dark:border-[#E63946]/10">
           <h3 className="text-xs font-semibold text-[#4A2F3C] dark:text-[#e2d9f3] mb-2">Story Outline</h3>
           <div className="flex flex-wrap gap-3">
             {sortedTypes.map(type => (
@@ -76,14 +76,14 @@ export default function StoryOutlineView({ nodes, onNodeClick }: StoryOutlineVie
         {/* Groups */}
         {sortedTypes.map(type => {
           const Icon = NODE_ICONS[type] || MapPin;
-          const color = NODE_COLORS[type] || '#FF8FA3';
+          const color = NODE_COLORS[type] || '#E63946';
           const isExpanded = expandedNodes.has(type);
           const items = groupedNodes[type];
 
           return (
-            <div key={type} className="rounded-xl border border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 overflow-hidden">
+            <div key={type} className="rounded-xl border border-[#FFB4A2]/15 dark:border-[#E63946]/10 overflow-hidden">
               <button onClick={() => toggleGroup(type)}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#FFB4A2]/5 dark:hover:bg-[#FF8FA3]/5 transition-all">
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#FFB4A2]/5 dark:hover:bg-[#E63946]/5 transition-all">
                 {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-[#5A3E4C]/40" /> : <ChevronRight className="w-3.5 h-3.5 text-[#5A3E4C]/40" />}
                 <div className="p-1 rounded-md" style={{ backgroundColor: `${color}20` }}>
                   <Icon className="w-3.5 h-3.5" style={{ color }} />
@@ -93,10 +93,10 @@ export default function StoryOutlineView({ nodes, onNodeClick }: StoryOutlineVie
               </button>
 
               {isExpanded && (
-                <div className="border-t border-[#FFB4A2]/10 dark:border-[#FF8FA3]/5">
+                <div className="border-t border-[#FFB4A2]/10 dark:border-[#E63946]/5">
                   {items.map((node: any, i: number) => (
                     <button key={node.id} onClick={() => onNodeClick?.(node.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-[#FFB4A2]/5 dark:hover:bg-[#FF8FA3]/5 transition-all ${i < items.length - 1 ? 'border-b border-[#FFB4A2]/5 dark:border-[#FF8FA3]/5' : ''}`}>
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-[#FFB4A2]/5 dark:hover:bg-[#E63946]/5 transition-all ${i < items.length - 1 ? 'border-b border-[#FFB4A2]/5 dark:border-[#E63946]/5' : ''}`}>
                       <span className="text-[9px] text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20 w-4">{i + 1}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-[#4A2F3C] dark:text-[#e2d9f3] truncate">{node.title || 'Untitled'}</p>

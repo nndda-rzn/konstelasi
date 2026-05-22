@@ -28,14 +28,14 @@ export default function WritingStatsPanel({ storyId, isOpen, onClose }: WritingS
   };
 
   return (
-    <div className="absolute top-0 right-0 h-full w-[340px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
+    <div className="absolute top-0 right-0 h-full w-[340px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB8C0]/15 dark:border-[#FF8FA3]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB8C0]/10 dark:border-[#FF8FA3]/10">
         <div className="flex items-center gap-2">
           <BarChart3 className="w-4 h-4 text-[#7C83FD]" />
           <h3 className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">Writing Statistics</h3>
         </div>
-        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB4A2]/10 transition-colors">
+        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB8C0]/10 transition-colors">
           <X className="w-4 h-4 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
         </button>
       </div>
@@ -128,7 +128,7 @@ export default function WritingStatsPanel({ storyId, isOpen, onClose }: WritingS
 
             {/* Longest Node */}
             {stats.longestNode?.wordCount > 0 && (
-              <div className="p-3 rounded-xl border border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 bg-[#FF922B]/5">
+              <div className="p-3 rounded-xl border border-[#FFB8C0]/15 dark:border-[#FF8FA3]/10 bg-[#FF922B]/5">
                 <p className="text-[9px] uppercase tracking-wider text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 font-semibold mb-1">Node Terpanjang</p>
                 <p className="text-xs font-bold text-[#4A2F3C] dark:text-[#e2d9f3] truncate">{stats.longestNode.title}</p>
                 <p className="text-[10px] text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40 mt-0.5">{stats.longestNode.wordCount.toLocaleString()} kata</p>

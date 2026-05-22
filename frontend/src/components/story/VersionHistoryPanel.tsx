@@ -58,14 +58,14 @@ export default function VersionHistoryPanel({ storyId, isOpen, onClose, onRestor
   };
 
   return (
-    <div className="absolute top-0 right-0 h-full w-[340px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
+    <div className="absolute top-0 right-0 h-full w-[340px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB8C0]/15 dark:border-[#E63946]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10">
         <div className="flex items-center gap-2">
           <GitBranch className="w-4 h-4 text-[#38D9A9]" />
           <h3 className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">Version History</h3>
         </div>
-        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB4A2]/10 transition-colors">
+        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB8C0]/10 transition-colors">
           <X className="w-4 h-4 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
         </button>
       </div>
@@ -88,14 +88,14 @@ export default function VersionHistoryPanel({ storyId, isOpen, onClose, onRestor
               placeholder="Label (opsional)"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-lg bg-white/80 dark:bg-white/5 border border-[#FFB4A2]/15 text-xs text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30"
+              className="w-full px-3 py-1.5 rounded-lg bg-white/80 dark:bg-white/5 border border-[#FFB8C0]/15 text-xs text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30"
             />
             <textarea
               placeholder="Catatan (opsional)"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="w-full px-3 py-1.5 rounded-lg bg-white/80 dark:bg-white/5 border border-[#FFB4A2]/15 text-xs text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 resize-none"
+              className="w-full px-3 py-1.5 rounded-lg bg-white/80 dark:bg-white/5 border border-[#FFB8C0]/15 text-xs text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 resize-none"
             />
             <div className="flex gap-2">
               <button onClick={handleCreate} disabled={creating} className="flex-1 px-3 py-1.5 rounded-lg bg-[#38D9A9] text-white text-xs font-medium hover:bg-[#38D9A9]/90 transition-colors disabled:opacity-50">
@@ -122,7 +122,7 @@ export default function VersionHistoryPanel({ storyId, isOpen, onClose, onRestor
         ) : (
           <div className="space-y-2.5">
             {versions.map((v: any) => (
-              <div key={v.id} className="p-3 rounded-xl border border-[#FFB4A2]/10 dark:border-[#FF8FA3]/5 bg-white/50 dark:bg-white/5 hover:border-[#38D9A9]/30 transition-colors group">
+              <div key={v.id} className="p-3 rounded-xl border border-[#FFB8C0]/10 dark:border-[#E63946]/5 bg-white/50 dark:bg-white/5 hover:border-[#38D9A9]/30 transition-colors group">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">{v.label || `Version ${v.version}`}</span>
                   <span className="text-[9px] text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20">v{v.version}</span>

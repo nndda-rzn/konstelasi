@@ -53,13 +53,13 @@ export default function NodeTypeSelector({ isOpen, onClose, onSelect }: NodeType
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="w-[480px] max-w-[90vw] bg-white dark:bg-[#2a2438] rounded-2xl border border-[#FFB4A2]/20 dark:border-[#FF8FA3]/10 shadow-2xl overflow-hidden">
+      <div className="w-[480px] max-w-[90vw] bg-white dark:bg-[#2a2438] rounded-2xl border border-[#FFB8C0]/20 dark:border-[#E63946]/10 shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10">
           <h3 className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">
             {step === 0 ? 'Pilih Tipe Node' : 'Detail Node'}
           </h3>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB4A2]/10 transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB8C0]/10 transition-colors">
             <X className="w-4 h-4 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
           </button>
         </div>
@@ -73,7 +73,7 @@ export default function NodeTypeSelector({ isOpen, onClose, onSelect }: NodeType
                 return (
                   <button key={type.value}
                     onClick={() => { setSelectedType(type.value); setStep(1); }}
-                    className="flex items-center gap-3 p-3 rounded-xl border border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 hover:bg-[#FF8FA3]/5 transition-all text-left">
+                    className="flex items-center gap-3 p-3 rounded-xl border border-[#FFB8C0]/15 hover:border-[#E63946]/30 hover:bg-[#E63946]/5 transition-all text-left">
                     <div className="p-1.5 rounded-lg" style={{ backgroundColor: `${type.color}20` }}>
                       <Icon className="w-4 h-4" style={{ color: type.color }} />
                     </div>
@@ -94,7 +94,7 @@ export default function NodeTypeSelector({ isOpen, onClose, onSelect }: NodeType
                 <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-1.5">Judul</label>
                 <input type="text" value={title} onChange={e => setTitle(e.target.value)}
                   placeholder={`Judul ${NODE_TYPES.find(t => t.value === selectedType)?.label}...`}
-                  className="w-full px-3 py-2.5 rounded-xl border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#FF8FA3]/50" />
+                  className="w-full px-3 py-2.5 rounded-xl border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#E63946]/50" />
               </div>
 
               {/* Scene-specific fields */}
@@ -104,13 +104,13 @@ export default function NodeTypeSelector({ isOpen, onClose, onSelect }: NodeType
                     <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-1.5">Lokasi</label>
                     <input type="text" value={metadata.sceneLocation || ''} onChange={e => setMetadata({ ...metadata, sceneLocation: e.target.value })}
                       placeholder="Dimana kejadian ini berlangsung..."
-                      className="w-full px-3 py-2.5 rounded-xl border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#FF8FA3]/50" />
+                      className="w-full px-3 py-2.5 rounded-xl border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#E63946]/50" />
                   </div>
                   <div>
                     <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-1.5">Waktu</label>
                     <input type="text" value={metadata.sceneTime || ''} onChange={e => setMetadata({ ...metadata, sceneTime: e.target.value })}
                       placeholder="Kapan kejadian ini..."
-                      className="w-full px-3 py-2.5 rounded-xl border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#FF8FA3]/50" />
+                      className="w-full px-3 py-2.5 rounded-xl border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#E63946]/50" />
                   </div>
                 </>
               )}
@@ -121,7 +121,7 @@ export default function NodeTypeSelector({ isOpen, onClose, onSelect }: NodeType
                   <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-1.5">Nama Karakter</label>
                   <input type="text" value={metadata.characterName || ''} onChange={e => setMetadata({ ...metadata, characterName: e.target.value })}
                     placeholder="Nama orang ini..."
-                    className="w-full px-3 py-2.5 rounded-xl border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#FF8FA3]/50" />
+                    className="w-full px-3 py-2.5 rounded-xl border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#E63946]/50" />
                 </div>
               )}
 
@@ -144,12 +144,12 @@ export default function NodeTypeSelector({ isOpen, onClose, onSelect }: NodeType
 
         {/* Footer */}
         {step === 1 && (
-          <div className="flex items-center justify-between px-5 py-4 border-t border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+          <div className="flex items-center justify-between px-5 py-4 border-t border-[#FFB8C0]/10 dark:border-[#E63946]/10">
             <button onClick={() => setStep(0)} className="px-4 py-2 text-sm text-[#5A3E4C]/60 hover:text-[#5A3E4C] transition-colors">
               Kembali
             </button>
             <button onClick={handleCreate}
-              className="px-5 py-2 rounded-xl bg-[#FF8FA3] hover:bg-[#FF8FA3]/90 text-white text-sm font-medium transition-all">
+              className="px-5 py-2 rounded-xl bg-[#E63946] hover:bg-[#E63946]/90 text-white text-sm font-medium transition-all">
               Buat Node
             </button>
           </div>

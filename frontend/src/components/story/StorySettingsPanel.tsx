@@ -80,11 +80,11 @@ export default function StorySettingsPanel({ story, onClose, onUpdate, onDelete 
   };
 
   return (
-    <div className="absolute top-0 right-0 h-full w-[360px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
+    <div className="absolute top-0 right-0 h-full w-[360px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB8C0]/15 dark:border-[#E63946]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10">
         <h3 className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">Story Settings</h3>
-        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB4A2]/10 transition-colors">
+        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB8C0]/10 transition-colors">
           <X className="w-4 h-4 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
         </button>
       </div>
@@ -96,17 +96,17 @@ export default function StorySettingsPanel({ story, onClose, onUpdate, onDelete 
           <div>
             <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-1.5">Judul</label>
             <input type="text" value={title} onChange={e => setTitle(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] focus:outline-none focus:border-[#FF8FA3]/50" />
+              className="w-full px-3 py-2 rounded-lg border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] focus:outline-none focus:border-[#E63946]/50" />
           </div>
           <div>
             <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-1.5">Subtitle</label>
             <input type="text" value={subtitle} onChange={e => setSubtitle(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] focus:outline-none focus:border-[#FF8FA3]/50" />
+              className="w-full px-3 py-2 rounded-lg border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] focus:outline-none focus:border-[#E63946]/50" />
           </div>
           <div>
             <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-1.5">Deskripsi</label>
             <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
-              className="w-full px-3 py-2 rounded-lg border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] focus:outline-none focus:border-[#FF8FA3]/50 resize-none" />
+              className="w-full px-3 py-2 rounded-lg border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] focus:outline-none focus:border-[#E63946]/50 resize-none" />
           </div>
         </div>
 
@@ -116,7 +116,7 @@ export default function StorySettingsPanel({ story, onClose, onUpdate, onDelete 
           <div className="flex gap-2">
             {STATUS_OPTIONS.map(opt => (
               <button key={opt.value} onClick={() => setStatus(opt.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${status === opt.value ? 'bg-[#FF8FA3]/10 text-[#FF8FA3] border border-[#FF8FA3]/30' : 'border border-[#FFB4A2]/15 text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40 hover:border-[#FF8FA3]/20'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${status === opt.value ? 'bg-[#E63946]/10 text-[#E63946] border border-[#E63946]/30' : 'border border-[#FFB8C0]/15 text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40 hover:border-[#E63946]/20'}`}>
                 {opt.label}
               </button>
             ))}
@@ -131,8 +131,8 @@ export default function StorySettingsPanel({ story, onClose, onUpdate, onDelete 
               const Icon = opt.icon;
               return (
                 <button key={opt.value} onClick={() => setPrivacyLevel(opt.value)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${privacyLevel === opt.value ? 'border-[#FF8FA3] bg-[#FF8FA3]/5' : 'border-[#FFB4A2]/15 hover:border-[#FF8FA3]/20'}`}>
-                  <Icon className={`w-4 h-4 ${privacyLevel === opt.value ? 'text-[#FF8FA3]' : 'text-[#5A3E4C]/30'}`} />
+                  className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${privacyLevel === opt.value ? 'border-[#E63946] bg-[#E63946]/5' : 'border-[#FFB8C0]/15 hover:border-[#E63946]/20'}`}>
+                  <Icon className={`w-4 h-4 ${privacyLevel === opt.value ? 'text-[#E63946]' : 'text-[#5A3E4C]/30'}`} />
                   <div>
                     <p className="text-xs font-medium text-[#4A2F3C] dark:text-[#e2d9f3]">{opt.label}</p>
                     <p className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">{opt.desc}</p>
@@ -150,15 +150,15 @@ export default function StorySettingsPanel({ story, onClose, onUpdate, onDelete 
             <div className="flex gap-2 mb-3">
               <input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
                 placeholder="Email teman..."
-                className="flex-1 px-3 py-2 rounded-lg border border-[#FFB4A2]/20 bg-white/50 dark:bg-[#1a1625]/50 text-xs text-[#4A2F3C] dark:text-[#e2d9f3] focus:outline-none focus:border-[#FF8FA3]/50" />
-              <button onClick={handleInvite} className="px-3 py-2 rounded-lg bg-[#FF8FA3] text-white text-xs font-medium">
+                className="flex-1 px-3 py-2 rounded-lg border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-xs text-[#4A2F3C] dark:text-[#e2d9f3] focus:outline-none focus:border-[#E63946]/50" />
+              <button onClick={handleInvite} className="px-3 py-2 rounded-lg bg-[#E63946] text-white text-xs font-medium">
                 Undang
               </button>
             </div>
             {accessData?.getStoryAccess?.length > 0 && (
               <div className="space-y-1.5">
                 {accessData.getStoryAccess.map((access: any) => (
-                  <div key={access.id} className="flex items-center justify-between p-2 rounded-lg bg-[#FFB4A2]/5 dark:bg-[#FF8FA3]/5">
+                  <div key={access.id} className="flex items-center justify-between p-2 rounded-lg bg-[#FFB8C0]/5 dark:bg-[#E63946]/5">
                     <span className="text-xs text-[#4A2F3C] dark:text-[#e2d9f3]">{access.grantedTo.email}</span>
                     <button onClick={() => handleRevoke(access.id)} className="p-1 rounded hover:bg-red-50 text-red-400">
                       <Trash2 className="w-3 h-3" />
@@ -172,9 +172,9 @@ export default function StorySettingsPanel({ story, onClose, onUpdate, onDelete 
       </div>
 
       {/* Save Button */}
-      <div className="px-5 py-4 border-t border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10 space-y-2">
+      <div className="px-5 py-4 border-t border-[#FFB8C0]/10 dark:border-[#E63946]/10 space-y-2">
         <button onClick={handleSave} disabled={saving}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#FF8FA3] hover:bg-[#FF8FA3]/90 text-white text-sm font-medium transition-all disabled:opacity-50">
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#E63946] hover:bg-[#E63946]/90 text-white text-sm font-medium transition-all disabled:opacity-50">
           <Save className="w-4 h-4" />
           {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
         </button>

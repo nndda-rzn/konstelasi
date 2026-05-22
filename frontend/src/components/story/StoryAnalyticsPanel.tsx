@@ -50,14 +50,14 @@ export default function StoryAnalyticsPanel({ storyId, isOpen, onClose, nodes = 
   };
 
   return (
-    <div className="absolute top-0 right-0 h-full w-[320px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
+    <div className="absolute top-0 right-0 h-full w-[320px] bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-xl border-l border-[#FFB8C0]/15 dark:border-[#E63946]/10 shadow-2xl z-50 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB4A2]/10 dark:border-[#FF8FA3]/10">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10">
         <div className="flex items-center gap-2">
-          <Award className="w-4 h-4 text-[#FF8FA3]" />
+          <Award className="w-4 h-4 text-[#E63946]" />
           <h3 className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">Analytics</h3>
         </div>
-        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB4A2]/10 transition-colors">
+        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#FFB8C0]/10 transition-colors">
           <X className="w-4 h-4 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
         </button>
       </div>
@@ -103,9 +103,9 @@ export default function StoryAnalyticsPanel({ storyId, isOpen, onClose, nodes = 
             <div>
               <h4 className="text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 font-semibold mb-2">Engagement</h4>
               <div className="grid grid-cols-2 gap-2.5">
-              <div className="p-3 rounded-xl bg-[#FF8FA3]/5 dark:bg-[#FF8FA3]/10">
+              <div className="p-3 rounded-xl bg-[#E63946]/5 dark:bg-[#E63946]/10">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <Eye className="w-3 h-3 text-[#FF8FA3]" />
+                  <Eye className="w-3 h-3 text-[#E63946]" />
                   <span className="text-[9px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">Views</span>
                 </div>
                 <p className="text-lg font-bold text-[#4A2F3C] dark:text-[#e2d9f3]">{analytics.totalViews}</p>
@@ -140,12 +140,12 @@ export default function StoryAnalyticsPanel({ storyId, isOpen, onClose, nodes = 
                 <h4 className="text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 font-semibold mb-3">Badge Distribution</h4>
                 <div className="space-y-2">
                   {analytics.badgeBreakdown.map((badge: any) => {
-                    const info = BADGE_LABELS[badge.type] || { label: badge.type, color: '#FFB4A2' };
+                    const info = BADGE_LABELS[badge.type] || { label: badge.type, color: '#FFB8C0' };
                     const maxCount = Math.max(...analytics.badgeBreakdown.map((b: any) => b.count));
                     return (
                       <div key={badge.type} className="flex items-center gap-2">
                         <span className="text-xs text-[#4A2F3C] dark:text-[#e2d9f3] w-28 truncate">{info.label}</span>
-                        <div className="flex-1 h-2 rounded-full bg-[#FFB4A2]/10 dark:bg-[#FF8FA3]/10 overflow-hidden">
+                        <div className="flex-1 h-2 rounded-full bg-[#FFB8C0]/10 dark:bg-[#E63946]/10 overflow-hidden">
                           <div className="h-full rounded-full transition-all" style={{ width: `${(badge.count / maxCount) * 100}%`, backgroundColor: info.color }} />
                         </div>
                         <span className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 w-6 text-right">{badge.count}</span>
@@ -157,10 +157,10 @@ export default function StoryAnalyticsPanel({ storyId, isOpen, onClose, nodes = 
             )}
 
             {/* Total Badges */}
-            <div className="p-4 rounded-xl border border-[#FFB4A2]/15 dark:border-[#FF8FA3]/10 bg-[#FF8FA3]/5 dark:bg-[#FF8FA3]/5">
+            <div className="p-4 rounded-xl border border-[#FFB8C0]/15 dark:border-[#E63946]/10 bg-[#E63946]/5 dark:bg-[#E63946]/5">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50">Total Badges</span>
-                <span className="text-sm font-bold text-[#FF8FA3]">{analytics.totalBadges}</span>
+                <span className="text-sm font-bold text-[#E63946]">{analytics.totalBadges}</span>
               </div>
             </div>
           </>

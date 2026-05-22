@@ -59,7 +59,7 @@ function StoryNode({ data, selected }: any) {
       />
 
       {/* Main Card */}
-      <div className={`relative w-full h-full bg-gradient-to-br ${config.bgGradient} backdrop-blur-sm border border-white/60 dark:border-[#FF8FA3]/10 rounded-xl shadow-lg shadow-black/5 overflow-hidden ${selected ? 'ring-2 ring-[#FF6B8B]/40' : ''}`}>
+      <div className={`relative w-full h-full bg-gradient-to-br ${config.bgGradient} backdrop-blur-sm border border-white/60 dark:border-[#E63946]/10 rounded-xl shadow-lg shadow-black/5 overflow-hidden ${selected ? 'ring-2 ring-[#FF6B8B]/40' : ''}`}>
         {/* Top accent line */}
         <div className="h-0.5 w-full" style={{ backgroundColor: emotionColor }} />
 
@@ -93,7 +93,7 @@ function StoryNode({ data, selected }: any) {
         {/* Metadata (Scene: location/time, Character: name, etc.) */}
         {metadata.sceneLocation && (
           <div className="px-3 pb-2 flex items-center gap-1">
-            <MapPin className="w-2.5 h-2.5 text-[#FF8FA3]/60" />
+            <MapPin className="w-2.5 h-2.5 text-[#E63946]/60" />
             <span className="text-[10px] text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40">{metadata.sceneLocation}</span>
           </div>
         )}
@@ -126,10 +126,10 @@ function StoryNode({ data, selected }: any) {
       </div>
 
       {/* Connection Handles */}
-      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-[#FF8FA3]/50 !border-white !rounded-full" />
-      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !bg-[#FF8FA3]/50 !border-white !rounded-full" />
-      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-[#FF8FA3]/50 !border-white !rounded-full" />
-      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-[#FF8FA3]/50 !border-white !rounded-full" />
+      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-[#E63946]/50 !border-white !rounded-full" />
+      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !bg-[#E63946]/50 !border-white !rounded-full" />
+      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-[#E63946]/50 !border-white !rounded-full" />
+      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-[#E63946]/50 !border-white !rounded-full" />
     </div>
   );
 }
