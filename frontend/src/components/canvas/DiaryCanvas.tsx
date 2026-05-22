@@ -713,9 +713,11 @@ export default function DiaryCanvas() {
       {selectedNote && (
         <NoteEditorSidebar 
           note={selectedNote}
+          allNotes={data?.getNotes || []}
           onClose={() => setSelectedNote(null)}
           onUpdateCache={handleUpdateCache}
           onDeleteSuccess={handleDeleteSuccess}
+          onNavigate={(id) => handleNodeDoubleClick(id)}
         />
       )}
 

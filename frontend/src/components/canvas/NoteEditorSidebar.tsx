@@ -8,17 +8,20 @@ import { UPDATE_NOTE_CONTENT, DELETE_NOTE, ADD_NOTE_IMAGE, DELETE_NOTE_IMAGE, AR
 import TiptapEditor from './TiptapEditor';
 import VersionPanel from './VersionPanel';
 import DrawingCanvas from './DrawingCanvas';
+import BacklinksPanel from '@/features/notes/components/BacklinksPanel';
 import { notify, toast } from '@/lib/toast';
 import { useTags } from '@/context/TagContext';
 
 interface NoteEditorSidebarProps {
   note: any;
+  allNotes?: any[];
   onClose: () => void;
   onDeleteSuccess: (nodeId: string) => void;
   onUpdateCache: (nodeId: string, title?: string, content?: string, newImages?: any[], color?: string, mood?: string) => void;
+  onNavigate?: (nodeId: string) => void;
 }
 
-export default function NoteEditorSidebar({ note, onClose, onDeleteSuccess, onUpdateCache }: NoteEditorSidebarProps) {
+export default function NoteEditorSidebar({ note, allNotes = [], onClose, onDeleteSuccess, onUpdateCache, onNavigate }: NoteEditorSidebarProps) {
   const [title, setTitle] = useState(note?.title || '');
   const [content, setContent] = useState(note?.content || '');
   const [color, setColor] = useState(note?.color || 'default');
@@ -415,20 +418,14 @@ export default function NoteEditorSidebar({ note, onClose, onDeleteSuccess, onUp
           </label>
         </div>
         
-        {/* ── Backlinks ── */}
-        {note.incomingEdges && note.incomingEdges.length > 0 && (
-          <div className="border-t border-[#FFB4A2]/15 pt-6 pb-4">
-            <label className="block text-xs font-semibold text-[#5A3E4C]/40 uppercase tracking-wider mb-3">Mentioned In</label>
-            <div className="space-y-2">
-              {note.incomingEdges.map((edge: any) => (
-                <div key={edge.id} className="px-3 py-2 bg-[#FFF5F0]/50 border border-[#FFB4A2]/15 rounded-lg text-sm text-[#5A3E4C]/70 hover:text-[#5A3E4C] hover:border-[#FF8FA3]/30 transition-all cursor-pointer flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#FF8FA3]/50" />
-                  <span className="truncate flex-1">{edge.source.title || 'Untitled Note'}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* ── Memory Backlinks (Knowledge Graph) ── */}
+        <div className="border-t border-[#FFB4A2]/15 pt-6 pb-4">
+          <BacklinksPanel
+            note={note}
+            allNotes={allNotes}
+            onNavigate={(id) => onNavigate?.(id)}
+          />
+        </div>
       </div>
     </div>
 
