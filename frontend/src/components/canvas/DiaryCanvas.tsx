@@ -23,7 +23,7 @@ import NoteNode from './NoteNode';
 import SemanticEdge from './SemanticEdge';
 import NoteEditorSidebar from './NoteEditorSidebar';
 import TimelineView from './TimelineView';
-import { Loader2, Sparkles, Search, Download, LayoutTemplate, List, Tag as TagIcon, Clock, BarChart3, Archive } from 'lucide-react';
+import { Loader2, Sparkles, Search, Download, LayoutTemplate, List, Tag as TagIcon, Clock, BarChart3, Archive, Wand2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toPng } from 'html-to-image';
 import { useCanvas } from '@/context/CanvasContext';
@@ -36,6 +36,7 @@ import StreakWidget from './StreakWidget';
 import ExportPanel from './ExportPanel';
 import CalendarPanel from './CalendarPanel';
 import AdvancedAnalyticsPanel from './AdvancedAnalyticsPanel';
+import { useAutoLayout } from '@/features/canvas/hooks/useAutoLayout';
 
 const nodeTypes = {
   default: NoteNode,
@@ -75,6 +76,10 @@ export default function DiaryCanvas() {
   
   const [createNote] = useMutation<any>(CREATE_NOTE);
   const [batchUpdateNotes] = useMutation<any>(BATCH_UPDATE_NOTES);
+  const { applyAutoLayout } = useAutoLayout({
+    nodes: data?.getNotes || [],
+    onApplied: () => { refetch(); },
+  });
   const [createNoteLink] = useMutation<any>(CREATE_NOTE_LINK);
   const [deleteNoteLink] = useMutation<any>(DELETE_NOTE_LINK);
   const [updateNoteLink] = useMutation<any>(UPDATE_NOTE_LINK);
@@ -593,6 +598,15 @@ export default function DiaryCanvas() {
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 ${showArchivePanel ? 'bg-[#FF8FA3]/10 border-[#FF8FA3]/30 text-[#FF8FA3]' : 'bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C]'}`}
           >
             <Archive className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={() => applyAutoLayout()}
+            title="Auto-Organize: rapikan node otomatis"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#FF8FA3]"
+          >
+            <Wand2 className="w-4 h-4" />
+            <span className="text-sm font-medium hidden sm:inline">Auto Layout</span>
           </button>
 
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 border border-[#FFB4A2]/15 shadow-inner text-xs font-medium text-[#5A3E4C]/50 backdrop-blur-md">
