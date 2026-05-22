@@ -5,7 +5,7 @@ import { X, Trash2, ImagePlus, Loader2, Tag as TagIcon, Archive, History, Pencil
 import { createClient } from '@/lib/supabase/client';
 import { useMutation } from '@apollo/client/react';
 import { UPDATE_NOTE_CONTENT, DELETE_NOTE, ADD_NOTE_IMAGE, DELETE_NOTE_IMAGE, ARCHIVE_NOTE } from '@/graphql/mutations';
-import TiptapEditor from './TiptapEditor';
+import TiptapEditor from '@/features/canvas/components/TiptapEditor';
 import VersionPanel from '@/features/canvas/panels/VersionPanel';
 import DrawingCanvas from './DrawingCanvas';
 import BacklinksPanel from '@/features/notes/components/BacklinksPanel';

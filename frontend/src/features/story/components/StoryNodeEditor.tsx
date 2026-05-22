@@ -7,7 +7,7 @@ import { UPDATE_NOTE_CONTENT, DELETE_NOTE, ADD_NOTE_IMAGE, DELETE_NOTE_IMAGE } f
 import { TOGGLE_NODE_LOCK } from '@/graphql/story';
 import { notify } from '@/lib/toast';
 import { createClient } from '@/lib/supabase/client';
-import TiptapEditor from '@/components/canvas/TiptapEditor';
+import TiptapEditor from '@/features/canvas/components/TiptapEditor';
 
 const NODE_TYPE_OPTIONS = [
   { value: 'scene', label: 'Scene', color: '#FF6B8B' },
