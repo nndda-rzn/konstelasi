@@ -13,7 +13,7 @@ import {
   addEdge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOpen, Image, List, BarChart3, Download, PenTool, Heart, Hourglass, GitBranch, User } from 'lucide-react';
+import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOpen, Image, List, BarChart3, Download, PenTool, Heart, Hourglass, GitBranch, User, Sparkles } from 'lucide-react';
 import { ApolloWrapper } from '@/lib/apollo/ApolloWrapper';
 import { Providers } from '@/lib/Providers';
 import { GET_STORY, UPDATE_STORY, ADD_NODE_TO_STORY } from '@/graphql/story';
@@ -35,6 +35,7 @@ import EmotionalArcPanel from '@/components/story/EmotionalArcPanel';
 import MemoryTimelinePanel from '@/components/story/MemoryTimelinePanel';
 import VersionHistoryPanel from '@/components/story/VersionHistoryPanel';
 import CharacterProfilePanel from '@/components/story/CharacterProfilePanel';
+import InsightsDrawer from '@/components/story/InsightsDrawer';
 
 const nodeTypes = { storyNode: StoryNode };
 const edgeTypes = { storyEdge: StoryEdge };
@@ -47,13 +48,9 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showNodeSelector, setShowNodeSelector] = useState(false);
   const [viewMode, setViewMode] = useState<'canvas' | 'timeline' | 'reading' | 'gallery' | 'outline'>('canvas');
-  const [showAnalytics, setShowAnalytics] = useState(false);
   const [showExport, setShowExport] = useState(false);
-  const [showWritingStats, setShowWritingStats] = useState(false);
-  const [showEmotionalArc, setShowEmotionalArc] = useState(false);
-  const [showMemoryTimeline, setShowMemoryTimeline] = useState(false);
-  const [showVersionHistory, setShowVersionHistory] = useState(false);
-  const [showCharacterProfile, setShowCharacterProfile] = useState(false);
+  const [activeInsight, setActiveInsight] = useState<string | null>(null);
+  const [showInsightsMenu, setShowInsightsMenu] = useState(false);
   const [selectedNote, setSelectedNote] = useState<any>(null);
 
   const { data, loading, refetch } = useQuery<any>(GET_STORY, {
@@ -235,23 +232,9 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           <button onClick={() => setShowSettings(!showSettings)} className={`p-2 rounded-lg transition-all ${showSettings ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
             <Settings className="w-4 h-4" />
           </button>
-          <button onClick={() => setShowAnalytics(!showAnalytics)} className={`p-2 rounded-lg transition-all ${showAnalytics ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
-            <BarChart3 className="w-4 h-4" />
-          </button>
-          <button onClick={() => setShowWritingStats(!showWritingStats)} className={`p-2 rounded-lg transition-all ${showWritingStats ? 'bg-[#7C83FD]/10 text-[#7C83FD]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
-            <PenTool className="w-4 h-4" />
-          </button>
-          <button onClick={() => setShowEmotionalArc(!showEmotionalArc)} className={`p-2 rounded-lg transition-all ${showEmotionalArc ? 'bg-[#FF6B8B]/10 text-[#FF6B8B]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
-            <Heart className="w-4 h-4" />
-          </button>
-          <button onClick={() => setShowMemoryTimeline(!showMemoryTimeline)} className={`p-2 rounded-lg transition-all ${showMemoryTimeline ? 'bg-[#CC5DE8]/10 text-[#CC5DE8]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
-            <Hourglass className="w-4 h-4" />
-          </button>
-          <button onClick={() => setShowVersionHistory(!showVersionHistory)} className={`p-2 rounded-lg transition-all ${showVersionHistory ? 'bg-[#38D9A9]/10 text-[#38D9A9]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
-            <GitBranch className="w-4 h-4" />
-          </button>
-          <button onClick={() => setShowCharacterProfile(!showCharacterProfile)} className={`p-2 rounded-lg transition-all ${showCharacterProfile ? 'bg-[#C074DF]/10 text-[#C074DF]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
-            <User className="w-4 h-4" />
+          <button onClick={() => setShowInsightsMenu(!showInsightsMenu)} className={`p-2 rounded-lg transition-all relative ${activeInsight ? 'bg-[#7C83FD]/10 text-[#7C83FD]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
+            <Sparkles className="w-4 h-4" />
+            {activeInsight && <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#7C83FD]" />}
           </button>
           <button onClick={() => setShowExport(!showExport)} className={`p-2 rounded-lg transition-all ${showExport ? 'bg-[#FF8FA3]/10 text-[#FF8FA3]' : 'hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'}`}>
             <Download className="w-4 h-4" />
@@ -309,60 +292,34 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           />
         )}
 
-        {/* Analytics Panel */}
-        {showAnalytics && (
-          <StoryAnalyticsPanel
-            storyId={storyId}
-            isOpen={showAnalytics}
-            onClose={() => setShowAnalytics(false)}
-            nodes={story?.nodes || []}
+        {/* Insights Dropdown Menu */}
+        {showInsightsMenu && (
+          <InsightsDrawer
+            isOpen={showInsightsMenu}
+            onClose={() => setShowInsightsMenu(false)}
+            onSelectTab={(tab) => setActiveInsight(activeInsight === tab ? null : tab)}
+            activeTab={activeInsight}
           />
         )}
 
-        {/* Writing Stats Panel */}
-        {showWritingStats && (
-          <WritingStatsPanel
-            storyId={storyId}
-            isOpen={showWritingStats}
-            onClose={() => setShowWritingStats(false)}
-          />
+        {/* Insight Panels (one at a time) */}
+        {activeInsight === 'analytics' && (
+          <StoryAnalyticsPanel storyId={storyId} isOpen={true} onClose={() => setActiveInsight(null)} nodes={story?.nodes || []} />
         )}
-
-        {/* Emotional Arc Panel */}
-        {showEmotionalArc && (
-          <EmotionalArcPanel
-            storyId={storyId}
-            isOpen={showEmotionalArc}
-            onClose={() => setShowEmotionalArc(false)}
-          />
+        {activeInsight === 'stats' && (
+          <WritingStatsPanel storyId={storyId} isOpen={true} onClose={() => setActiveInsight(null)} />
         )}
-
-        {/* Memory Timeline Panel */}
-        {showMemoryTimeline && (
-          <MemoryTimelinePanel
-            storyId={storyId}
-            isOpen={showMemoryTimeline}
-            onClose={() => setShowMemoryTimeline(false)}
-          />
+        {activeInsight === 'emotional' && (
+          <EmotionalArcPanel storyId={storyId} isOpen={true} onClose={() => setActiveInsight(null)} />
         )}
-
-        {/* Version History Panel */}
-        {showVersionHistory && (
-          <VersionHistoryPanel
-            storyId={storyId}
-            isOpen={showVersionHistory}
-            onClose={() => setShowVersionHistory(false)}
-            onRestore={() => refetch()}
-          />
+        {activeInsight === 'timeline' && (
+          <MemoryTimelinePanel storyId={storyId} isOpen={true} onClose={() => setActiveInsight(null)} />
         )}
-
-        {/* Character Profile Panel */}
-        {showCharacterProfile && (
-          <CharacterProfilePanel
-            storyId={storyId}
-            isOpen={showCharacterProfile}
-            onClose={() => setShowCharacterProfile(false)}
-          />
+        {activeInsight === 'versions' && (
+          <VersionHistoryPanel storyId={storyId} isOpen={true} onClose={() => setActiveInsight(null)} onRestore={() => refetch()} />
+        )}
+        {activeInsight === 'characters' && (
+          <CharacterProfilePanel storyId={storyId} isOpen={true} onClose={() => setActiveInsight(null)} />
         )}
 
         {/* Export Panel */}
