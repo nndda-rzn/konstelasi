@@ -15,7 +15,7 @@
 
 <p>
   <img src="https://img.shields.io/badge/Status-Active_Development-38D9A9?style=flat-square&labelColor=302D41" />
-  <img src="https://img.shields.io/badge/Version-3.0.0-7C83FD?style=flat-square&labelColor=302D41" />
+  <img src="https://img.shields.io/badge/Version-3.1.0-7C83FD?style=flat-square&labelColor=302D41" />
   <img src="https://img.shields.io/badge/Made_with-Love-FF6B8B?style=flat-square&labelColor=302D41" />
 </p>
 
@@ -118,15 +118,16 @@
 
 #### Analysis & Insights Panels
 
-| Panel | Icon | Deskripsi |
-|:------|:-----|:----------|
-| **Analytics** | BarChart3 | Engagement stats (views, bookmarks, badges) |
-| **Writing Stats** | PenTool | Word count, writing streak, mood breakdown |
-| **Emotional Arc** | Heart | Recharts visualization of emotional journey |
-| **Memory Timeline** | Hourglass | Dual timeline (event date vs write date) |
-| **Version History** | GitBranch | Save/restore story snapshots |
-| **Character Profile** | User | Deep dive karakter + mention tracking |
-| **Export** | Download | Markdown, HTML, JSON export |
+> Semua panel insight diakses melalui **1 tombol "Insights"** (Sparkles icon) di toolbar, mengurangi cognitive load.
+
+| Panel | Deskripsi |
+|:------|:----------|
+| **Writing Stats** | Word count, writing streak, mood breakdown, reading time |
+| **Emotional Arc** | Recharts area chart visualisasi emotional journey + trend |
+| **Memory Timeline** | Dual timeline (event date vs write date), nostalgia tracking |
+| **Version History** | Save/restore story snapshots (unlimited versions) |
+| **Character Profile** | Deep dive karakter + mention tracking across nodes |
+| **Analytics** | Engagement stats (views, bookmarks, badges) |
 
 #### Story Features Detail
 
@@ -145,6 +146,9 @@
 | **Character Mentions** | Auto-detect character appearances across nodes |
 | **Privacy Levels** | Private, Friends Only, Public |
 | **Access Control** | Grant/revoke access dengan View/Edit levels |
+| **Media Upload** | Upload gambar via Supabase Storage per node |
+| **Focus/Zen Mode** | Full-screen immersive writing overlay |
+| **Insights Drawer** | Unified dropdown menu untuk semua analysis panels |
 
 ---
 
@@ -180,7 +184,11 @@ konstelasi/
 │   │   │       └── [id]/page.tsx       # Story detail + canvas
 │   │   ├── components/
 │   │   │   ├── canvas/             # Canvas components
-│   │   │   └── story/              # Story components (16 files)
+│   │   │   └── story/              # Story components (18 files)
+│   │   │       ├── StoryNode.tsx       # Node visualization
+│   │   │       ├── StoryNodeEditor.tsx # Editor with Focus Mode
+│   │   │       ├── InsightsDrawer.tsx  # Unified insights menu
+│   │   │       └── ...                 # Panels, views, selectors
 │   │   ├── graphql/                # Queries & mutations
 │   │   └── lib/                    # Utilities & Apollo client
 │   └── package.json
@@ -295,14 +303,20 @@ Frontend berjalan di `http://localhost:3000`
 - [x] Memory/Moment Timeline (dual timeline)
 - [x] Story Versioning with Timestamps
 - [x] Character Deep Dive Profile
+- [x] Media/Image Upload per node (Supabase Storage)
+- [x] Unified Insights Drawer (1 button → 6 panels)
+- [x] Focus/Zen Mode (full-screen immersive editor)
+- [x] Typography & Readability improvements
+- [x] Schema Auto-Sync on startup
 
 ### Planned
 
 - [ ] AI-Powered Story Suggestions
 - [ ] Story Templates & Scaffolding
 - [ ] Advanced Search & Filtering
-- [ ] Distraction-Free Writing Mode
 - [ ] Custom Story Themes & Styling
+- [ ] Smooth Transitions (Framer Motion)
+- [ ] Smart Canvas Nodes (responsive content)
 - [ ] Mobile Responsive Design
 - [ ] PWA Support
 
