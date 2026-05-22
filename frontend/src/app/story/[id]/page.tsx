@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useCallback, useEffect } from 'react';
+import { use, useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@apollo/client/react';
 import {
@@ -17,7 +17,7 @@ import { ArrowLeft, Settings, Lock, Globe, Users, Eye, LayoutGrid, Clock, BookOp
 import { ApolloWrapper } from '@/lib/apollo/ApolloWrapper';
 import { Providers } from '@/lib/Providers';
 import { GET_STORY, UPDATE_STORY, ADD_NODE_TO_STORY } from '@/graphql/story';
-import { CREATE_NOTE, CREATE_NOTE_LINK } from '@/graphql/mutations';
+import { CREATE_NOTE, CREATE_NOTE_LINK, BATCH_UPDATE_NOTES } from '@/graphql/mutations';
 import { ThemeProvider } from '@/context/ThemeContext';
 import StorySettingsPanel from '@/components/story/StorySettingsPanel';
 import StoryNode from '@/components/story/StoryNode';
@@ -92,6 +92,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   const [activeInsight, setActiveInsight] = useState<string | null>(null);
   const [showInsightsMenu, setShowInsightsMenu] = useState(false);
   const [selectedNote, setSelectedNote] = useState<any>(null);
+  const saveNodeChangesTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data, loading, refetch } = useQuery<any>(GET_STORY, {
     variables: { id: storyId },
@@ -100,6 +101,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
 
   const [createNote] = useMutation<any>(CREATE_NOTE);
   const [createNoteLink] = useMutation<any>(CREATE_NOTE_LINK);
+  const [batchUpdateNotes] = useMutation<any>(BATCH_UPDATE_NOTES);
   const [updateStory] = useMutation<any>(UPDATE_STORY);
   const [addNodeToStory] = useMutation<any>(ADD_NODE_TO_STORY);
 
@@ -116,6 +118,10 @@ function StoryCanvas({ params }: { params: { id: string } }) {
     const flowNodes = story.nodes.map((note: any) => ({
       id: note.id,
       position: { x: note.positionX, y: note.positionY },
+      style: {
+        width: note.width || undefined,
+        height: note.height || undefined,
+      },
       data: {
         title: note.title,
         content: note.content,
@@ -170,6 +176,41 @@ function StoryCanvas({ params }: { params: { id: string } }) {
       console.error('Failed to create connection:', err);
     }
   }, [createNoteLink, setEdges]);
+
+  const handleNodesChange = useCallback((changes: any[]) => {
+    onNodesChange(changes);
+
+    const savedChanges = changes.filter(change => (
+      (change.type === 'position' && change.dragging === false && change.position)
+      || (change.type === 'dimensions' && change.resizing === false && change.dimensions)
+    ));
+
+    if (savedChanges.length === 0) return;
+    if (saveNodeChangesTimer.current) clearTimeout(saveNodeChangesTimer.current);
+
+    saveNodeChangesTimer.current = setTimeout(() => {
+      const inputs = new Map<string, any>();
+
+      savedChanges.forEach(change => {
+        if (!inputs.has(change.id)) inputs.set(change.id, { id: change.id });
+        const input = inputs.get(change.id);
+
+        if (change.type === 'position') {
+          input.positionX = change.position.x;
+          input.positionY = change.position.y;
+        }
+
+        if (change.type === 'dimensions') {
+          input.width = change.dimensions.width;
+          input.height = change.dimensions.height;
+        }
+      });
+
+      batchUpdateNotes({ variables: { inputs: Array.from(inputs.values()) } }).catch(err => {
+        console.error('Failed to save story node size/position:', err);
+      });
+    }, 500);
+  }, [onNodesChange, batchUpdateNotes]);
 
   const handleAddNode = async (nodeType: string, title: string, emotion: string, metadata: any) => {
     const position = { x: Math.random() * 500 + 100, y: Math.random() * 400 + 100 };
@@ -298,7 +339,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           <ReactFlow
             nodes={nodes}
             edges={edges}
-            onNodesChange={onNodesChange}
+            onNodesChange={handleNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onNodeDoubleClick={handleNodeDoubleClick}
