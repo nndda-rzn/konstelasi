@@ -33,10 +33,10 @@ export default memo(function NoteNode({ data, isConnectable, selected, viewMode 
   const theme = THEMES[color] || THEMES.default;
   
   // If searching and not a match, fade out
-  const searchFade = isSearching && !isMatch ? 'opacity-25 scale-95 pointer-events-none grayscale' : 'opacity-100 scale-100';
+  const searchFade = isSearching && !isMatch ? 'opacity-20 scale-95 pointer-events-none grayscale blur-[1px]' : 'opacity-100 scale-100';
   
   // If searching and IS a match, highlight
-  const searchHighlight = isSearching && isMatch ? 'ring-2 ring-amber-300 shadow-[0_0_60px_-10px_rgba(252,211,77,0.3)] z-50' : '';
+  const searchHighlight = isSearching && isMatch ? 'ring-2 ring-[#E63946]/60 shadow-[0_0_60px_-8px_rgba(230,57,70,0.45)] z-50 animate-[pulse_2.5s_ease-in-out_infinite]' : '';
 
   const isSelectedStyle = selected && (!isSearching || isMatch);
 
