@@ -1,4 +1,4 @@
-import GlobalSidebar from '@/components/GlobalSidebar';
+import GlobalSidebar from '@/components/layout/GlobalSidebar';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
