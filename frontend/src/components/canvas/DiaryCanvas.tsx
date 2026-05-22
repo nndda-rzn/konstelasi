@@ -18,7 +18,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { GET_NOTES } from '@/graphql/queries';
-import { CREATE_NOTE, UPDATE_NOTE_POSITION, UPDATE_NOTE_SIZE, BATCH_UPDATE_NOTES, CREATE_NOTE_LINK, DELETE_NOTE_LINK, UPDATE_NOTE_LINK, DELETE_NOTE } from '@/graphql/mutations';
+import { CREATE_NOTE, BATCH_UPDATE_NOTES, CREATE_NOTE_LINK, DELETE_NOTE_LINK, UPDATE_NOTE_LINK, DELETE_NOTE } from '@/graphql/mutations';
 import NoteNode from './NoteNode';
 import SemanticEdge from './SemanticEdge';
 import NoteEditorSidebar from './NoteEditorSidebar';
@@ -47,8 +47,6 @@ const edgeTypes = {
   semanticEdge: SemanticEdge,
 };
 
-let debounceTimer: NodeJS.Timeout;
-
 export default function DiaryCanvas() {
   const router = useRouter();
   const supabase = createClient();
@@ -67,6 +65,8 @@ export default function DiaryCanvas() {
   const [showExportPanel, setShowExportPanel] = useState(false);
   const [showCalendarPanel, setShowCalendarPanel] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const pendingNodeLayoutChanges = useRef<Map<string, any>>(new Map());
+  const saveNodeLayoutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data, loading, error, refetch } = useQuery<any>(GET_NOTES, {
     variables: { 
@@ -78,13 +78,32 @@ export default function DiaryCanvas() {
   });
   
   const [createNote] = useMutation<any>(CREATE_NOTE);
-  const [updateNotePosition] = useMutation<any>(UPDATE_NOTE_POSITION);
-  const [updateNoteSize] = useMutation<any>(UPDATE_NOTE_SIZE);
   const [batchUpdateNotes] = useMutation<any>(BATCH_UPDATE_NOTES);
   const [createNoteLink] = useMutation<any>(CREATE_NOTE_LINK);
   const [deleteNoteLink] = useMutation<any>(DELETE_NOTE_LINK);
   const [updateNoteLink] = useMutation<any>(UPDATE_NOTE_LINK);
   const [deleteNote] = useMutation<any>(DELETE_NOTE);
+
+  const flushPendingNodeLayoutChanges = useCallback(() => {
+    const inputsArray = Array.from(pendingNodeLayoutChanges.current.values());
+    pendingNodeLayoutChanges.current.clear();
+    saveNodeLayoutTimer.current = null;
+
+    if (inputsArray.length === 0) return;
+
+    batchUpdateNotes({
+      variables: { inputs: inputsArray }
+    }).catch((err) => {
+      console.error('Failed to save note layout changes:', err);
+    });
+  }, [batchUpdateNotes]);
+
+  useEffect(() => {
+    return () => {
+      if (saveNodeLayoutTimer.current) clearTimeout(saveNodeLayoutTimer.current);
+      flushPendingNodeLayoutChanges();
+    };
+  }, [flushPendingNodeLayoutChanges]);
 
   useEffect(() => {
     if (data && data.getNotes) {
@@ -293,46 +312,33 @@ export default function DiaryCanvas() {
   const handleNodesChange = useCallback(
     (changes: NodeChange<Node>[]) => {
       onNodesChange(changes);
-      
-      const positionChanges = changes.filter(
-        (c) => c.type === 'position' && c.dragging === false && c.position
-      );
 
-      const dimensionsChanges = changes.filter(
-        (c) => c.type === 'dimensions' && c.resizing === false && c.dimensions
-      );
+      changes.forEach((change: any) => {
+        const isFinalPosition = change.type === 'position' && change.dragging === false && change.position;
+        const isFinalDimensions = change.type === 'dimensions' && change.resizing === false && change.dimensions;
+        if (!isFinalPosition && !isFinalDimensions) return;
 
-      if (positionChanges.length > 0 || dimensionsChanges.length > 0) {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-          const batchInputs = new Map<string, any>();
+        const pending = pendingNodeLayoutChanges.current;
+        const input = pending.get(change.id) || { id: change.id };
 
-          positionChanges.forEach((change: any) => {
-            if (!batchInputs.has(change.id)) batchInputs.set(change.id, { id: change.id });
-            const input = batchInputs.get(change.id);
-            input.positionX = change.position.x;
-            input.positionY = change.position.y;
-          });
+        if (isFinalPosition) {
+          input.positionX = change.position.x;
+          input.positionY = change.position.y;
+        }
 
-          dimensionsChanges.forEach((change: any) => {
-            if (!batchInputs.has(change.id)) batchInputs.set(change.id, { id: change.id });
-            const input = batchInputs.get(change.id);
-            input.width = change.dimensions.width;
-            input.height = change.dimensions.height;
-          });
+        if (isFinalDimensions) {
+          input.width = change.dimensions.width;
+          input.height = change.dimensions.height;
+        }
 
-          const inputsArray = Array.from(batchInputs.values());
-          if (inputsArray.length > 0) {
-            batchUpdateNotes({
-              variables: {
-                inputs: inputsArray
-              }
-            });
-          }
-        }, 500); 
-      }
+        pending.set(change.id, input);
+      });
+
+      if (pendingNodeLayoutChanges.current.size === 0) return;
+      if (saveNodeLayoutTimer.current) clearTimeout(saveNodeLayoutTimer.current);
+      saveNodeLayoutTimer.current = setTimeout(flushPendingNodeLayoutChanges, 500);
     },
-    [onNodesChange, batchUpdateNotes]
+    [onNodesChange, flushPendingNodeLayoutChanges]
   );
 
   const onConnect = useCallback(

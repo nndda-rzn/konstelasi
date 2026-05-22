@@ -54,6 +54,7 @@ export default memo(function NoteNode({ data, isConnectable, selected, viewMode 
           isVisible={selected} 
           minWidth={200} 
           minHeight={120}
+          maxWidth={1200}
           handleClassName="h-3 w-3 bg-white border-2 border-[#FFF5F0] rounded-full"
           lineClassName="border-[#FFB4A2]/30"
         />
@@ -70,8 +71,6 @@ export default memo(function NoteNode({ data, isConnectable, selected, viewMode 
           ${theme.borderHover} ${theme.shadowHover}
         `}
         style={{
-          width: data.width ? `${data.width}px` : 'auto',
-          height: data.height ? `${data.height}px` : 'auto',
           maxWidth: '1200px',
         }}
       >
