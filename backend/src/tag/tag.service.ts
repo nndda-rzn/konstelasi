@@ -75,10 +75,11 @@ export class TagService {
     noteId: string,
     tagIds: string[]
   ): Promise<Note> {
-    // Verify note ownership
+    // Verify note ownership and populate tags
     const note = await this.em.findOneOrFail(
       Note,
-      { id: noteId, user: { id: userId } }
+      { id: noteId, user: { id: userId } },
+      { populate: ['tags', 'images'] as any }
     );
 
     // Verify tags ownership and existence
@@ -98,10 +99,11 @@ export class TagService {
     noteId: string,
     tagId: string
   ): Promise<Note> {
-    // Verify note ownership
+    // Verify note ownership and populate tags
     const note = await this.em.findOneOrFail(
       Note,
-      { id: noteId, user: { id: userId } }
+      { id: noteId, user: { id: userId } },
+      { populate: ['tags', 'images'] as any }
     );
 
     // Verify tag exists and belongs to user
