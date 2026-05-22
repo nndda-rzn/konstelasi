@@ -38,7 +38,6 @@ import { useTheme } from '@/context/ThemeContext';
 import ExportPanel from './ExportPanel';
 import CalendarPanel from './CalendarPanel';
 import AdvancedAnalyticsPanel from './AdvancedAnalyticsPanel';
-import PhotoBoothModal from './PhotoBoothModal';
 
 const nodeTypes = {
   default: NoteNode,
@@ -65,7 +64,6 @@ export default function DiaryCanvas() {
   const [showArchivePanel, setShowArchivePanel] = useState(false);
   const [showExportPanel, setShowExportPanel] = useState(false);
   const [showCalendarPanel, setShowCalendarPanel] = useState(false);
-  const [showPhotoBooth, setShowPhotoBooth] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const pendingNodeLayoutChanges = useRef<Map<string, any>>(new Map());
   const saveNodeLayoutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -258,31 +256,6 @@ export default function DiaryCanvas() {
     },
     [deleteNote]
   );
-
-  const handlePhotoSaved = useCallback((newNote: any) => {
-    const flowNode = {
-      id: newNote.id,
-      type: 'default',
-      position: { x: newNote.positionX, y: newNote.positionY },
-      data: {
-        title: newNote.title,
-        content: newNote.content || '',
-        images: newNote.images || [],
-        color: 'default',
-        type: 'default',
-        mood: '',
-        incomingEdges: [],
-        outgoingEdges: [],
-        tags: [],
-        createdAt: newNote.createdAt || new Date().toISOString(),
-        isSearching: false,
-        isMatch: true,
-        onDoubleClick: () => handleNodeDoubleClick(newNote.id),
-      },
-      style: { width: undefined, height: undefined },
-    };
-    setNodes(nds => [...nds, flowNode]);
-  }, [setNodes, handleNodeDoubleClick]);
 
   const handleEdgesDelete = useCallback(
     (edgesToDelete: Edge[]) => {
@@ -648,7 +621,7 @@ export default function DiaryCanvas() {
           <StreakWidget />
 
           <button 
-            onClick={() => setShowPhotoBooth(true)}
+            onClick={() => router.push('/photobooth')}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/60 hover:bg-white/80 border border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C] transition-all duration-300"
           >
             <Camera className="w-4 h-4" />
@@ -844,14 +817,6 @@ export default function DiaryCanvas() {
           onNoteClick={(noteId) => { handleNodeDoubleClick(noteId); setShowCalendarPanel(false); }}
         />
       )}
-
-      {/* ── Photo Booth ── */}
-      <PhotoBoothModal
-        isOpen={showPhotoBooth}
-        onClose={() => setShowPhotoBooth(false)}
-        onPhotoSaved={handlePhotoSaved}
-        canvasId={selectedCanvasId || undefined}
-      />
     </div>
   );
 }
