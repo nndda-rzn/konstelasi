@@ -1,5 +1,5 @@
-import DiaryCanvas from '@/components/canvas/DiaryCanvas';
-import DiaryListView from '@/components/canvas/DiaryListView';
+import DiaryCanvas from '@/features/canvas/components/DiaryCanvas';
+import DiaryListView from '@/features/canvas/components/DiaryListView';
 
 export const metadata = {
   title: 'Canvas | Visual Diary',
