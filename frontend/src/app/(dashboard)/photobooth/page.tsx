@@ -57,14 +57,14 @@ function loadImg(src: string): Promise<HTMLImageElement> {
 
 function drawStickers(ctx: CanvasRenderingContext2D, stickers: StickerItem[], cW: number, cH: number) {
   stickers.forEach(s => {
-    ctx.font = '42px serif';
+    ctx.font = '64px serif';
     ctx.textAlign = 'center';
     ctx.fillText(s.emoji, (s.x / 100) * cW, (s.y / 100) * cH);
   });
 }
 
 async function renderSingle(src: string, filter: FilterKey, stickers: StickerItem[], caption: string): Promise<string> {
-  const S = 720, P = 36, B = 110;
+  const S = 1080, P = 54, B = 160;
   const cW = S + P * 2, cH = S + P * 2 + B;
   const canvas = document.createElement('canvas'); canvas.width = cW; canvas.height = cH;
   const ctx = canvas.getContext('2d')!;
@@ -81,7 +81,7 @@ async function renderSingle(src: string, filter: FilterKey, stickers: StickerIte
 }
 
 async function renderStrip(photos: string[], filter: FilterKey, colorKey: string, stickers: StickerItem[], caption: string): Promise<string> {
-  const W = 580, H = 580, PAD = 28, GAP = 12, FOOT = 80;
+  const W = 800, H = 800, PAD = 40, GAP = 18, FOOT = 110;
   const cW = W + PAD * 2;
   const cH = H * photos.length + GAP * (photos.length - 1) + PAD * 2 + FOOT;
   const color = STRIP_COLORS.find(c => c.key === colorKey) || STRIP_COLORS[0];
@@ -105,7 +105,7 @@ async function renderStrip(photos: string[], filter: FilterKey, colorKey: string
 }
 
 async function renderGrid(photos: string[], filter: FilterKey, colorKey: string, cols: number, stickers: StickerItem[], caption: string): Promise<string> {
-  const CELL = 360, PAD = 24, GAP = 10, FOOT = 70;
+  const CELL = 540, PAD = 36, GAP = 14, FOOT = 100;
   const rows = Math.ceil(photos.length / cols);
   const cW = CELL * cols + GAP * (cols - 1) + PAD * 2;
   const cH = CELL * rows + GAP * (rows - 1) + PAD * 2 + FOOT;
@@ -176,7 +176,7 @@ function PhotoboothContent() {
   useEffect(() => {
     if (countdown !== 0 || !isCapturing) return;
     setCountdown(null);
-    const raw = webcamRef.current?.getScreenshot({ width: 1080, height: 1080 });
+    const raw = webcamRef.current?.getScreenshot({ width: 1920, height: 1920 });
     if (!raw) return;
     setStage('flash');
     setTimeout(() => {
@@ -291,7 +291,7 @@ function PhotoboothContent() {
           {(stage === 'setup' || stage === 'countdown' || stage === 'flash') && (
             <div className="flex flex-col gap-6">
               <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-3xl border border-white/60 bg-black shadow-[0_24px_80px_rgba(84,45,55,0.14)]" style={{ aspectRatio: '1/1' }}>
-                <Webcam ref={webcamRef} audio={false} screenshotFormat="image/png" videoConstraints={{ facingMode, aspectRatio: 1, width: 1080, height: 1080 }} mirrored={facingMode === 'user'} className="h-full w-full object-cover" />
+                <Webcam ref={webcamRef} audio={false} screenshotFormat="image/png" videoConstraints={{ facingMode, aspectRatio: 1, width: 1920, height: 1920 }} mirrored={facingMode === 'user'} className="h-full w-full object-cover" />
                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:33.33%_33.33%]" />
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,transparent_60%,rgba(0,0,0,0.3)_100%)]" />
                 <AnimatePresence>{stage === 'countdown' && countdown !== null && countdown > 0 && (
