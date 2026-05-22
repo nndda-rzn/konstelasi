@@ -35,47 +35,52 @@ export default function GlobalSidebar() {
   return (
     <>
       {/* ── Desktop Floating Sidebar ── */}
-      <aside className="fixed left-4 top-4 bottom-4 z-40 hidden md:flex w-[220px] flex-col rounded-3xl border border-white/50 dark:border-[#E63946]/10 bg-white/72 dark:bg-[#1a1625]/72 backdrop-blur-2xl shadow-[0_8px_40px_rgba(84,45,55,0.12)] overflow-hidden">
-        {/* Top accent line */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E63946]/40 to-transparent" />
+      <aside className="fixed left-3 top-3 bottom-3 z-40 hidden md:flex w-[220px] flex-col rounded-2xl border border-[#E8E4E0]/70 dark:border-white/[0.06] bg-[#FAFAF9]/96 dark:bg-[#1C1917]/96 backdrop-blur-xl shadow-[0_2px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_2px_20px_rgba(0,0,0,0.3)] overflow-hidden">
 
         {/* Brand */}
         <div className="px-5 pt-6 pb-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FF6B7A] to-[#9D0208] shadow-[0_4px_16px_rgba(157,2,8,0.28)]">
-              <Sparkles className="h-5 w-5 text-white" />
-            </div>
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="h-[18px] w-[18px] shrink-0 text-[#C9A96E] dark:text-[#D9B979]" />
             <div>
-              <p className="text-sm font-black tracking-[-0.03em] text-[#3F2A35] dark:text-[#e2d9f3]">Konstelasi</p>
-              <p className="text-[10px] text-[#5A3E4C]/45 dark:text-[#e2d9f3]/35">Visual Diary</p>
+              <p className="text-[13px] font-semibold tracking-[-0.01em] text-[#2D2420] dark:text-[#F0EBE5]">
+                Konstelasi
+              </p>
+              <p className="text-[10px] text-[#A89E98] dark:text-[#4A4440] mt-0.5">Visual Diary</p>
             </div>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="mx-4 h-px bg-gradient-to-r from-transparent via-[#E6B8A2]/35 to-transparent" />
+        <div className="mx-4 h-px bg-[#EAE6E2] dark:bg-white/[0.06]" />
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = isActive(href);
             return (
-              <Link key={href} href={href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-all duration-200 group ${
+              <Link
+                key={href}
+                href={href}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group ${
                   active
-                    ? 'bg-gradient-to-r from-[#9D0208]/10 to-[#E63946]/6 border border-[#E63946]/18 shadow-sm'
-                    : 'border border-transparent hover:bg-white/55 dark:hover:bg-white/5'
-                }`}>
-                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all ${
-                  active
-                    ? 'bg-gradient-to-br from-[#E63946] to-[#9D0208] shadow-[0_4px_12px_rgba(157,2,8,0.22)]'
-                    : 'bg-[#FFE5E8]/55 dark:bg-white/8 group-hover:bg-[#FFE5E8] dark:group-hover:bg-white/12'
-                }`}>
-                  <Icon className={`h-4 w-4 ${active ? 'text-white' : 'text-[#9D0208]/65 dark:text-[#e2d9f3]/50'}`} />
-                </div>
-                <span className={`text-sm font-semibold truncate ${
-                  active ? 'text-[#9D0208] dark:text-[#FF6B7A]' : 'text-[#3F2A35]/75 dark:text-[#e2d9f3]/65'
-                }`}>
+                    ? 'bg-white dark:bg-white/[0.07] shadow-[0_1px_6px_rgba(0,0,0,0.07)] dark:shadow-none'
+                    : 'hover:bg-[#F4F1EE]/80 dark:hover:bg-white/[0.04]'
+                }`}
+              >
+                <Icon
+                  className={`h-[15px] w-[15px] shrink-0 transition-colors duration-150 ${
+                    active
+                      ? 'text-[#C9A96E] dark:text-[#D9B979]'
+                      : 'text-[#C0B8B2] dark:text-[#3A3430] group-hover:text-[#8A7E78] dark:group-hover:text-[#5A5450]'
+                  }`}
+                />
+                <span
+                  className={`text-[13px] transition-colors duration-150 ${
+                    active
+                      ? 'font-semibold text-[#2D2420] dark:text-[#F0EBE5]'
+                      : 'font-medium text-[#A89E98] dark:text-[#3A3430] group-hover:text-[#5A4E48] dark:group-hover:text-[#6A6460]'
+                  }`}
+                >
                   {label}
                 </span>
               </Link>
@@ -84,25 +89,28 @@ export default function GlobalSidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="px-3 pb-5 space-y-1">
-          <div className="mx-1 mb-2 h-px bg-gradient-to-r from-transparent via-[#E6B8A2]/30 to-transparent" />
-          <button onClick={toggleTheme}
-            className="flex w-full items-center gap-3 px-3 py-2.5 rounded-2xl border border-transparent hover:bg-white/55 dark:hover:bg-white/5 transition-all">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#FFE5E8]/55 dark:bg-white/8">
-              {theme === 'light'
-                ? <Moon className="h-4 w-4 text-[#9D0208]/65" />
-                : <Sun className="h-4 w-4 text-[#e2d9f3]/50" />}
-            </div>
-            <span className="text-sm font-semibold text-[#3F2A35]/70 dark:text-[#e2d9f3]/60">
+        <div className="px-2.5 pb-4 space-y-0.5">
+          <div className="mx-2 mb-2 h-px bg-[#EAE6E2] dark:bg-white/[0.06]" />
+
+          <button
+            onClick={toggleTheme}
+            className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#F4F1EE]/80 dark:hover:bg-white/[0.04] transition-all group"
+          >
+            {theme === 'light'
+              ? <Moon className="h-[15px] w-[15px] shrink-0 text-[#C0B8B2] group-hover:text-[#8A7E78] transition-colors" />
+              : <Sun  className="h-[15px] w-[15px] shrink-0 text-[#3A3430] group-hover:text-[#5A5450] transition-colors" />
+            }
+            <span className="text-[13px] font-medium text-[#A89E98] dark:text-[#3A3430] group-hover:text-[#5A4E48] dark:group-hover:text-[#6A6460] transition-colors">
               {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
             </span>
           </button>
-          <button onClick={handleLogout}
-            className="flex w-full items-center gap-3 px-3 py-2.5 rounded-2xl border border-transparent hover:bg-red-50/60 dark:hover:bg-red-900/10 transition-all group">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#FFE5E8]/55 dark:bg-white/8 group-hover:bg-red-100/70 dark:group-hover:bg-red-900/20">
-              <LogOut className="h-4 w-4 text-[#9D0208]/65 group-hover:text-red-500 transition-colors" />
-            </div>
-            <span className="text-sm font-semibold text-[#3F2A35]/70 dark:text-[#e2d9f3]/60 group-hover:text-red-500 transition-colors">
+
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#F4F1EE]/80 dark:hover:bg-white/[0.04] transition-all group"
+          >
+            <LogOut className="h-[15px] w-[15px] shrink-0 text-[#C0B8B2] dark:text-[#3A3430] group-hover:text-[#C9A96E] dark:group-hover:text-[#D9B979] transition-colors" />
+            <span className="text-[13px] font-medium text-[#A89E98] dark:text-[#3A3430] group-hover:text-[#5A4E48] dark:group-hover:text-[#6A6460] transition-colors">
               Keluar
             </span>
           </button>
@@ -110,16 +118,21 @@ export default function GlobalSidebar() {
       </aside>
 
       {/* ── Mobile Bottom Bar ── */}
-      <nav className="fixed bottom-0 inset-x-0 z-40 flex md:hidden items-center justify-around border-t border-[#E6B8A2]/20 bg-white/88 dark:bg-[#1a1625]/88 backdrop-blur-2xl px-2 pt-2 pb-3">
+      <nav className="fixed bottom-0 inset-x-0 z-40 flex md:hidden items-center justify-around border-t border-[#EAE6E2] dark:border-white/[0.06] bg-[#FAFAF9]/96 dark:bg-[#1C1917]/96 backdrop-blur-xl px-2 pt-2 pb-3">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = isActive(href);
           return (
-            <Link key={href} href={href}
-              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl transition-all ${
-                active ? 'text-[#E63946]' : 'text-[#5A3E4C]/45 dark:text-[#e2d9f3]/35'
-              }`}>
+            <Link
+              key={href}
+              href={href}
+              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all ${
+                active
+                  ? 'text-[#C9A96E] dark:text-[#D9B979]'
+                  : 'text-[#C0B8B2] dark:text-[#3A3430]'
+              }`}
+            >
               <Icon className="h-5 w-5" />
-              <span className="text-[9px] font-bold">{label}</span>
+              <span className="text-[9px] font-semibold">{label}</span>
             </Link>
           );
         })}
