@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { X, Save, RotateCcw, Trash2, GitBranch, FileText, Clock } from 'lucide-react';
-import { GET_STORY_VERSIONS } from '../../graphql/queries';
-import { CREATE_STORY_VERSION, RESTORE_STORY_VERSION, DELETE_STORY_VERSION } from '../../graphql/mutations';
+import { GET_STORY_VERSIONS } from '@/graphql/queries';
+import { CREATE_STORY_VERSION, RESTORE_STORY_VERSION, DELETE_STORY_VERSION } from '@/graphql/mutations';
 
 interface VersionHistoryPanelProps {
   storyId: string;

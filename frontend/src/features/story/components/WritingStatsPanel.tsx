@@ -2,7 +2,7 @@
 
 import { useQuery } from '@apollo/client/react';
 import { X, PenTool, BookOpen, Clock, Calendar, Flame, FileText, Heart, BarChart3 } from 'lucide-react';
-import { GET_WRITING_STATISTICS } from '../../graphql/queries';
+import { GET_WRITING_STATISTICS } from '@/graphql/queries';
 
 interface WritingStatsPanelProps {
   storyId: string;

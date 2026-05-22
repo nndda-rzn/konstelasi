@@ -3,7 +3,7 @@
 import { useQuery } from '@apollo/client/react';
 import { X, TrendingUp, TrendingDown, Minus, Heart, Zap, Sun } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Area, AreaChart } from 'recharts';
-import { GET_EMOTIONAL_ARC } from '../../graphql/queries';
+import { GET_EMOTIONAL_ARC } from '@/graphql/queries';
 
 const MOOD_COLORS: Record<string, string> = {
   happy: '#FF922B',

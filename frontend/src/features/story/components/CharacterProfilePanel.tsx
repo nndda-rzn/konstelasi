@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@apollo/client/react';
 import { X, User, Heart, MessageCircle, Calendar, PenTool, Star } from 'lucide-react';
-import { GET_CHARACTER_PROFILE } from '../../graphql/queries';
+import { GET_CHARACTER_PROFILE } from '@/graphql/queries';
 
 const NODE_COLORS: Record<string, string> = {
   scene: '#FF6B8B', memory: '#7C83FD', character: '#C074DF', dialogue: '#38D9A9',

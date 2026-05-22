@@ -2,7 +2,7 @@
 
 import { useQuery } from '@apollo/client/react';
 import { X, Calendar, MapPin, Clock, Hourglass, Star } from 'lucide-react';
-import { GET_MEMORY_TIMELINE } from '../../graphql/queries';
+import { GET_MEMORY_TIMELINE } from '@/graphql/queries';
 
 const NODE_COLORS: Record<string, string> = {
   scene: '#FF6B8B', memory: '#7C83FD', character: '#C074DF', dialogue: '#38D9A9',
