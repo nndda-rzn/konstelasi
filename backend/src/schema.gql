@@ -312,6 +312,7 @@ type Query {
   canvas(id: String!): Canvas!
   canvases: [Canvas!]!
   childCanvases(parentId: String!): [Canvas!]!
+  getAllMedia(canvasId: String, storyId: String): [NoteImage!]!
   getArchivedNotes(canvasId: String): [Note!]!
   getBookmarks(storyId: String!): [StoryEngagement!]!
   getCharacterProfile(storyId: String!): CharacterProfile!

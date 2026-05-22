@@ -282,6 +282,29 @@ export class NotesService {
     return note;
   }
 
+  async getAllMedia(userId: string, filters?: { canvasId?: string; storyId?: string }): Promise<NoteImage[]> {
+    const where: any = { user: { id: userId }, note: { isArchived: false } };
+
+    if (filters?.canvasId) {
+      where.note = { ...where.note, canvas: { id: filters.canvasId } };
+    }
+    if (filters?.storyId) {
+      where.note = { ...where.note, story: { id: filters.storyId } };
+    }
+
+    const images = await this.em.find(NoteImage, where, {
+      populate: ['note', 'note.canvas', 'note.story'] as any,
+      orderBy: { createdAt: 'DESC' },
+    });
+
+    // Filter out images from time-locked notes
+    return images.filter(img => {
+      const note = img.note as any;
+      if (note.unlockDate && new Date(note.unlockDate).getTime() > Date.now()) return false;
+      return true;
+    });
+  }
+
   async getArchivedNotes(userId: string, canvasId?: string): Promise<Note[]> {
     const where: any = { user: { id: userId }, isArchived: true };
     if (canvasId) {

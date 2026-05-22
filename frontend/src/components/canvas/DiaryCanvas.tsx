@@ -23,7 +23,7 @@ import NoteNode from './NoteNode';
 import SemanticEdge from './SemanticEdge';
 import NoteEditorSidebar from './NoteEditorSidebar';
 import TimelineView from './TimelineView';
-import { Loader2, LogOut, Sparkles, Search, Download, LayoutTemplate, List, Tag as TagIcon, Clock, BarChart3, Archive, Moon, Sun, BookOpen } from 'lucide-react';
+import { Loader2, LogOut, Sparkles, Search, Download, LayoutTemplate, List, Tag as TagIcon, Clock, BarChart3, Archive, Moon, Sun, BookOpen, Image as ImageIcon } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toPng } from 'html-to-image';
@@ -619,6 +619,14 @@ export default function DiaryCanvas() {
           </div>
 
           <StreakWidget />
+
+          <button 
+            onClick={() => router.push('/gallery')}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/60 hover:bg-white/80 border border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C] transition-all duration-300"
+          >
+            <ImageIcon className="w-4 h-4" />
+            <span className="text-sm font-medium">Gallery</span>
+          </button>
 
           <button 
             onClick={() => router.push('/story')}

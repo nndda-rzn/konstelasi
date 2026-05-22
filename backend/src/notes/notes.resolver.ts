@@ -128,6 +128,15 @@ export class NotesResolver {
     return this.notesService.deleteNoteImage(user.id, id);
   }
 
+  @Query(() => [NoteImage])
+  async getAllMedia(
+    @CurrentUser() user: any,
+    @Args('canvasId', { nullable: true }) canvasId?: string,
+    @Args('storyId', { nullable: true }) storyId?: string,
+  ) {
+    return this.notesService.getAllMedia(user.id, { canvasId, storyId });
+  }
+
   // Archive Feature
   @Query(() => [Note])
   async getArchivedNotes(
