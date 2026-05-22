@@ -178,8 +178,8 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
   return (
     <div className={`${focusMode ? 'fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm' : ''}`}>
     <div className={`${focusMode ? 'relative w-[700px] max-h-[90vh] rounded-2xl shadow-2xl' : 'absolute top-0 right-0 h-full w-[420px]'} bg-white/95 dark:bg-[#2a2438]/95 backdrop-blur-2xl shadow-2xl border-l border-[#FFB8C0]/15 dark:border-[#E63946]/10 z-50 flex flex-col overflow-hidden`}>
-      {/* Accent line */}
-      <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: nodeColor }} />
+      {/* Accent line - gradient */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-candy-accent-line" />
 
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 mt-1 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10">

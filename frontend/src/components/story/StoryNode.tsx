@@ -54,14 +54,13 @@ function StoryNode({ data, selected }: any) {
 
       {/* Ambient Glow */}
       <div
-        className="absolute -inset-2 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"
-        style={{ backgroundColor: `${emotionColor}20` }}
+        className="absolute -inset-2 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl bg-candy-glow"
       />
 
       {/* Main Card */}
-      <div className={`relative w-full h-full bg-gradient-to-br ${config.bgGradient} backdrop-blur-sm border border-white/60 dark:border-[#E63946]/10 rounded-xl shadow-lg shadow-black/5 overflow-hidden ${selected ? 'ring-2 ring-[#FF6B8B]/40' : ''}`}>
-        {/* Top accent line */}
-        <div className="h-0.5 w-full" style={{ backgroundColor: emotionColor }} />
+      <div className={`relative w-full h-full bg-gradient-to-br ${config.bgGradient} backdrop-blur-sm border border-white/60 dark:border-[#E63946]/10 rounded-xl shadow-lg shadow-black/5 overflow-hidden ${selected ? 'ring-candy' : ''}`}>
+        {/* Top accent line - gradient */}
+        <div className="h-[3px] w-full bg-candy-accent-line" />
 
         {/* Header */}
         <div className="flex items-center gap-2 px-3 pt-2.5 pb-1">

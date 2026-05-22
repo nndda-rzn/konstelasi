@@ -65,7 +65,7 @@ function StoryDashboard() {
           </div>
           <button
             onClick={() => setShowWizard(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#E63946] hover:bg-[#E63946]/90 text-white font-medium text-sm transition-all shadow-lg shadow-[#E63946]/20"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-candy-primary text-white font-medium text-sm transition-all shadow-candy hover:shadow-candy-lg hover:scale-[1.02]"
           >
             <Plus className="w-4 h-4" />
             Buat Story Baru
@@ -258,7 +258,7 @@ function StoryWizard({ formData, setFormData, wizardStep, setWizardStep, onClose
           <button
             onClick={wizardStep === 2 ? onCreate : () => setWizardStep(wizardStep + 1)}
             disabled={wizardStep === 1 && !formData.title.trim()}
-            className="px-5 py-2 rounded-xl bg-[#E63946] hover:bg-[#E63946]/90 text-white text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-5 py-2 rounded-xl bg-candy-primary text-white text-sm font-medium transition-all shadow-candy hover:shadow-candy-lg disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {wizardStep === 2 ? 'Buat Story' : 'Lanjut'}
           </button>
