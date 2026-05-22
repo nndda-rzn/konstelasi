@@ -49,7 +49,7 @@ export default function GlobalSidebar() {
             <Sparkles className="h-5 w-5 shrink-0 text-[#E63946]" />
             <div>
               <p className="text-sm font-black tracking-[-0.02em] text-candy">Konstelasi</p>
-              <p className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 mt-0.5">Visual Diary</p>
+              <p className="text-[10px] text-[#5A3E4C]/60 dark:text-[#e2d9f3]/45 mt-0.5">Visual Diary</p>
             </div>
           </div>
         </div>
@@ -80,18 +80,18 @@ export default function GlobalSidebar() {
                   className={`h-4 w-4 shrink-0 transition-colors duration-150 ${
                     active
                       ? 'text-[#E63946]'
-                      : 'text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20 group-hover:text-[#E63946]/50'
+                      : 'text-[#5A3E4C]/55 dark:text-[#e2d9f3]/40 group-hover:text-[#E63946]/70'
                   }`}
                 />
                 <div className="min-w-0 flex-1">
                   <span className={`text-[13px] transition-colors duration-150 block leading-tight ${
                     active
                       ? 'font-semibold text-[#E63946] dark:text-[#FF6B7A]'
-                      : 'font-medium text-[#5A3E4C]/50 dark:text-[#e2d9f3]/35 group-hover:text-[#4A2F3C] dark:group-hover:text-[#e2d9f3]/65'
+                      : 'font-medium text-[#4A2F3C]/80 dark:text-[#e2d9f3]/60 group-hover:text-[#4A2F3C] dark:group-hover:text-[#e2d9f3]/80'
                   }`}>
                     {label}
                   </span>
-                  <span className="text-[10px] text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20 block mt-0.5 leading-none">
+                  <span className="text-[10px] text-[#5A3E4C]/55 dark:text-[#e2d9f3]/35 block mt-0.5 leading-none">
                     {desc}
                   </span>
                 </div>
@@ -109,10 +109,10 @@ export default function GlobalSidebar() {
             className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/60 dark:hover:bg-white/5 transition-all group"
           >
             {theme === 'light'
-              ? <Moon className="h-4 w-4 shrink-0 text-[#5A3E4C]/30 group-hover:text-[#E63946]/50 transition-colors" />
-              : <Sun  className="h-4 w-4 shrink-0 text-[#e2d9f3]/20 group-hover:text-[#E63946]/50 transition-colors" />
+              ? <Moon className="h-4 w-4 shrink-0 text-[#5A3E4C]/55 group-hover:text-[#E63946]/70 transition-colors" />
+              : <Sun  className="h-4 w-4 shrink-0 text-[#e2d9f3]/45 group-hover:text-[#E63946]/70 transition-colors" />
             }
-            <span className="text-[13px] font-medium text-[#5A3E4C]/50 dark:text-[#e2d9f3]/35 group-hover:text-[#4A2F3C] dark:group-hover:text-[#e2d9f3]/65 transition-colors">
+            <span className="text-[13px] font-medium text-[#4A2F3C]/75 dark:text-[#e2d9f3]/55 group-hover:text-[#4A2F3C] dark:group-hover:text-[#e2d9f3]/80 transition-colors">
               {theme === 'light' ? 'Mode Gelap' : 'Mode Terang'}
             </span>
           </button>
@@ -121,8 +121,8 @@ export default function GlobalSidebar() {
             onClick={handleLogout}
             className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/60 dark:hover:bg-white/5 transition-all group"
           >
-            <LogOut className="h-4 w-4 shrink-0 text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20 group-hover:text-[#E63946]/60 transition-colors" />
-            <span className="text-[13px] font-medium text-[#5A3E4C]/50 dark:text-[#e2d9f3]/35 group-hover:text-[#4A2F3C] dark:group-hover:text-[#e2d9f3]/65 transition-colors">
+            <LogOut className="h-4 w-4 shrink-0 text-[#5A3E4C]/55 dark:text-[#e2d9f3]/40 group-hover:text-[#E63946]/70 transition-colors" />
+            <span className="text-[13px] font-medium text-[#4A2F3C]/75 dark:text-[#e2d9f3]/55 group-hover:text-[#4A2F3C] dark:group-hover:text-[#e2d9f3]/80 transition-colors">
               Keluar
             </span>
           </button>
@@ -138,7 +138,7 @@ export default function GlobalSidebar() {
               key={href}
               href={href}
               className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all ${
-                active ? 'text-[#E63946]' : 'text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30'
+                active ? 'text-[#E63946]' : 'text-[#5A3E4C]/65 dark:text-[#e2d9f3]/45'
               }`}
             >
               <Icon className="h-5 w-5" />
