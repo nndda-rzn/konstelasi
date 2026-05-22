@@ -22,7 +22,7 @@ import { CREATE_NOTE, BATCH_UPDATE_NOTES, CREATE_NOTE_LINK, DELETE_NOTE_LINK, UP
 import NoteNode from './NoteNode';
 import SemanticEdge from './SemanticEdge';
 import NoteEditorSidebar from './NoteEditorSidebar';
-import TimelineView from './TimelineView';
+import TimelineView from '@/features/canvas/components/TimelineView';
 import { Loader2, Sparkles, Search, Download, LayoutTemplate, List, Tag as TagIcon, Clock, BarChart3, Archive, Wand2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toPng } from 'html-to-image';
@@ -32,7 +32,7 @@ import TagPanel from '@/features/canvas/panels/TagPanel';
 import SearchPanel from '@/features/canvas/panels/SearchPanel';
 import StatsPanel from '@/features/canvas/panels/StatsPanel';
 import ArchivePanel from '@/features/canvas/panels/ArchivePanel';
-import StreakWidget from './StreakWidget';
+import StreakWidget from '@/features/canvas/components/StreakWidget';
 import ExportPanel from '@/features/canvas/panels/ExportPanel';
 import CalendarPanel from '@/features/canvas/panels/CalendarPanel';
 import AdvancedAnalyticsPanel from '@/features/canvas/panels/AdvancedAnalyticsPanel';
