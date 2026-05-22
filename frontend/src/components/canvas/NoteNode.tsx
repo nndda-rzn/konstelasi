@@ -103,7 +103,7 @@ export default memo(function NoteNode({ data, isConnectable, selected, viewMode 
         onDoubleClick={() => data.onDoubleClick?.()}
       >
         {data.images && data.images.length > 0 && (
-          <div className="mb-4 w-full shrink overflow-hidden rounded-xl border border-[#FFB4A2]/10 shadow-inner relative group/image flex justify-center bg-[#FFF5F0]/50" style={{ minHeight: '60px', maxHeight: '50%' }}>
+          <div className="mb-4 w-full shrink-0 overflow-hidden rounded-xl border border-[#FFB4A2]/10 shadow-inner relative group/image flex justify-center bg-[#FFF5F0]/50" style={{ minHeight: '60px', maxHeight: '180px' }}>
             <img 
               src={data.images[0].imageUrl} 
               alt={data.images[0].caption || 'Note attachment'} 
@@ -165,6 +165,8 @@ export default memo(function NoteNode({ data, isConnectable, selected, viewMode 
   if (prevData.mood !== nextData.mood) return false;
   if (prevData.isSearching !== nextData.isSearching) return false;
   if (prevData.isMatch !== nextData.isMatch) return false;
+  if (prevData.images?.length !== nextData.images?.length) return false;
+  if (prevData.images?.[0]?.id !== nextData.images?.[0]?.id) return false;
   
   return true;
 });
