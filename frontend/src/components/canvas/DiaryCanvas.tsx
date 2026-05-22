@@ -28,14 +28,14 @@ import { useRouter } from 'next/navigation';
 import { toPng } from 'html-to-image';
 import { useCanvas } from '@/context/CanvasContext';
 import { useTags } from '@/context/TagContext';
-import TagPanel from './TagPanel';
-import SearchPanel from './SearchPanel';
-import StatsPanel from './StatsPanel';
-import ArchivePanel from './ArchivePanel';
+import TagPanel from '@/features/canvas/panels/TagPanel';
+import SearchPanel from '@/features/canvas/panels/SearchPanel';
+import StatsPanel from '@/features/canvas/panels/StatsPanel';
+import ArchivePanel from '@/features/canvas/panels/ArchivePanel';
 import StreakWidget from './StreakWidget';
-import ExportPanel from './ExportPanel';
-import CalendarPanel from './CalendarPanel';
-import AdvancedAnalyticsPanel from './AdvancedAnalyticsPanel';
+import ExportPanel from '@/features/canvas/panels/ExportPanel';
+import CalendarPanel from '@/features/canvas/panels/CalendarPanel';
+import AdvancedAnalyticsPanel from '@/features/canvas/panels/AdvancedAnalyticsPanel';
 import { useAutoLayout } from '@/features/canvas/hooks/useAutoLayout';
 
 const nodeTypes = {
