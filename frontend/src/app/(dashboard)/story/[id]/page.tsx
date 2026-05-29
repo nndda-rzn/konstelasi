@@ -339,6 +339,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             const noteData = story?.nodes?.find((n: any) => n.id === nodeId);
             if (noteData) setSelectedNote(noteData);
           }}
+          searchQuery={searchQuery}
           scrapbookCanvasClass={scrapbookCanvasClass}
           scrapbookGridColor={scrapbookGridColor}
           scrapbookFontClass={scrapbookFontClass}
@@ -436,6 +437,7 @@ function StoryCanvas({ params }: { params: { id: string } }) {
               refetch();
             }}
             onUpdateCache={handleUpdateCache}
+            onRequestRefresh={() => refetch()}
             onDeleteSuccess={() => {
               const deletedId = selectedNote?.id;
               setSelectedNote(null);

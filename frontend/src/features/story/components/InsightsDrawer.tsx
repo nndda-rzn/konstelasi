@@ -37,7 +37,7 @@ export default function InsightsDrawer({ isOpen, onClose, onSelectTab, activeTab
           return (
             <button
               key={tab.id}
-              onClick={() => { onSelectTab(tab.id); onClose(); }}
+              onClick={() => onSelectTab(tab.id)}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium transition-all ${
                 isActive
                   ? 'bg-[#FFB8C0]/10 dark:bg-[#E63946]/10'

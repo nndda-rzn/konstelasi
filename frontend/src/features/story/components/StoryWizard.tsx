@@ -1,6 +1,7 @@
 'use client';
 
-import { Heart, User, Compass, Star, Sparkles, BookOpen, Lock, Globe, Users } from 'lucide-react';
+import { Heart, User, Compass, Star, Sparkles, BookOpen, Lock, Globe, Users, Layers } from 'lucide-react';
+import { getTemplateFor } from '@/features/story/templates';
 
 export interface StoryWizardFormData {
   title: string;
@@ -69,12 +70,13 @@ export default function StoryWizard({
                 {STORY_TYPES.map((type) => {
                   const Icon = type.icon;
                   const selected = formData.storyType === type.value;
+                  const template = getTemplateFor(type.value);
                   return (
                     <button
                       key={type.value}
                       onClick={() => setFormData({ ...formData, storyType: type.value })}
                       aria-pressed={selected}
-                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                      className={`relative p-3.5 rounded-xl border text-left transition-all ${
                         selected
                           ? 'border-[#E63946] bg-[#E63946]/5 shadow-sm'
                           : 'border-[#FFB8C0]/15 hover:border-[#E63946]/30'
@@ -83,10 +85,38 @@ export default function StoryWizard({
                       <Icon className="w-5 h-5 mb-2" style={{ color: type.color }} />
                       <p className="text-xs font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">{type.label}</p>
                       <p className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 mt-0.5">{type.desc}</p>
+                      {template && (
+                        <span
+                          className="absolute top-2 right-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#E63946]/10 text-[#E63946] text-[9px] font-semibold tabular-nums"
+                          title={`Auto-generate ${template.nodes.length} starter scenes`}
+                        >
+                          <Layers className="w-2.5 h-2.5" />
+                          +{template.nodes.length}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
               </div>
+              {formData.storyType && (() => {
+                const tmpl = getTemplateFor(formData.storyType);
+                return tmpl ? (
+                  <div className="mt-3 px-3 py-2 rounded-lg bg-[#FFB8C0]/8 border border-[#FFB8C0]/20 flex items-start gap-2">
+                    <Layers className="w-3.5 h-3.5 text-[#E63946] mt-0.5 shrink-0" />
+                    <p className="text-[11px] text-[#5A3E4C]/70 dark:text-[#e2d9f3]/60 leading-relaxed">
+                      <span className="font-medium">Template:</span> {tmpl.description}.
+                      Cerita akan dibuat dengan {tmpl.nodes.length} scene awal yang sudah terhubung.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-3 px-3 py-2 rounded-lg bg-[#5A3E4C]/5 border border-[#5A3E4C]/10 flex items-start gap-2">
+                    <BookOpen className="w-3.5 h-3.5 text-[#5A3E4C]/40 mt-0.5 shrink-0" />
+                    <p className="text-[11px] text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50 leading-relaxed">
+                      Mulai dari kanvas kosong. Tambahkan scene sesuai keinginanmu.
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
           )}
 

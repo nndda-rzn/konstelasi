@@ -35,6 +35,8 @@ interface Props {
    * Opens the node editor without forcing a view switch.
    */
   onSelectNodeId?: (nodeId: string) => void;
+  /** Search query forwarded from header. Filters nodes in non-canvas views. */
+  searchQuery?: string;
   scrapbookCanvasClass: string;
   scrapbookGridColor: string;
   scrapbookFontClass: string;
@@ -56,11 +58,23 @@ export default function StoryContent({
   onConnect,
   onNodeDoubleClick,
   onSelectNodeId,
+  searchQuery = '',
   scrapbookCanvasClass,
   scrapbookGridColor,
   scrapbookFontClass,
 }: Props) {
-  const storyNodes = story?.nodes || [];
+  const allStoryNodes = story?.nodes || [];
+
+  // Filter nodes by search query for non-canvas views.
+  // Canvas mode handles search via opacity dimming in flowNodes (parent).
+  const query = searchQuery.trim().toLowerCase();
+  const storyNodes = !query
+    ? allStoryNodes
+    : allStoryNodes.filter((n: any) => {
+        const title = n.title?.toLowerCase() || '';
+        const content = (n.content || '').replace(/<[^>]+>/g, '').toLowerCase();
+        return title.includes(query) || content.includes(query);
+      });
 
   // From a non-canvas view, clicking a node should open the editor
   // directly (no forced view switch).

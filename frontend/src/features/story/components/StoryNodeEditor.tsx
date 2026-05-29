@@ -59,9 +59,11 @@ interface StoryNodeEditorProps {
   onClose: () => void;
   onUpdateCache: (nodeId: string, title?: string, content?: string, newImages?: any[], color?: string, mood?: string, extra?: any) => void;
   onDeleteSuccess: () => void;
+  /** Optional callback to refetch the story when content needs reload (e.g. Time Capsule auto-unlock). */
+  onRequestRefresh?: () => void;
 }
 
-export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDeleteSuccess }: StoryNodeEditorProps) {
+export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDeleteSuccess, onRequestRefresh }: StoryNodeEditorProps) {
   const [title, setTitle] = useState(note?.title || '');
   const [content, setContent] = useState(note?.content || '');
   const [contentMasked, setContentMasked] = useState(Boolean(note?.isTimeLocked && (note?.content === null || note?.content === undefined)));
@@ -168,6 +170,27 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
   const isTimeLocked = Boolean(unlockDate && new Date(unlockDate).getTime() > Date.now());
   const unlockLabel = unlockDate ? formatUnlockDate(unlockDate) : '';
   const isContentSealed = isTimeLocked || contentMasked;
+
+  // Auto-reload Time Capsule when unlock date passes:
+  // 1. If contentMasked is true but unlock has already passed -> immediately
+  //    request a refresh so the editor loads the actual content.
+  // 2. If unlock date is in the future, schedule a refresh exactly at unlock
+  //    time so user doesn't have to manually close/reopen the editor.
+  useEffect(() => {
+    if (!unlockDate || !onRequestRefresh) return;
+    const unlockTs = new Date(unlockDate).getTime();
+    const now = Date.now();
+    // Already passed and content is masked -> refresh now.
+    if (unlockTs <= now && contentMasked) {
+      onRequestRefresh();
+      return;
+    }
+    // Schedule refresh at exact unlock time (cap at 24h to avoid huge timers).
+    const delay = Math.min(unlockTs - now, 24 * 60 * 60 * 1000);
+    if (delay <= 0) return;
+    const timer = setTimeout(() => onRequestRefresh(), delay + 500);
+    return () => clearTimeout(timer);
+  }, [unlockDate, contentMasked, onRequestRefresh]);
 
   return (
     <div className={`${focusMode ? 'fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm' : ''}`}>

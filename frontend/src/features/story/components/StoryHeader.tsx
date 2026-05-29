@@ -15,7 +15,10 @@ import {
   Download,
   Sparkles,
   Search,
+  Share2,
+  Check,
 } from 'lucide-react';
+import { useState } from 'react';
 
 export type StoryViewMode =
   | 'canvas'
@@ -36,6 +39,7 @@ const VIEW_MODES: Array<{ mode: StoryViewMode; icon: any; label: string }> = [
 
 interface Props {
   story: {
+    id?: string;
     title?: string;
     subtitle?: string | null;
     status?: string;
@@ -74,6 +78,22 @@ export default function StoryHeader({
   onAddScene,
   onBack,
 }: Props) {
+  const [linkCopied, setLinkCopied] = useState(false);
+  const isShareable = story?.privacyLevel === 'public' || story?.privacyLevel === 'friends_only';
+
+  const handleShare = async () => {
+    if (!story?.id || typeof window === 'undefined') return;
+    const url = `${window.location.origin}/story/${story.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      // Fallback: select and copy via prompt
+      window.prompt('Copy link:', url);
+    }
+  };
+
   const PrivIcon =
     story?.privacyLevel === 'private'
       ? Lock
@@ -173,6 +193,25 @@ export default function StoryHeader({
         >
           <Settings className="w-4 h-4" />
         </button>
+
+        {isShareable && (
+          <button
+            onClick={handleShare}
+            aria-label={linkCopied ? 'Link tersalin' : 'Salin link share'}
+            title={linkCopied ? 'Link tersalin!' : 'Salin link untuk dibagikan'}
+            className={`p-2 rounded-lg transition-all ${
+              linkCopied
+                ? 'bg-emerald-500/10 text-emerald-600'
+                : 'hover:bg-[#FFB8C0]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'
+            }`}
+          >
+            {linkCopied ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <Share2 className="w-4 h-4" />
+            )}
+          </button>
+        )}
 
         <button
           onClick={onToggleInsights}
