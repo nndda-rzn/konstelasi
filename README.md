@@ -3,7 +3,7 @@
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=0,2,4,6,12&height=220&section=header&text=Konstelasi&fontSize=84&fontColor=ffffff&animation=fadeIn&fontAlignY=36&desc=Visual%20Diary%20%E2%80%A2%20Connected%20Bubbles%20%E2%80%A2%20Personal%20Storytelling&descSize=17&descAlignY=58" alt="Konstelasi Banner" />
 
 <h3>
-  <em>"Tulis ceritamu sebagai bintang. Hubungkan mereka menjadi konstelasi kenangan."</em>
+  <em>"Write your stories as stars. Connect them into constellations of memories."</em>
 </h3>
 
 <p>
@@ -26,49 +26,49 @@
 
 ---
 
-## Daftar Isi
+## Table of Contents
 
-- [Tentang](#tentang)
-- [Fitur Utama](#fitur-utama)
+- [About](#about)
+- [Key Features](#key-features)
 - [Tech Stack](#tech-stack)
-- [Arsitektur](#arsitektur)
-- [Memulai](#memulai)
-- [Struktur Project](#struktur-project)
-- [Fitur Detail](#fitur-detail)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [Feature Details](#feature-details)
 - [GraphQL API](#graphql-api)
 - [Database Schema](#database-schema)
 - [Roadmap](#roadmap)
-- [Kontribusi](#kontribusi)
-- [Lisensi](#lisensi)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## Tentang
+## About
 
-**Konstelasi** adalah platform diary visual berbasis node yang memungkinkan kamu menulis cerita sebagai "bubble" yang saling terhubung. Setiap catatan adalah bintang, dan hubungan antar catatan membentuk konstelasi kenangan personal kamu.
+**Konstelasi** is a node-based visual diary platform that lets you write your stories as interconnected "bubbles." Each note is a star, and the relationships between notes form a personal constellation of memories.
 
-Tidak seperti aplikasi catatan linear tradisional, Konstelasi menggunakan **canvas tak terbatas** dengan **graph-based note-taking** sehingga kamu bisa:
+Unlike traditional linear note-taking applications, Konstelasi leverages an **infinite canvas** with **graph-based note-taking**, enabling you to:
 
-- Visualisasi hubungan antara pikiran, kenangan, dan ide
-- Membangun cerita kompleks dengan multi-cabang naratif
-- Time capsule untuk membuka memory di tanggal tertentu
-- Story mode dengan 6 view modes (canvas, timeline, reading, gallery, outline, cinematic)
-- Photobooth untuk mengabadikan momen langsung
+- Visualize relationships between thoughts, memories, and ideas
+- Build complex stories with multi-branched narratives
+- Use time capsules to unlock memories on specific dates
+- Experience story mode with 6 distinct view modes (canvas, timeline, reading, gallery, outline, cinematic)
+- Capture moments instantly with the integrated photobooth
 
-### Kenapa Konstelasi?
+### Why Konstelasi?
 
-| Aspek | Catatan Tradisional | Konstelasi |
-|-------|---------------------|------------|
+| Aspect | Traditional Notes | Konstelasi |
+|--------|-------------------|------------|
 | Format | Linear (top-to-bottom) | Visual graph + bubbles |
-| Hubungan | Implisit, tersebar | Eksplisit via edges |
-| Storytelling | Terbatas | 6 view modes berbeda |
-| Personalisasi | Minim | Scrapbook themes + 6 fonts |
-| Privasi | Local atau cloud | Time capsules + per-story privacy |
-| Kolaborasi | Tidak ada | Friends-only stories + public sharing |
+| Relationships | Implicit, scattered | Explicit via edges |
+| Storytelling | Limited | 6 distinct view modes |
+| Personalization | Minimal | Scrapbook themes + 6 fonts |
+| Privacy | Local or cloud | Time capsules + per-story privacy |
+| Collaboration | None | Friends-only stories + public sharing |
 
 ---
 
-## Fitur Utama
+## Key Features
 
 <div align="center">
 
@@ -78,7 +78,7 @@ Tidak seperti aplikasi catatan linear tradisional, Konstelasi menggunakan **canv
 | **Story Mode** | Stable | 6 view modes, templates, time capsule, branching narrative |
 | **Rich Editor** | Stable | TipTap with markdown shortcuts, fonts, alignments, code blocks |
 | **Photobooth** | Stable | Real-time webcam, filters, frames, batch capture |
-| **Gallery** | Stable | Aggregate images across all notes |
+| **Gallery** | Stable | Aggregated images across all notes |
 | **Engagement** | New | Bookmarks, share links, view tracking |
 | **Theming** | Stable | 4 scrapbook palettes, 3 scrapbook fonts, 6 content fonts |
 | **Search** | Stable | Cross-mode filtering with grayscale dim for non-matches |
@@ -87,17 +87,17 @@ Tidak seperti aplikasi catatan linear tradisional, Konstelasi menggunakan **canv
 
 ### Capability Highlights
 
-- **Auto-save semua perubahan** dengan visual indicator (saving/saved/error)
-- **Optimistic UI** untuk perceived performance instant
-- **Undo/Redo** dengan keyboard shortcut (Ctrl+Z / Ctrl+Shift+Z)
-- **Keyboard navigation** antar nodes (arrow keys)
-- **Edge reconnection** drag endpoint ke node lain
-- **Branch-aware positioning** saat add scene baru di story
-- **Time capsules** dengan auto-reload saat unlock
-- **Multi-image notes** dengan badge counter di canvas
-- **Word count + reading time** estimasi
-- **Created/Updated timestamps** dengan format relatif Indonesia
-- **Scrapbook themes** dengan picker visible di header
+- **Auto-save on every change** with real-time visual indicators (saving / saved / error)
+- **Optimistic UI** for instant perceived performance
+- **Undo / Redo** via keyboard shortcuts (Ctrl+Z / Ctrl+Shift+Z)
+- **Keyboard navigation** between nodes using arrow keys
+- **Edge reconnection** by dragging endpoints to other nodes
+- **Branch-aware positioning** when adding new scenes to a story
+- **Time capsules** with auto-reload on unlock
+- **Multi-image notes** with badge counter on the canvas
+- **Word count and reading time** estimation
+- **Created and updated timestamps** with relative format
+- **Scrapbook themes** with picker accessible directly in the header
 
 ---
 
@@ -147,7 +147,7 @@ Tidak seperti aplikasi catatan linear tradisional, Konstelasi menggunakan **canv
   <img src="https://img.shields.io/badge/RxJS-B7178C?style=for-the-badge&logo=reactivex&logoColor=white" alt="RxJS"/>
 </p>
 
-### Tooling & DevOps
+### Tooling and DevOps
 
 <p>
   <img src="https://img.shields.io/badge/ESLint_9-4B32C3?style=for-the-badge&logo=eslint&logoColor=white" alt="ESLint"/>
@@ -178,7 +178,7 @@ Tidak seperti aplikasi catatan linear tradisional, Konstelasi menggunakan **canv
 
 ---
 
-## Arsitektur
+## Architecture
 
 ```
                     +---------------------+
@@ -220,65 +220,66 @@ Tidak seperti aplikasi catatan linear tradisional, Konstelasi menggunakan **canv
         +-------------------+
 ```
 
-### Pattern yang Dipakai
+### Architectural Patterns
 
-- **Code-first GraphQL** - Schema generated otomatis dari TypeScript decorators
-- **Module-based feature isolation** - Notes, Story, Tag, Canvas, Auth sebagai modules terpisah
-- **Hooks-first frontend architecture** - Custom hooks untuk reusable logic (useEdgeOperations, useNoteCreation, useCanvasHistory, dll)
-- **Optimistic UI everywhere** - Apollo cache update langsung sebelum server respond
-- **Debounced auto-save** - 800ms debounce untuk semua content updates
-- **Graph-based data model** - Self-referential edges via NoteLink entity
+- **Code-first GraphQL** - Schema generated automatically from TypeScript decorators
+- **Module-based feature isolation** - Notes, Story, Tag, Canvas, and Auth are separated as independent modules
+- **Hooks-first frontend architecture** - Custom hooks encapsulate reusable logic (useEdgeOperations, useNoteCreation, useCanvasHistory, etc.)
+- **Optimistic UI everywhere** - Apollo cache updates immediately before server confirmation
+- **Debounced auto-save** - 800 ms debounce on all content updates
+- **Graph-based data model** - Self-referential edges via the NoteLink entity
 
 ---
 
-## Memulai
 
-### Prasyarat
+## Getting Started
+
+### Prerequisites
 
 - **Node.js** 20+ ([download](https://nodejs.org))
-- **npm** 10+ atau pnpm
-- **PostgreSQL** 14+ (lokal atau hosted di Supabase)
-- **Supabase** account untuk image storage ([signup](https://supabase.com))
+- **npm** 10+ or pnpm
+- **PostgreSQL** 14+ (local or hosted on Supabase)
+- A **Supabase** account for image storage ([sign up](https://supabase.com))
 
-### Setup Backend
+### Backend Setup
 
 ```bash
-# Clone repo
+# Clone the repository
 git clone https://github.com/nndda-rzn/konstelasi.git
 cd konstelasi/backend
 
 # Install dependencies
 npm install
 
-# Setup .env
+# Configure environment variables
 cp .env.example .env
-# Edit DATABASE_URL, JWT_SECRET, dll.
+# Edit DATABASE_URL, JWT_SECRET, and other variables as needed
 
-# Start dev server
+# Start the development server
 npm run start:dev
 ```
 
-Backend akan running di `http://localhost:3001`. GraphQL playground tersedia di `http://localhost:3001/graphql`.
+The backend will run at `http://localhost:3001`. The GraphQL playground is available at `http://localhost:3001/graphql`.
 
-Schema database **auto-sync** saat startup via MikroORM `updateSchema({ safe: true })` - tidak perlu run migration manual untuk setup awal.
+The database schema is **auto-synced** at startup via MikroORM `updateSchema({ safe: true })`, so no manual migration is required for initial setup.
 
-### Setup Frontend
+### Frontend Setup
 
 ```bash
 cd ../frontend
 
-# Install dependencies (gunakan --legacy-peer-deps karena TipTap)
+# Install dependencies (use --legacy-peer-deps because of TipTap)
 npm install --legacy-peer-deps
 
-# Setup .env.local
+# Configure environment variables
 cp .env.example .env.local
-# Edit NEXT_PUBLIC_GRAPHQL_URL, NEXT_PUBLIC_SUPABASE_URL, dll.
+# Edit NEXT_PUBLIC_GRAPHQL_URL, NEXT_PUBLIC_SUPABASE_URL, etc.
 
-# Start dev server (Turbopack)
+# Start the development server (Turbopack)
 npm run dev
 ```
 
-Frontend akan running di `http://localhost:3000`.
+The frontend will run at `http://localhost:3000`.
 
 ### Environment Variables
 
@@ -301,30 +302,30 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 ```bash
 # Frontend
-npm run dev          # Start dev server (port 3000)
-npm run build        # Production build
-npm run lint         # ESLint check
+npm run dev          # Start the dev server (port 3000)
+npm run build        # Build for production
+npm run lint         # Run ESLint
 
 # Backend
 npm run start:dev    # Watch mode (port 3001)
-npm run build        # Production build
+npm run build        # Build for production
 npm run test         # Run tests
-npm run lint         # ESLint + auto-fix
+npm run lint         # ESLint with auto-fix
 ```
 
 ---
 
-## Struktur Project
+## Project Structure
 
 ```
 konstelasi/
-+-- frontend/                       # Next.js 16 App
++-- frontend/                       # Next.js 16 application
 |   +-- src/
 |   |   +-- app/                    # App Router pages
 |   |   |   +-- (dashboard)/        # Protected routes
 |   |   |   |   +-- canvas/         # Main canvas page
-|   |   |   |   +-- story/          # Story dashboard + detail
-|   |   |   |   +-- gallery/        # Aggregate image gallery
+|   |   |   |   +-- story/          # Story dashboard and detail pages
+|   |   |   |   +-- gallery/        # Aggregated image gallery
 |   |   |   |   +-- photobooth/     # Webcam capture
 |   |   |   +-- login/              # Auth pages
 |   |   |   +-- register/
@@ -340,7 +341,7 @@ konstelasi/
 |   |   |   |   +-- utils/          # scrapbookTheme, nodeOrder
 |   |   |   |   +-- templates.ts    # Story type templates
 |   |   |   +-- photobooth/
-|   |   +-- components/             # Shared UI
+|   |   +-- components/             # Shared UI components
 |   |   +-- context/                # CanvasContext, StoryContext, TagContext
 |   |   +-- graphql/                # Queries, mutations, story.ts
 |   |   +-- lib/                    # Apollo wrapper, providers, toast
@@ -348,59 +349,60 @@ konstelasi/
 |
 +-- backend/                        # NestJS 11 API
 |   +-- src/
-|   |   +-- auth/                   # JWT auth + guards
-|   |   +-- canvas/                 # Canvas resolver + service
-|   |   +-- entities/               # MikroORM entities (note, story, tag, etc)
+|   |   +-- auth/                   # JWT auth and guards
+|   |   +-- canvas/                 # Canvas resolver and service
+|   |   +-- entities/               # MikroORM entities (note, story, tag, etc.)
 |   |   +-- migrations/             # SQL migration files
-|   |   +-- notes/                  # Notes module (CRUD + links + images)
-|   |   +-- story/                  # Story module (resolvers + bookmarks)
+|   |   +-- notes/                  # Notes module (CRUD, links, images)
+|   |   +-- story/                  # Story module (resolvers, bookmarks)
 |   |   +-- streak/                 # Writing streak tracker
 |   |   +-- tag/                    # Tag module
-|   |   +-- mikro-orm.config.ts     # ORM config
-|   |   +-- main.ts                 # Entry + schema auto-sync
+|   |   +-- mikro-orm.config.ts     # ORM configuration
+|   |   +-- main.ts                 # Entry point and schema auto-sync
 |   |   +-- schema.gql              # Generated GraphQL schema
 |
 +-- README.md
-+-- database_setup.sql              # Initial RLS + bucket setup
++-- database_setup.sql              # Initial RLS and bucket setup
 ```
 
 ---
 
-## Fitur Detail
+
+## Feature Details
 
 ### Visual Canvas
 
-Canvas tak terbatas untuk visualisasi pikiran sebagai connected bubbles.
+An infinite canvas for visualizing thoughts as connected bubbles.
 
 **Capabilities:**
-- Drag-and-drop nodes dengan smooth bezier curves
-- Multi-node selection + bulk delete dengan ConfirmDialog
-- Undo/Redo (Ctrl+Z / Ctrl+Shift+Z) dengan 50-step history
-- Keyboard navigation (arrow keys) antar nodes
+- Drag-and-drop nodes with smooth bezier curves
+- Multi-node selection and bulk delete with a confirmation dialog
+- Undo / Redo (Ctrl+Z / Ctrl+Shift+Z) with a 50-step history
+- Keyboard navigation between nodes using arrow keys
 - 3 view modes: Canvas, Thread, Timeline
-- Auto-layout untuk merapikan posisi node otomatis
+- Auto-layout to organize nodes automatically
 - 8 color themes per node (default, red, amber, emerald, blue, indigo, purple, pink)
 - 6 mood options (memory, hope, secret, dream, ordinary, important)
-- Multi-image upload dengan badge counter
-- Tag system dengan auto-complete
-- Edge labels (narrative, causal, character, thematic, dll)
-- Search dengan grayscale dim untuk non-matches
-- Export ke PNG via html-to-image
+- Multi-image upload with badge counter
+- Tag system with auto-complete
+- Edge labels (narrative, causal, character, thematic, etc.)
+- Search with grayscale dimming for non-matching nodes
+- PNG export via html-to-image
 
 ### Story Mode
 
-Tingkat selanjutnya dari catatan biasa - kumpulan node dengan struktur naratif.
+The next level beyond simple notes - a collection of nodes with narrative structure.
 
 **6 View Modes:**
 
-| Mode | Deskripsi |
-|------|-----------|
-| **Canvas** | Editing surface dengan React Flow, drag, connect, edit |
-| **Timeline** | Vertical timeline sorted by eventDate atau createdAt |
-| **Reading** | Single-page reader, navigate via edges atau array order, bookmark |
-| **Gallery** | Masonry image grid dengan lightbox |
-| **Outline** | Grouped by node type dengan collapsible sections |
-| **Cinematic** | Full-screen 7s/slide auto-advance dengan Ken Burns effect |
+| Mode | Description |
+|------|-------------|
+| **Canvas** | Editing surface with React Flow: drag, connect, edit |
+| **Timeline** | Vertical timeline sorted by eventDate or createdAt |
+| **Reading** | Single-page reader with edge-aware navigation and bookmarks |
+| **Gallery** | Masonry image grid with lightbox |
+| **Outline** | Grouped by node type with collapsible sections |
+| **Cinematic** | Full-screen 7s/slide auto-advance with Ken Burns effect |
 
 **10 Story Node Types:**
 
@@ -410,101 +412,102 @@ scene, memory, character, dialogue, moment, feeling, timeline_event, media, quot
 - Love Story - 4 scenes connected linearly
 - Biography - 4 timeline events
 - Memory Collection - branching memories
-- Adventure - persiapan -> berangkat -> petualangan -> pulang
-- Character Study - branching profil
+- Adventure - preparation, departure, journey, return
+- Character Study - branching profile
 
-**Sharing & Privacy:**
+**Sharing and Privacy:**
 - 3 levels: Private, Friends Only, Public
-- Copy public link dengan visual feedback
-- Bookmark per node untuk reading view
-- Friends-only via email invite + GRANT_STORY_ACCESS
+- Copy public link with visual feedback
+- Bookmark per node in reading view
+- Friends-only access via email invite and `GRANT_STORY_ACCESS`
 
 **Time Capsules:**
-- Set unlock date pada node level
-- Backend menyembunyikan content sampai tanggal unlock
-- Auto-reload content saat unlock date passed (no manual refresh)
+- Set an unlock date at the node level
+- The backend hides content until the unlock date
+- Auto-reload of content when the unlock date passes (no manual refresh required)
 
 ### Rich Text Editor (TipTap 3)
 
 **Format Options:**
 - Bold, Italic, Strikethrough
-- Heading 2/3
-- Bullet/Ordered/Task lists
-- Quote, Code block (dengan syntax highlight via lowlight)
-- Link, Horizontal rule
-- 3 Text alignment (left/center/right)
-- 6 Font families (Default, Serif, Display, Handwriting, Script, Monospace)
+- Heading levels 2 and 3
+- Bullet, ordered, and task lists
+- Quote, code block (with syntax highlighting via lowlight)
+- Link, horizontal rule
+- 3 text alignments (left / center / right)
+- 6 font families (Default, Serif, Display, Handwriting, Script, Monospace)
 
 **Productivity:**
 - Markdown shortcuts (`**bold**`, `# heading`, `> quote`, `- list`)
-- Auto-save dengan visual indicator real-time
-- Word count + reading time estimasi
+- Auto-save with a real-time visual indicator
+- Word count and reading time estimation
 - Title font picker (per-note customization)
-- Created/Updated timestamp display dengan format relatif Indonesia
+- Created and updated timestamp display in relative format
 
 ### Photobooth
 
-Real-time webcam capture dengan custom filters.
+Real-time webcam capture with custom filters.
 
 **Features:**
 - Multi-shot batch capture
 - Custom frame overlays
-- Color filters (B&W, sepia, vintage, dll)
-- Caption + sticker support
-- Direct save ke note sebagai image
+- Color filters (black-and-white, sepia, vintage, etc.)
+- Caption and sticker support
+- Direct save to a note as an image
 
 ### Gallery
 
-Aggregate semua image dari semua notes ke satu masonry grid:
-- Filter by tag, color, atau date range
+Aggregates images from all notes into a single masonry grid:
+- Filter by tag, color, or date range
 - Lightbox preview
-- Click untuk jump ke source note
+- Click to jump to the source note
 
 ### Engagement Layer
 
-- **Bookmarks** per node dengan visual indicator filled di reading view
-- **View tracking** (RECORD_VIEW mutation, ready untuk analytics)
-- **Badges** untuk milestone (ADD_BADGE mutation, ready untuk gamification)
-- **Story analytics** dengan emotional arc, word count, mood distribution
+- **Bookmarks** per node with a filled visual indicator in reading view
+- **View tracking** (`recordView` mutation, ready for analytics)
+- **Badges** for milestones (`addBadge` mutation, ready for gamification)
+- **Story analytics** with emotional arc, word count, and mood distribution
 
 ---
 
+
 ## GraphQL API
 
-API utama tersedia di `/graphql` dengan code-first schema generation.
+The main API is exposed at `/graphql` with code-first schema generation.
 
 ### Notes Module
 
 **Queries:**
-- `getNotes(canvasId, tagIds)` - List all notes dengan filter
+- `getNotes(canvasId, tagIds)` - List all notes with filters
 - `getArchivedNotes(canvasId)` - List archived notes
-- `getNote(id)` - Single note dengan full data
-- `getWritingStreak` - User's writing streak counter
+- `getNote(id)` - Single note with full data
+- `getWritingStreak` - User writing streak counter
 
 **Mutations:**
-- `createNote(input)` - Create note dengan optional mood
-- `updateNotePosition(input)` - Single position update
+- `createNote(input)` - Create a note with optional mood
+- `updateNotePosition(input)` - Update single position
 - `batchUpdateNotes(inputs)` - Batch position/size update (debounced)
-- `updateNoteContent(input)` - Full content update (title, body, color, mood, titleFont, etc)
+- `updateNoteContent(input)` - Full content update (title, body, color, mood, titleFont, etc.)
 - `deleteNote(id)` / `archiveNote(id)` / `unarchiveNote(id)`
 - `createNoteLink(input)` / `updateNoteLink(input)` / `deleteNoteLink(id)`
 - `addNoteImage(input)` / `deleteNoteImage(id)`
-- `restoreNoteVersion(id)` - Restore previous version
+- `restoreNoteVersion(id)` - Restore a previous version
 
 ### Story Module
 
 **Queries:**
-- `getStories` - List user's stories
-- `getStory(id)` - Full story dengan nodes + edges
-- `getOnThisDayMemories` - Memory dari tahun lalu di tanggal ini
+- `getStories` - List all stories owned by the user
+- `getStory(id)` - Full story with nodes and edges
+- `getOnThisDayMemories` - Memories from this date in previous years
 - `getPublicStory(id)` - Public access (no auth required)
 - `getStoryAccess(storyId)` - List friend invitations
-- `getBookmarks(storyId)` - User's bookmarked nodes
-- `getStoryAnalytics(storyId)` - Aggregate stats + emotional arc
+- `getBookmarks(storyId)` - User-bookmarked nodes
+- `getStoryAnalytics(storyId)` - Aggregated stats and emotional arc
 
 **Mutations:**
-- `createStory(input)` - Create dengan privacy + theme + storyType
-- `updateStory(input)` - Update meta + status + scrapbookTheme
+- `createStory(input)` - Create with privacy, theme, and storyType
+- `updateStory(input)` - Update meta, status, and scrapbookTheme
 - `deleteStory(id)`
 - `addNodeToStory(storyId, noteId, nodeType, metadata)`
 - `removeNodeFromStory(storyId, noteId)`
@@ -516,7 +519,7 @@ API utama tersedia di `/graphql` dengan code-first schema generation.
 - `recordView(storyId, nodeId, timeSpent)`
 - `createStoryVersion(storyId)` / `restoreStoryVersion(id)` / `deleteStoryVersion(id)`
 
-### Tag & Canvas Module
+### Tag and Canvas Modules
 
 **Mutations:**
 - `createTag(name, color)` / `updateTag(id, name, color)` / `deleteTag(id)`
@@ -527,15 +530,15 @@ API utama tersedia di `/graphql` dengan code-first schema generation.
 
 ### Auth Module
 
-- `login(email, password)` - Returns JWT token
-- `register(email, password, name)` - Create account + auto-login
+- `login(email, password)` - Returns a JWT token
+- `register(email, password, name)` - Create account and auto-login
 - `me` - Current user info
 
 ---
 
 ## Database Schema
 
-PostgreSQL database dengan 12 entities:
+PostgreSQL database with 12 entities:
 
 ```
 users
@@ -550,7 +553,7 @@ users
 +-> stories (1:N)
 |   +-> nodes [Note] (1:N via story_id)
 |   +-> story_versions (1:N)
-|   +-> story_access (1:N - friends invites)
+|   +-> story_access (1:N - friend invites)
 |   +-> story_engagement (1:N - bookmarks, views, badges)
 +-> tags (1:N)
 +-> writing_streak (1:1)
@@ -558,18 +561,19 @@ users
 
 **Key Design Decisions:**
 
-- **Single Note entity untuk canvas + story** - Story nodes are notes dengan `story_id` + `storyNodeType` discriminator
-- **Self-relation NoteLink** - Edges direksional dengan handle positions (top/bottom/left/right)
-- **JSON fields untuk flexible data** - `storyMetadata`, `scrapbookTheme` sebagai TEXT JSON
-- **Soft archiving** - `isArchived` + `archivedAt` instead of hard delete
-- **Time capsule** - `unlockDate` field di Note, content sembunyi dari API jika belum unlock
-- **Auto-sync schema** - MikroORM `updateSchema({ safe: true })` di `main.ts` startup
+- **Single Note entity for canvas and story** - Story nodes are notes with `story_id` and `storyNodeType` discriminator
+- **Self-relation NoteLink** - Directional edges with handle positions (top, bottom, left, right)
+- **JSON fields for flexible data** - `storyMetadata` and `scrapbookTheme` stored as TEXT JSON
+- **Soft archiving** - `isArchived` and `archivedAt` instead of hard deletion
+- **Time capsules** - `unlockDate` field on Note hides content from the API until unlocked
+- **Auto-sync schema** - MikroORM `updateSchema({ safe: true })` runs at startup in `main.ts`
 
 ---
 
+
 ## Roadmap
 
-### Selesai (Phase 1-31)
+### Completed (Phase 1-31)
 
 | Phase | Feature |
 |-------|---------|
@@ -578,7 +582,7 @@ users
 | 13-15 | Image lazy loading, loading skeletons, ConfirmDialog |
 | 16-19 | Undo/redo, focus management, keyboard nav, type safety |
 | 20-27 | Note editor improvements (auto-save, word count, timestamps, fonts) |
-| 28-29 | Text alignment + Google Fonts integration |
+| 28-29 | Text alignment and Google Fonts integration |
 | 30-31 | Title font with backend migration |
 | Tier 1 | Critical story bugs (privacy, emotion, status, sort, click-nav) |
 | Tier 2 | Story UX (insights, search, time capsule, wizard preview, share) |
@@ -586,85 +590,85 @@ users
 
 ### In Progress
 
-- Public viewer route untuk shared stories
-- Reading time tracking dengan analytics dashboard
+- Public viewer route for shared stories
+- Reading time tracking with analytics dashboard
 - Engagement layer UI (badges, view counter)
 
 ### Planned (Future Tiers)
 
-- **Real-time collaboration** - WebSocket multi-user editing
-- **Mobile-first canvas** - Touch gestures + responsive layout
-- **Audio narration** - Voice notes untuk reading view
-- **AI assistance** - Auto-tagging, summary generation, suggestion
-- **Export to ebook** - EPUB/PDF dengan layout preserved
-- **Offline mode** - PWA dengan sync saat online
+- **Real-time collaboration** - WebSocket-based multi-user editing
+- **Mobile-first canvas** - Touch gestures and responsive layout
+- **Audio narration** - Voice notes for the reading view
+- **AI assistance** - Auto-tagging, summary generation, suggestions
+- **Export to ebook** - EPUB and PDF with layout preserved
+- **Offline mode** - PWA with background sync when online
 
 ---
 
-## Kontribusi
+## Contributing
 
-Konstelasi terbuka untuk kontribusi! Berikut cara untuk berpartisipasi:
+Konstelasi welcomes contributions. Here is how to get involved:
 
 ### Reporting Bugs
 
-Buka [GitHub Issue](https://github.com/nndda-rzn/konstelasi/issues/new) dengan:
-- Deskripsi singkat dan jelas
+Open a [GitHub Issue](https://github.com/nndda-rzn/konstelasi/issues/new) with:
+- A short, clear description
 - Steps to reproduce
-- Expected vs actual behavior
-- Screenshot atau video jika ada
-- Browser + OS info
+- Expected versus actual behavior
+- Screenshots or videos if available
+- Browser and OS information
 
 ### Feature Requests
 
-Untuk fitur baru, buka issue dengan label `enhancement` dan jelaskan:
-- Use case yang ingin diselesaikan
-- Mockup atau referensi visual (jika ada)
-- Alternatif yang sudah dipertimbangkan
+For new features, open an issue with the `enhancement` label and explain:
+- The use case you want to address
+- Mockups or visual references (if any)
+- Alternatives you have considered
 
 ### Pull Requests
 
 ```bash
-# 1. Fork repository
-# 2. Clone fork lokal
+# 1. Fork the repository
+# 2. Clone your fork locally
 git clone https://github.com/YOUR_USERNAME/konstelasi.git
 cd konstelasi
 
-# 3. Buat branch feature
-git checkout -b feature/nama-fitur
+# 3. Create a feature branch
+git checkout -b feature/feature-name
 
-# 4. Commit changes (gunakan conventional commits)
-git commit -m "feat: deskripsi singkat fitur"
+# 4. Commit your changes (use conventional commits)
+git commit -m "feat: short feature description"
 
-# 5. Push ke fork
-git push origin feature/nama-fitur
+# 5. Push to your fork
+git push origin feature/feature-name
 
-# 6. Buat Pull Request via GitHub UI
+# 6. Open a Pull Request via the GitHub UI
 ```
 
 ### Conventional Commits
 
-Format yang dipakai:
-- `feat:` - Fitur baru
+The format used in this project:
+- `feat:` - New feature
 - `fix:` - Bug fix
-- `refactor:` - Code refactoring tanpa perubahan behavior
+- `refactor:` - Code refactoring without behavior changes
 - `docs:` - Documentation only
-- `style:` - Formatting, missing semi colons, dll
+- `style:` - Formatting, missing semicolons, etc.
 - `test:` - Adding tests
-- `chore:` - Build process, tooling, dll
+- `chore:` - Build process, tooling, etc.
 
 ### Code Style
 
-- TypeScript strict mode aktif
-- ESLint config dari `eslint-config-next` + custom rules
-- Prefer functional components dengan hooks
-- Use Tailwind classes, hindari custom CSS kecuali animations
-- Comment dalam Bahasa Indonesia atau English (consistent per file)
+- TypeScript strict mode is enabled
+- ESLint config from `eslint-config-next` with custom rules
+- Prefer functional components with hooks
+- Use Tailwind classes; avoid custom CSS unless required for animations
+- Keep comments consistent (English preferred for new files)
 
 ---
 
-## Lisensi
+## License
 
-Project ini dilisensikan di bawah **MIT License** - lihat [LICENSE](./LICENSE) untuk detail.
+This project is licensed under the **MIT License** - see [LICENSE](./LICENSE) for details.
 
 ```
 MIT License
@@ -694,7 +698,7 @@ in the Software without restriction...
   </a>
 </p>
 
-<sub>"Setiap catatan adalah bintang. Setiap koneksi adalah konstelasi. Setiap cerita adalah galaksi."</sub>
+<sub>"Every note is a star. Every connection is a constellation. Every story is a galaxy."</sub>
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=0,2,4,6,12&height=120&section=footer" alt="Footer" />
 
