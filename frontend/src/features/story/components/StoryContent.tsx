@@ -30,6 +30,11 @@ interface Props {
   onEdgesChange: (changes: any[]) => void;
   onConnect: (connection: Connection) => void;
   onNodeDoubleClick: (event: any, node: any) => void;
+  /**
+   * Called when user clicks a node from a non-canvas view.
+   * Opens the node editor without forcing a view switch.
+   */
+  onSelectNodeId?: (nodeId: string) => void;
   scrapbookCanvasClass: string;
   scrapbookGridColor: string;
   scrapbookFontClass: string;
@@ -50,11 +55,22 @@ export default function StoryContent({
   onEdgesChange,
   onConnect,
   onNodeDoubleClick,
+  onSelectNodeId,
   scrapbookCanvasClass,
   scrapbookGridColor,
   scrapbookFontClass,
 }: Props) {
   const storyNodes = story?.nodes || [];
+
+  // From a non-canvas view, clicking a node should open the editor
+  // directly (no forced view switch).
+  const handleAlternativeClick = (nodeId: string) => {
+    if (onSelectNodeId) {
+      onSelectNodeId(nodeId);
+    } else {
+      setViewMode('canvas');
+    }
+  };
 
   if (viewMode === 'canvas') {
     return (
@@ -78,7 +94,7 @@ export default function StoryContent({
   }
 
   if (viewMode === 'timeline') {
-    return <StoryTimelineView nodes={storyNodes} onNodeClick={() => setViewMode('canvas')} />;
+    return <StoryTimelineView nodes={storyNodes} onNodeClick={handleAlternativeClick} />;
   }
 
   if (viewMode === 'reading') {
@@ -98,7 +114,7 @@ export default function StoryContent({
   }
 
   if (viewMode === 'outline') {
-    return <StoryOutlineView nodes={storyNodes} onNodeClick={() => setViewMode('canvas')} />;
+    return <StoryOutlineView nodes={storyNodes} onNodeClick={handleAlternativeClick} />;
   }
 
   if (viewMode === 'cinematic') {

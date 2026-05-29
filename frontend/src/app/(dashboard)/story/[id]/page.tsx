@@ -226,6 +226,9 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             title,
             positionX: position.x,
             positionY: position.y,
+            // Persist emotion as mood so it shows up in editor + analytics
+            // (previously dropped silently on create).
+            mood: emotion || undefined,
           },
         },
       });
@@ -332,6 +335,10 @@ function StoryCanvas({ params }: { params: { id: string } }) {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeDoubleClick={handleNodeDoubleClick}
+          onSelectNodeId={(nodeId) => {
+            const noteData = story?.nodes?.find((n: any) => n.id === nodeId);
+            if (noteData) setSelectedNote(noteData);
+          }}
           scrapbookCanvasClass={scrapbookCanvasClass}
           scrapbookGridColor={scrapbookGridColor}
           scrapbookFontClass={scrapbookFontClass}

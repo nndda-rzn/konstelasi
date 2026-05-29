@@ -20,7 +20,11 @@ const NODE_TYPE_LABELS: Record<string, string> = {
 export default function CinematicView({ nodes, storyTitle, onClose, durationMs = 7000 }: CinematicViewProps) {
   const sortedNodes = [...nodes]
     .filter(n => !n?.isTimeLocked)
-    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    .sort((a, b) => {
+      const aTime = new Date(a.eventDate || a.createdAt).getTime();
+      const bTime = new Date(b.eventDate || b.createdAt).getTime();
+      return aTime - bTime;
+    });
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);

@@ -36,7 +36,11 @@ export default function StoryOutlineView({ nodes, onNodeClick }: StoryOutlineVie
     });
     // Sort each group by date
     Object.values(groups).forEach(group => {
-      group.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      group.sort((a, b) => {
+        const aTime = new Date(a.eventDate || a.createdAt).getTime();
+        const bTime = new Date(b.eventDate || b.createdAt).getTime();
+        return aTime - bTime;
+      });
     });
     return groups;
   }, [nodes]);

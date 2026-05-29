@@ -50,6 +50,8 @@ function StoryDashboard() {
       subtitle: formData.subtitle || undefined,
       description: formData.description || undefined,
       storyType: formData.storyType.toUpperCase(),
+      privacyLevel: formData.privacyLevel.toUpperCase(),
+      theme: formData.theme,
     });
     if (!story) return;
 
@@ -221,8 +223,8 @@ function StoryDashboard() {
                       {story.privacyLevel === 'private' && <Lock className="w-3 h-3 text-[#5A3E4C]/30" />}
                       {story.privacyLevel === 'friends_only' && <Users className="w-3 h-3 text-[#5A3E4C]/30" />}
                       {story.privacyLevel === 'public' && <Globe className="w-3 h-3 text-[#5A3E4C]/30" />}
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${story.status === 'draft' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                        {story.status}
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${story.status?.toLowerCase() === 'draft' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                        {story.status?.toLowerCase()}
                       </span>
                     </div>
                   </div>

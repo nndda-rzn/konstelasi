@@ -33,7 +33,11 @@ interface StoryTimelineViewProps {
 
 export default function StoryTimelineView({ nodes, onNodeClick }: StoryTimelineViewProps) {
   const sortedNodes = useMemo(() => {
-    return [...nodes].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    return [...nodes].sort((a, b) => {
+      const aTime = new Date(a.eventDate || a.createdAt).getTime();
+      const bTime = new Date(b.eventDate || b.createdAt).getTime();
+      return aTime - bTime;
+    });
   }, [nodes]);
 
   if (sortedNodes.length === 0) {

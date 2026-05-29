@@ -47,7 +47,11 @@ export default function StoryExportPanel({ story, nodes, isOpen, onClose }: Stor
 
   if (!isOpen) return null;
 
-  const sortedNodes = [...nodes].sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const sortedNodes = [...nodes].sort((a: any, b: any) => {
+    const aTime = new Date(a.eventDate || a.createdAt).getTime();
+    const bTime = new Date(b.eventDate || b.createdAt).getTime();
+    return aTime - bTime;
+  });
   const dateStr = new Date().toISOString().split('T')[0];
   const safeTitle = (story.title || 'Story').replace(/[^a-zA-Z0-9]/g, '_');
 
