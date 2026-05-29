@@ -29,6 +29,10 @@ interface Props {
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: any[]) => void;
   onConnect: (connection: Connection) => void;
+  /** Edge reconnect handlers (drag existing edge endpoint to a new node). */
+  onReconnectStart?: () => void;
+  onReconnect?: (oldEdge: any, newConnection: Connection) => void;
+  onReconnectEnd?: (event: any, edge: any) => void;
   onNodeDoubleClick: (event: any, node: any) => void;
   /**
    * Called when user clicks a node from a non-canvas view.
@@ -56,6 +60,9 @@ export default function StoryContent({
   onNodesChange,
   onEdgesChange,
   onConnect,
+  onReconnectStart,
+  onReconnect,
+  onReconnectEnd,
   onNodeDoubleClick,
   onSelectNodeId,
   searchQuery = '',
@@ -94,9 +101,13 @@ export default function StoryContent({
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onReconnectStart={onReconnectStart}
+        onReconnect={onReconnect}
+        onReconnectEnd={onReconnectEnd}
         onNodeDoubleClick={onNodeDoubleClick}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        edgesReconnectable
         fitView
         className={scrapbookCanvasClass}
       >

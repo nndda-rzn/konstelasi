@@ -21,6 +21,7 @@ export class CreateStoryInput {
   @Field({ nullable: true }) description?: string;
   @Field({ nullable: true }) coverImage?: string;
   @Field(() => StoryType, { nullable: true }) storyType?: StoryType;
+  @Field(() => PrivacyLevel, { nullable: true }) privacyLevel?: PrivacyLevel;
   @Field({ nullable: true }) theme?: string;
   @Field({ nullable: true }) authorNote?: string;
   @Field({ nullable: true }) scrapbookTheme?: string;

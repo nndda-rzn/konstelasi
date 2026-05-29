@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useState } from 'react';
-import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath } from '@xyflow/react';
+import { BaseEdge, EdgeLabelRenderer, getBezierPath } from '@xyflow/react';
 
 const EDGE_COLORS: Record<string, string> = {
   narrative: '#FF6B8B',
@@ -19,9 +19,9 @@ function StoryEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, tar
 
   const edgeColor = EDGE_COLORS[data?.color || 'default'] || EDGE_COLORS.default;
 
-  const [edgePath, labelX, labelY] = getSmoothStepPath({
+  const [edgePath, labelX, labelY] = getBezierPath({
     sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition,
-    borderRadius: 20,
+    curvature: 0.35,
   });
 
   const handleLabelChange = (newLabel: string) => {

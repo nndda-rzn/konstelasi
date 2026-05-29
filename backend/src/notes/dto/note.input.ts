@@ -16,6 +16,10 @@ export class CreateNoteInput {
 
   @Field(() => [String], { nullable: true })
   tagIds?: string[];
+
+  /** Initial mood/emotion (e.g. "excited", "happy"). Optional. */
+  @Field(() => String, { nullable: true })
+  mood?: string;
 }
 
 @InputType()

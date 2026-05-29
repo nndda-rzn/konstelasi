@@ -151,10 +151,10 @@ function StoryNode({ data, selected }: any) {
       </div>
 
       {/* Connection Handles */}
-      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-[#E63946]/50 !border-white !rounded-full" />
-      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !bg-[#E63946]/50 !border-white !rounded-full" />
-      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-[#E63946]/50 !border-white !rounded-full" />
-      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-[#E63946]/50 !border-white !rounded-full" />
+      <Handle type="target" position={Position.Top} id="top" className="!w-2 !h-2 !bg-[#E63946]/50 !border-white !rounded-full" />
+      <Handle type="target" position={Position.Left} id="left" className="!w-2 !h-2 !bg-[#E63946]/50 !border-white !rounded-full" />
+      <Handle type="source" position={Position.Bottom} id="bottom" className="!w-2 !h-2 !bg-[#E63946]/50 !border-white !rounded-full" />
+      <Handle type="source" position={Position.Right} id="right" className="!w-2 !h-2 !bg-[#E63946]/50 !border-white !rounded-full" />
     </div>
   );
 }

@@ -1,7 +1,15 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, BookOpen, MapPin, Clock, Lock, Hourglass } from 'lucide-react';
+import { useMemo, useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  BookOpen,
+  MapPin,
+  Clock,
+  Lock,
+  Hourglass,
+} from "lucide-react";
 
 interface StoryReadingViewProps {
   nodes: any[];
@@ -12,24 +20,33 @@ interface StoryReadingViewProps {
 }
 
 function isNodeTimeLocked(node: any) {
-  return Boolean(node?.isTimeLocked || (node?.unlockDate && new Date(node.unlockDate).getTime() > Date.now()));
+  return Boolean(
+    node?.isTimeLocked ||
+    (node?.unlockDate && new Date(node.unlockDate).getTime() > Date.now()),
+  );
 }
 
 function formatUnlockDate(value?: string) {
-  if (!value) return '';
+  if (!value) return "";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleString('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
-export default function StoryReadingView({ nodes, storyTitle, storySubtitle, scrapbookFontClass = '', scrapbookBackgroundClass = 'bg-[#FFFAF7] dark:bg-[#1a1625]' }: StoryReadingViewProps) {
+export default function StoryReadingView({
+  nodes,
+  storyTitle,
+  storySubtitle,
+  scrapbookFontClass = "",
+  scrapbookBackgroundClass = "bg-[#FFFAF7] dark:bg-[#1a1625]",
+}: StoryReadingViewProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const sortedNodes = useMemo(() => {
@@ -43,7 +60,9 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle, scr
   if (sortedNodes.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-sm text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">Belum ada node dalam story ini</p>
+        <p className="text-sm text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">
+          Belum ada node dalam story ini
+        </p>
       </div>
     );
   }
@@ -52,9 +71,13 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle, scr
   const timeLocked = isNodeTimeLocked(currentNode);
   const unlockLabel = formatUnlockDate(currentNode.unlockDate);
   let metadata: any = {};
-  try { if (currentNode.storyMetadata) metadata = JSON.parse(currentNode.storyMetadata); } catch {}
+  try {
+    if (currentNode.storyMetadata)
+      metadata = JSON.parse(currentNode.storyMetadata);
+  } catch {}
 
-  const goNext = () => setCurrentIndex(Math.min(currentIndex + 1, sortedNodes.length - 1));
+  const goNext = () =>
+    setCurrentIndex(Math.min(currentIndex + 1, sortedNodes.length - 1));
   const goPrev = () => setCurrentIndex(Math.max(currentIndex - 1, 0));
 
   return (
@@ -63,7 +86,9 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle, scr
       <div className="flex items-center justify-between px-8 py-4 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10">
         <div className="flex items-center gap-2">
           <BookOpen className="w-4 h-4 text-[#E63946]" />
-          <span className="text-xs font-medium text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50">{storyTitle}</span>
+          <span className="text-xs font-medium text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50">
+            {storyTitle}
+          </span>
         </div>
         <span className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">
           {currentIndex + 1} / {sortedNodes.length}
@@ -76,7 +101,7 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle, scr
           {/* Node type badge */}
           <div className="flex items-center gap-2 mb-4">
             <span className="text-[9px] uppercase tracking-wider font-semibold text-[#E63946]">
-              {(currentNode.storyNodeType || 'scene').replace('_', ' ')}
+              {(currentNode.storyNodeType || "scene").replace("_", " ")}
             </span>
             {metadata.sceneLocation && (
               <span className="flex items-center gap-1 text-[9px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">
@@ -92,18 +117,33 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle, scr
 
           {/* Title */}
           <h1 className="text-2xl font-bold text-[#4A2F3C] dark:text-[#e2d9f3] mb-6 leading-tight">
-            {currentNode.title || 'Untitled'}
+            {currentNode.title || "Untitled"}
           </h1>
 
           {/* Images */}
           {!timeLocked && currentNode.images?.length > 0 && (
             <div className="mb-6 rounded-xl overflow-hidden">
-              <img src={currentNode.images[0].imageUrl} alt="" loading="lazy" decoding="async" className="w-full max-h-[300px] object-cover" />
+              <img
+                src={currentNode.images[0].imageUrl}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="w-full max-h-[300px] object-cover"
+              />
               {currentNode.images.length > 1 && (
                 <div className="flex gap-1.5 mt-1.5">
                   {currentNode.images.slice(1, 4).map((img: any) => (
-                    <div key={img.id} className="flex-1 h-16 rounded-lg overflow-hidden">
-                      <img src={img.imageUrl} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                    <div
+                      key={img.id}
+                      className="flex-1 h-16 rounded-lg overflow-hidden"
+                    >
+                      <img
+                        src={img.imageUrl}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   ))}
                 </div>
@@ -121,14 +161,24 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle, scr
                 <Hourglass className="w-3 h-3" />
                 Time Capsule
               </div>
-              <p className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">Memory ini masih tersegel</p>
+              <p className="text-sm font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">
+                Memory ini masih tersegel
+              </p>
               <p className="text-xs text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40 mt-2">
-                {unlockLabel ? `Akan terbuka pada ${unlockLabel}.` : 'Konten dan media disembunyikan sampai tanggal buka.'}
+                {unlockLabel
+                  ? `Akan terbuka pada ${unlockLabel}.`
+                  : "Konten dan media disembunyikan sampai tanggal buka."}
               </p>
             </div>
           ) : (
-            <div className="prose-dark prose prose-sm max-w-none text-[#5A3E4C] dark:text-[#e2d9f3]/80 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: currentNode.content || '<p class="text-[#5A3E4C]/30 italic">Belum ada konten...</p>' }} />
+            <div
+              className="prose-dark prose prose-sm max-w-none text-[#5A3E4C] dark:text-[#e2d9f3]/80 leading-relaxed"
+              dangerouslySetInnerHTML={{
+                __html:
+                  currentNode.content ||
+                  '<p class="text-[#5A3E4C]/30 italic">Belum ada konten...</p>',
+              }}
+            />
           )}
 
           {/* Mood */}
@@ -143,7 +193,12 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle, scr
           {/* Date */}
           <div className="mt-4">
             <span className="text-[9px] text-[#5A3E4C]/30 dark:text-[#e2d9f3]/20">
-              {new Date(currentNode.createdAt).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              {new Date(currentNode.createdAt).toLocaleDateString("id-ID", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
             </span>
           </div>
         </div>
@@ -151,21 +206,30 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle, scr
 
       {/* Navigation */}
       <div className="flex items-center justify-between px-8 py-4 border-t border-[#FFB8C0]/10 dark:border-[#E63946]/10">
-        <button onClick={goPrev} disabled={currentIndex === 0}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50 hover:bg-[#FFB8C0]/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+        <button
+          onClick={goPrev}
+          disabled={currentIndex === 0}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50 hover:bg-[#FFB8C0]/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+        >
           <ChevronLeft className="w-4 h-4" /> Sebelumnya
         </button>
 
         {/* Progress dots */}
         <div className="flex gap-1">
           {sortedNodes.map((_: any, i: number) => (
-            <button key={i} onClick={() => setCurrentIndex(i)}
-              className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentIndex ? 'bg-[#E63946] w-4' : 'bg-[#FFB8C0]/30 hover:bg-[#FFB8C0]/50'}`} />
+            <button
+              key={i}
+              onClick={() => setCurrentIndex(i)}
+              className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentIndex ? "bg-[#E63946] w-4" : "bg-[#FFB8C0]/30 hover:bg-[#FFB8C0]/50"}`}
+            />
           ))}
         </div>
 
-        <button onClick={goNext} disabled={currentIndex === sortedNodes.length - 1}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50 hover:bg-[#FFB8C0]/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+        <button
+          onClick={goNext}
+          disabled={currentIndex === sortedNodes.length - 1}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50 hover:bg-[#FFB8C0]/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+        >
           Selanjutnya <ChevronRight className="w-4 h-4" />
         </button>
       </div>

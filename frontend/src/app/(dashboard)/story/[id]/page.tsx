@@ -9,6 +9,7 @@ import {
   useEdgesState,
   useReactFlow,
   addEdge,
+  reconnectEdge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { toast } from "sonner";
@@ -42,6 +43,7 @@ import { GET_STORY, UPDATE_STORY, ADD_NODE_TO_STORY } from "@/graphql/story";
 import {
   CREATE_NOTE,
   CREATE_NOTE_LINK,
+  DELETE_NOTE_LINK,
   BATCH_UPDATE_NOTES,
 } from "@/graphql/mutations";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -86,6 +88,8 @@ function StoryCanvas({ params }: { params: { id: string } }) {
 
   const [createNote] = useMutation<any>(CREATE_NOTE);
   const [createNoteLink] = useMutation<any>(CREATE_NOTE_LINK);
+  const [deleteNoteLink] = useMutation<any>(DELETE_NOTE_LINK);
+  const edgeReconnectSuccessful = useRef(true);
   const [batchUpdateNotes] = useMutation<any>(BATCH_UPDATE_NOTES);
   const [updateStory] = useMutation<any>(UPDATE_STORY);
   const [addNodeToStory] = useMutation<any>(ADD_NODE_TO_STORY);
@@ -176,6 +180,55 @@ function StoryCanvas({ params }: { params: { id: string } }) {
       }
     },
     [createNoteLink, setEdges],
+  );
+
+  // Edge reconnection: drag an existing edge endpoint to a new node.
+  // Pattern: delete old link + create new link on the backend.
+  // If user drops outside any handle, the edge is removed.
+  const onReconnectStart = useCallback(() => {
+    edgeReconnectSuccessful.current = false;
+  }, []);
+
+  const onReconnect = useCallback(
+    async (oldEdge: any, newConnection: any) => {
+      edgeReconnectSuccessful.current = true;
+      try {
+        // Optimistic UI update first.
+        setEdges((eds) => reconnectEdge(oldEdge, newConnection, eds));
+        // Replace link in backend: delete old, create new.
+        if (!oldEdge.id.startsWith("temp-")) {
+          await deleteNoteLink({ variables: { id: oldEdge.id } });
+        }
+        await createNoteLink({
+          variables: {
+            input: {
+              sourceId: newConnection.source,
+              targetId: newConnection.target,
+              sourceHandle: newConnection.sourceHandle || "right",
+              targetHandle: newConnection.targetHandle || "left",
+            },
+          },
+        });
+      } catch (err) {
+        console.error("Failed to reconnect edge:", err);
+        toast.error("Gagal memindah koneksi");
+      }
+    },
+    [createNoteLink, deleteNoteLink, setEdges],
+  );
+
+  const onReconnectEnd = useCallback(
+    (_event: any, edge: any) => {
+      // Drop happened outside a handle: remove the edge entirely.
+      if (!edgeReconnectSuccessful.current) {
+        setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+        if (!edge.id.startsWith("temp-")) {
+          deleteNoteLink({ variables: { id: edge.id } }).catch(() => {});
+        }
+      }
+      edgeReconnectSuccessful.current = true;
+    },
+    [deleteNoteLink, setEdges],
   );
 
   const { queueChanges: queueLayoutChanges } = usePositionPersistence({

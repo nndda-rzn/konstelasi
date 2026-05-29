@@ -73,6 +73,7 @@ type CharacterProfile {
 
 input CreateNoteInput {
   canvasId: String
+  mood: String
   positionX: Float
   positionY: Float
   tagIds: [String!]
@@ -90,6 +91,7 @@ input CreateStoryInput {
   authorNote: String
   coverImage: String
   description: String
+  privacyLevel: PrivacyLevel
   scrapbookTheme: String
   storyType: StoryType
   subtitle: String
