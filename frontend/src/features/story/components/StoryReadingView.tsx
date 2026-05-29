@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,12 +9,17 @@ import {
   Clock,
   Lock,
   Hourglass,
+  Bookmark,
 } from "lucide-react";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { TOGGLE_BOOKMARK, GET_BOOKMARKS } from "@/graphql/story";
+import { toast } from "sonner";
 
 interface StoryReadingViewProps {
   nodes: any[];
   storyTitle: string;
   storySubtitle?: string;
+  storyId?: string;
   scrapbookFontClass?: string;
   scrapbookBackgroundClass?: string;
 }
@@ -44,10 +49,34 @@ export default function StoryReadingView({
   nodes,
   storyTitle,
   storySubtitle,
+  storyId,
   scrapbookFontClass = "",
   scrapbookBackgroundClass = "bg-[#FFFAF7] dark:bg-[#1a1625]",
 }: StoryReadingViewProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [toggleBookmark] = useMutation<any>(TOGGLE_BOOKMARK);
+  const { data: bookmarksData, refetch: refetchBookmarks } = useQuery<any>(
+    GET_BOOKMARKS,
+    { variables: { storyId }, skip: !storyId },
+  );
+
+  const bookmarkedNodeIds = useMemo(() => {
+    const list = bookmarksData?.getBookmarks || [];
+    return new Set(list.map((b: any) => b.node?.id).filter(Boolean));
+  }, [bookmarksData]);
+
+  const handleToggleBookmark = async (nodeId?: string) => {
+    if (!storyId || !nodeId) return;
+    try {
+      await toggleBookmark({ variables: { storyId, nodeId } });
+      await refetchBookmarks();
+      const wasBookmarked = bookmarkedNodeIds.has(nodeId);
+      toast.success(wasBookmarked ? "Bookmark dihapus" : "Bookmark ditambahkan");
+    } catch (err) {
+      console.error("Failed to toggle bookmark:", err);
+      toast.error("Gagal mengubah bookmark");
+    }
+  };
 
   const sortedNodes = useMemo(() => {
     return [...nodes].sort((a, b) => {
@@ -76,9 +105,38 @@ export default function StoryReadingView({
       metadata = JSON.parse(currentNode.storyMetadata);
   } catch {}
 
-  const goNext = () =>
+  // Edge-aware navigation: follow outgoing/incoming edges first, fall back
+  // to array order. This makes branching stories readable in their
+  // narrative flow instead of typing order.
+  const findIndexById = (id: string) =>
+    sortedNodes.findIndex((n: any) => n.id === id);
+
+  const goNext = () => {
+    const outgoing = currentNode.outgoingEdges || [];
+    if (outgoing.length > 0) {
+      // Follow first outgoing edge if its target is in current node list.
+      const targetId = outgoing[0]?.target?.id;
+      const idx = targetId ? findIndexById(targetId) : -1;
+      if (idx >= 0) {
+        setCurrentIndex(idx);
+        return;
+      }
+    }
     setCurrentIndex(Math.min(currentIndex + 1, sortedNodes.length - 1));
-  const goPrev = () => setCurrentIndex(Math.max(currentIndex - 1, 0));
+  };
+
+  const goPrev = () => {
+    const incoming = currentNode.incomingEdges || [];
+    if (incoming.length > 0) {
+      const sourceId = incoming[0]?.source?.id;
+      const idx = sourceId ? findIndexById(sourceId) : -1;
+      if (idx >= 0) {
+        setCurrentIndex(idx);
+        return;
+      }
+    }
+    setCurrentIndex(Math.max(currentIndex - 1, 0));
+  };
 
   return (
     <div className={`h-full flex flex-col ${scrapbookBackgroundClass}`}>
@@ -115,10 +173,35 @@ export default function StoryReadingView({
             )}
           </div>
 
-          {/* Title */}
-          <h1 className="text-2xl font-bold text-[#4A2F3C] dark:text-[#e2d9f3] mb-6 leading-tight">
-            {currentNode.title || "Untitled"}
-          </h1>
+          {/* Title + Bookmark */}
+          <div className="flex items-start justify-between gap-3 mb-6">
+            <h1 className="text-2xl font-bold text-[#4A2F3C] dark:text-[#e2d9f3] leading-tight flex-1">
+              {currentNode.title || "Untitled"}
+            </h1>
+            {storyId && (
+              <button
+                onClick={() => handleToggleBookmark(currentNode.id)}
+                title={
+                  bookmarkedNodeIds.has(currentNode.id)
+                    ? "Hapus bookmark"
+                    : "Tambah bookmark"
+                }
+                aria-label="Toggle bookmark"
+                className={`shrink-0 p-2 rounded-lg transition-all hover:scale-110 ${
+                  bookmarkedNodeIds.has(currentNode.id)
+                    ? "bg-[#FFB8C0]/20 text-[#E63946]"
+                    : "hover:bg-[#FFB8C0]/10 text-[#5A3E4C]/40 dark:text-[#e2d9f3]/40"
+                }`}
+              >
+                <Bookmark
+                  className="w-5 h-5"
+                  fill={
+                    bookmarkedNodeIds.has(currentNode.id) ? "currentColor" : "none"
+                  }
+                />
+              </button>
+            )}
+          </div>
 
           {/* Images */}
           {!timeLocked && currentNode.images?.length > 0 && (

@@ -270,25 +270,55 @@ function StoryCanvas({ params }: { params: { id: string } }) {
     emotion: string,
     metadata: any,
   ) => {
-    // Smart positioning: place new node near existing nodes or viewport center
+    // Smart positioning (branch-aware):
+    // 1. No nodes yet -> center of viewport
+    // 2. A node is currently selected -> place beside it (enables branching)
+    // 3. Otherwise -> place to the right of the rightmost node
     const computeSmartPosition = () => {
       if (nodes.length === 0) {
-        // First node: center of current viewport
         return screenToFlowPosition({
           x: window.innerWidth / 2,
           y: window.innerHeight / 2,
         });
       }
-      // Find rightmost node and place new node to its right with offset
+      const NODE_WIDTH = 220;
+      const NODE_HEIGHT = 180;
+      const GAP = 40;
+
+      // Anchor on selected node when available - lets user grow story by
+      // branching off any node, not just the rightmost.
+      if (selectedNote?.id) {
+        const anchor = nodes.find((n: any) => n.id === selectedNote.id);
+        if (anchor) {
+          // Find existing children to the right of anchor and offset
+          // vertically so new branch nodes don't overlap.
+          const siblings = nodes.filter(
+            (n: any) =>
+              n.position.x >= anchor.position.x + NODE_WIDTH &&
+              n.position.x < anchor.position.x + NODE_WIDTH * 2 + GAP &&
+              Math.abs(n.position.y - anchor.position.y) < NODE_HEIGHT * 3,
+          );
+          const verticalOffset =
+            siblings.length === 0
+              ? 0
+              : (siblings.length % 2 === 0 ? 1 : -1) *
+                Math.ceil(siblings.length / 2) *
+                (NODE_HEIGHT + GAP);
+          return {
+            x: anchor.position.x + NODE_WIDTH + GAP,
+            y: anchor.position.y + verticalOffset,
+          };
+        }
+      }
+
+      // Fallback: rightmost + offset
       const rightmost = nodes.reduce(
         (acc: any, n: any) => (!acc || n.position.x > acc.position.x ? n : acc),
         null,
       );
-      const NODE_WIDTH = 220;
-      const GAP = 40;
       return {
         x: rightmost.position.x + NODE_WIDTH + GAP,
-        y: rightmost.position.y + (Math.random() * 60 - 30), // small vertical jitter
+        y: rightmost.position.y + (Math.random() * 60 - 30),
       };
     };
 
@@ -388,6 +418,32 @@ function StoryCanvas({ params }: { params: { id: string } }) {
         onViewModeChange={setViewMode}
         showSettings={showSettings}
         onToggleSettings={() => setShowSettings(!showSettings)}
+        onToggleStatus={async (nextStatus) => {
+          try {
+            await updateStory({
+              variables: { input: { id: storyId, status: nextStatus } },
+            });
+            toast.success(
+              nextStatus === 'PUBLISHED' ? 'Story dipublish!' : 'Kembali ke draft',
+            );
+            refetch();
+          } catch (err) {
+            console.error('Failed to toggle status:', err);
+            toast.error('Gagal mengubah status');
+          }
+        }}
+        scrapbookTheme={story?.scrapbookTheme}
+        onScrapbookThemeChange={async (nextJson) => {
+          try {
+            await updateStory({
+              variables: { input: { id: storyId, scrapbookTheme: nextJson } },
+            });
+            refetch();
+          } catch (err) {
+            console.error('Failed to update theme:', err);
+            toast.error('Gagal mengubah tema');
+          }
+        }}
         showInsightsMenu={showInsightsMenu}
         onToggleInsights={() => setShowInsightsMenu(!showInsightsMenu)}
         activeInsight={activeInsight}

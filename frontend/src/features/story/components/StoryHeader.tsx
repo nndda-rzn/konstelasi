@@ -19,6 +19,7 @@ import {
   Check,
 } from 'lucide-react';
 import { useState } from 'react';
+import ScrapbookThemePicker from '@/features/story/components/ScrapbookThemePicker';
 
 export type StoryViewMode =
   | 'canvas'
@@ -52,6 +53,11 @@ interface Props {
   onViewModeChange: (mode: StoryViewMode) => void;
   showSettings: boolean;
   onToggleSettings: () => void;
+  /** Toggle status between draft/published (parent owns the mutation). */
+  onToggleStatus?: (nextStatus: 'DRAFT' | 'PUBLISHED') => void;
+  /** Current scrapbookTheme JSON value + change handler. */
+  scrapbookTheme?: string | null;
+  onScrapbookThemeChange?: (nextJson: string) => void;
   showInsightsMenu: boolean;
   onToggleInsights: () => void;
   activeInsight: string | null;
@@ -70,6 +76,9 @@ export default function StoryHeader({
   onViewModeChange,
   showSettings,
   onToggleSettings,
+  onToggleStatus,
+  scrapbookTheme,
+  onScrapbookThemeChange,
   showInsightsMenu,
   onToggleInsights,
   activeInsight,
@@ -121,15 +130,36 @@ export default function StoryHeader({
         </div>
         <div className="flex items-center gap-1.5 ml-3">
           <PrivIcon className="w-3 h-3 text-[#5A3E4C]/30" />
-          <span
-            className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-              story?.status?.toLowerCase() === 'draft'
-                ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
-                : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
-            }`}
-          >
-            {story?.status}
-          </span>
+          {onToggleStatus ? (
+            <button
+              onClick={() => {
+                const isDraft = story?.status?.toLowerCase() === 'draft';
+                onToggleStatus(isDraft ? 'PUBLISHED' : 'DRAFT');
+              }}
+              title={
+                story?.status?.toLowerCase() === 'draft'
+                  ? 'Klik untuk publish story'
+                  : 'Klik untuk kembalikan ke draft'
+              }
+              className={`text-[10px] px-1.5 py-0.5 rounded-full transition-all hover:scale-105 hover:shadow-sm ${
+                story?.status?.toLowerCase() === 'draft'
+                  ? 'bg-amber-50 text-amber-600 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400'
+                  : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400'
+              }`}
+            >
+              {story?.status?.toLowerCase()}
+            </button>
+          ) : (
+            <span
+              className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                story?.status?.toLowerCase() === 'draft'
+                  ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
+                  : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
+              }`}
+            >
+              {story?.status}
+            </span>
+          )}
         </div>
       </div>
 
@@ -193,6 +223,13 @@ export default function StoryHeader({
         >
           <Settings className="w-4 h-4" />
         </button>
+
+        {onScrapbookThemeChange && (
+          <ScrapbookThemePicker
+            value={scrapbookTheme}
+            onChange={onScrapbookThemeChange}
+          />
+        )}
 
         {isShareable && (
           <button

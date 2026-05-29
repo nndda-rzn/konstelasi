@@ -135,6 +135,7 @@ export default function StoryContent({
         nodes={storyNodes}
         storyTitle={story?.title || ''}
         storySubtitle={story?.subtitle}
+        storyId={story?.id}
         scrapbookFontClass={scrapbookFontClass}
         scrapbookBackgroundClass={scrapbookCanvasClass}
       />
