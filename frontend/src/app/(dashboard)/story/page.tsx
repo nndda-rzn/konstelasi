@@ -125,13 +125,16 @@ function StoryDashboard() {
               <p className="text-sm text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40 mt-1">Ceritakan kisah Anda melalui connected bubbles</p>
             </div>
           </div>
-          <button
-            onClick={() => setShowWizard(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-candy-primary text-white font-medium text-sm transition-all shadow-candy hover:shadow-candy-lg hover:scale-[1.02]"
-          >
-            <Plus className="w-4 h-4" />
-            Buat Story Baru
-          </button>
+          {/* Hide header CTA when list is empty - StoryEmptyState already has its own CTA. */}
+          {!loading && stories.length > 0 && (
+            <button
+              onClick={() => setShowWizard(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-candy-primary text-white font-medium text-sm transition-all shadow-candy hover:shadow-candy-lg hover:scale-[1.02]"
+            >
+              <Plus className="w-4 h-4" />
+              Buat Story Baru
+            </button>
+          )}
         </div>
 
         {/* On This Day */}

@@ -33,6 +33,9 @@ interface Props {
   onReconnectStart?: () => void;
   onReconnect?: (oldEdge: any, newConnection: Connection) => void;
   onReconnectEnd?: (event: any, edge: any) => void;
+  /** Node drag lifecycle - used by parent to guard against refetch races. */
+  onNodeDragStart?: (event: any, node: any) => void;
+  onNodeDragStop?: (event: any, node: any) => void;
   onNodeDoubleClick: (event: any, node: any) => void;
   /**
    * Called when user clicks a node from a non-canvas view.
@@ -63,6 +66,8 @@ export default function StoryContent({
   onReconnectStart,
   onReconnect,
   onReconnectEnd,
+  onNodeDragStart,
+  onNodeDragStop,
   onNodeDoubleClick,
   onSelectNodeId,
   searchQuery = '',
@@ -104,6 +109,8 @@ export default function StoryContent({
         onReconnectStart={onReconnectStart}
         onReconnect={onReconnect}
         onReconnectEnd={onReconnectEnd}
+        onNodeDragStart={onNodeDragStart}
+        onNodeDragStop={onNodeDragStop}
         onNodeDoubleClick={onNodeDoubleClick}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}

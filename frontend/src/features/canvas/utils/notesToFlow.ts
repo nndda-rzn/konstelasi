@@ -44,7 +44,12 @@ export function notesToFlow(
   const nodes = notes.map((note) => ({
     id: note.id,
     type: 'default',
-    position: { x: note.positionX, y: note.positionY },
+    // Coerce to numbers - React Flow requires valid numbers, not null/undefined,
+    // otherwise the node is treated as "uninitialized" and dragging fails (#015).
+    position: {
+      x: typeof note.positionX === 'number' ? note.positionX : 0,
+      y: typeof note.positionY === 'number' ? note.positionY : 0,
+    },
     data: {
       title: note.title,
       content: note.content,

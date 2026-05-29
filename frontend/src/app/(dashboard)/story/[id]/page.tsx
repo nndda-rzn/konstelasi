@@ -90,6 +90,9 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   const [createNoteLink] = useMutation<any>(CREATE_NOTE_LINK);
   const [deleteNoteLink] = useMutation<any>(DELETE_NOTE_LINK);
   const edgeReconnectSuccessful = useRef(true);
+  // Track when user is actively dragging a node so we don't clobber
+  // their position via refetch race conditions.
+  const isDraggingRef = useRef(false);
   const [batchUpdateNotes] = useMutation<any>(BATCH_UPDATE_NOTES);
   const [updateStory] = useMutation<any>(UPDATE_STORY);
   const [addNodeToStory] = useMutation<any>(ADD_NODE_TO_STORY);
@@ -104,6 +107,9 @@ function StoryCanvas({ params }: { params: { id: string } }) {
   // Transform story nodes to React Flow nodes
   useEffect(() => {
     if (!story?.nodes) return;
+    // Race condition guard: skip rebuild while user is actively dragging
+    // a node to avoid clobbering their in-flight position with stale server data.
+    if (isDraggingRef.current) return;
     const query = searchQuery.trim().toLowerCase();
     const flowNodes = story.nodes.map((note: any) => {
       const titleMatch = note.title?.toLowerCase().includes(query);
@@ -114,7 +120,12 @@ function StoryCanvas({ params }: { params: { id: string } }) {
       const isMatch = !query || titleMatch || contentMatch;
       return {
         id: note.id,
-        position: { x: note.positionX, y: note.positionY },
+        // Coerce to numbers - React Flow requires valid numbers, not null/undefined,
+        // otherwise the node is treated as "uninitialized" and dragging fails (#015).
+        position: {
+          x: typeof note.positionX === "number" ? note.positionX : 0,
+          y: typeof note.positionY === "number" ? note.positionY : 0,
+        },
         style: {
           width: note.width || undefined,
           height: note.height || undefined,
@@ -242,6 +253,16 @@ function StoryCanvas({ params }: { params: { id: string } }) {
     },
     [onNodesChange, queueLayoutChanges],
   );
+
+  // Drag lifecycle handlers - flag prevents refetch from clobbering
+  // local positions during an active drag (race condition guard).
+  const handleNodeDragStart = useCallback(() => {
+    isDraggingRef.current = true;
+  }, []);
+
+  const handleNodeDragStop = useCallback(() => {
+    isDraggingRef.current = false;
+  }, []);
 
   const handleAddNode = async (
     nodeType: string,
@@ -392,6 +413,8 @@ function StoryCanvas({ params }: { params: { id: string } }) {
             const noteData = story?.nodes?.find((n: any) => n.id === nodeId);
             if (noteData) setSelectedNote(noteData);
           }}
+          onNodeDragStart={handleNodeDragStart}
+          onNodeDragStop={handleNodeDragStop}
           searchQuery={searchQuery}
           scrapbookCanvasClass={scrapbookCanvasClass}
           scrapbookGridColor={scrapbookGridColor}
