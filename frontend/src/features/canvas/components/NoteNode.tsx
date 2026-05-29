@@ -1,7 +1,28 @@
 import { memo } from 'react';
 import { Handle, Position, NodeResizer } from '@xyflow/react';
+import type { NoteNodeData, NoteColor } from '@/features/canvas/types';
 
-const THEMES: Record<string, any> = {
+/**
+ * Compact relative timestamp ("2h", "3d", "2w") suitable for tight
+ * card layouts. Falls back to short date for older items.
+ */
+function formatRelativeShort(iso: string): string {
+  const ts = new Date(iso).getTime();
+  if (isNaN(ts)) return '';
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return 'baru saja';
+  const min = Math.floor(diff / 60);
+  if (min < 60) return `${min}m`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}j`;
+  const days = Math.floor(hr / 24);
+  if (days < 7) return `${days}h`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return `${weeks}mg`;
+  return new Date(ts).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+}
+
+const THEMES: Record<NoteColor, any> = {
   default: {
     borderBase: 'border-[#FFB4A2]/20', borderHover: 'hover:border-[#FF8FA3]/40', shadowHover: 'hover:shadow-[0_8px_40px_rgba(255,180,162,0.15),0_0_30px_rgba(255,143,163,0.1)]', selectedBorder: 'border-[#FF8FA3]/50', selectedShadow: 'shadow-[0_0_50px_-10px_rgba(255,143,163,0.25)]', selectedBg: 'bg-white/95', bgHover: 'hover:bg-white/90', topLine: 'via-[#FF8FA3]', innerGlow: 'from-[#FFB4A2]/10', innerGlowUnselected: 'from-[#FFB4A2]/5'
   },
@@ -28,9 +49,17 @@ const THEMES: Record<string, any> = {
   }
 };
 
-export default memo(function NoteNode({ data, isConnectable, selected, viewMode = 'canvas', id }: any) {
-  const { isSearching, isMatch, color = 'default', _threadAlign = 'right', type = 'text', mood = '' } = data;
-  const theme = THEMES[color] || THEMES.default;
+export default memo(function NoteNode({ data, isConnectable, selected, viewMode = 'canvas', id }: {
+  data: NoteNodeData;
+  isConnectable?: boolean;
+  selected?: boolean;
+  viewMode?: 'canvas' | 'thread' | 'timeline';
+  id?: string;
+  width?: number;
+  height?: number;
+}) {
+  const { isSearching, isMatch, color = 'default', _threadAlign = 'right', type = 'default', mood = '' } = data;
+  const theme = THEMES[color as NoteColor] || THEMES.default;
   
   // If searching and not a match, fade out
   const searchFade = isSearching && !isMatch ? 'opacity-20 scale-95 pointer-events-none grayscale blur-[1px]' : 'opacity-100 scale-100';
@@ -107,8 +136,19 @@ export default memo(function NoteNode({ data, isConnectable, selected, viewMode 
             <img 
               src={data.images[0].imageUrl} 
               alt={data.images[0].caption || 'Note attachment'} 
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover opacity-90 group-hover/image:opacity-100 transition-all duration-700" 
             />
+            {data.images.length > 1 && (
+              <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/55 backdrop-blur-sm text-white text-[10px] font-medium tabular-nums shadow-md flex items-center gap-1">
+                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="14" height="14" rx="2" />
+                  <path d="M21 7v12a2 2 0 0 1-2 2H7" />
+                </svg>
+                +{data.images.length - 1}
+              </span>
+            )}
           </div>
         )}
 
@@ -131,9 +171,17 @@ export default memo(function NoteNode({ data, isConnectable, selected, viewMode 
           </>
         ) : (
           <>
-            <h3 className={`font-semibold text-[16px] mb-1.5 shrink-0 tracking-wide transition-colors duration-300 w-full ${selected ? 'text-[#4A2F3C]' : 'text-[#4A2F3C]/85 group-hover:text-[#4A2F3C]'}`}>
+            <h3
+              className={`font-semibold text-[16px] mb-1 shrink-0 tracking-wide transition-colors duration-300 w-full ${selected ? 'text-[#4A2F3C]' : 'text-[#4A2F3C]/85 group-hover:text-[#4A2F3C]'}`}
+              style={data.titleFont ? { fontFamily: data.titleFont } : undefined}
+            >
               {data.title || 'Untitled Note'}
             </h3>
+            {data.createdAt && (
+              <p className="text-[10px] text-[#5A3E4C]/35 mb-1.5 shrink-0 tracking-wide font-medium">
+                {formatRelativeShort(data.createdAt)}
+              </p>
+            )}
             <div className="text-[#5A3E4C]/50 text-[13px] leading-relaxed font-light overflow-y-auto custom-scrollbar flex-1 pr-1 w-full">
               {data.content ? (
                 <div dangerouslySetInnerHTML={{ __html: data.content }} className="prose prose-p:my-0 prose-img:hidden max-w-none break-words w-full" />

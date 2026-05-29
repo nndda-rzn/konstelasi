@@ -94,12 +94,12 @@ export default function StoryReadingView({ nodes, storyTitle, storySubtitle, scr
           {/* Images */}
           {!timeLocked && currentNode.images?.length > 0 && (
             <div className="mb-6 rounded-xl overflow-hidden">
-              <img src={currentNode.images[0].imageUrl} alt="" className="w-full max-h-[300px] object-cover" />
+              <img src={currentNode.images[0].imageUrl} alt="" loading="lazy" decoding="async" className="w-full max-h-[300px] object-cover" />
               {currentNode.images.length > 1 && (
                 <div className="flex gap-1.5 mt-1.5">
                   {currentNode.images.slice(1, 4).map((img: any) => (
                     <div key={img.id} className="flex-1 h-16 rounded-lg overflow-hidden">
-                      <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />
+                      <img src={img.imageUrl} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>

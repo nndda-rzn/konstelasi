@@ -129,7 +129,7 @@ export default function StoryTimelineView({ nodes, onNodeClick }: StoryTimelineV
                   <div className="mt-2 flex gap-1.5">
                     {node.images.slice(0, 3).map((img: any) => (
                       <div key={img.id} className="w-12 h-12 rounded-lg overflow-hidden">
-                        <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />
+                        <img src={img.imageUrl} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                       </div>
                     ))}
                     {node.images.length > 3 && (

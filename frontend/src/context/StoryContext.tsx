@@ -1,8 +1,13 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { useQuery, useMutation } from '@apollo/client/react';
-import { GET_STORIES, CREATE_STORY, UPDATE_STORY, DELETE_STORY } from '@/graphql/story';
+import { createContext, useContext, useState, ReactNode } from "react";
+import { useQuery, useMutation } from "@apollo/client/react";
+import {
+  GET_STORIES,
+  CREATE_STORY,
+  UPDATE_STORY,
+  DELETE_STORY,
+} from "@/graphql/story";
 
 interface StoryContextType {
   stories: any[];
@@ -21,7 +26,7 @@ export function StoryProvider({ children }: { children: ReactNode }) {
   const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null);
 
   const { data, loading, refetch } = useQuery<any>(GET_STORIES, {
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: "cache-and-network",
   });
 
   const [createStoryMutation] = useMutation<any>(CREATE_STORY, {
@@ -71,6 +76,6 @@ export function StoryProvider({ children }: { children: ReactNode }) {
 
 export function useStory() {
   const context = useContext(StoryContext);
-  if (!context) throw new Error('useStory must be used within StoryProvider');
+  if (!context) throw new Error("useStory must be used within StoryProvider");
   return context;
 }

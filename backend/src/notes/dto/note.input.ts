@@ -50,6 +50,13 @@ export class UpdateNoteContentInput {
   @Field(() => String, { nullable: true })
   mood?: string;
 
+  /**
+   * Font family CSS value for the note title.
+   * Empty string or null resets to the default font.
+   */
+  @Field(() => String, { nullable: true })
+  titleFont?: string;
+
   @Field(() => String, { nullable: true })
   eventDate?: string;
 

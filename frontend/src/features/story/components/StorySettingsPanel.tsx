@@ -5,6 +5,11 @@ import { X, Lock, Globe, Users, Trash2, Save, AlertTriangle, Palette, PenLine } 
 import { useQuery, useMutation } from '@apollo/client/react';
 import { GET_STORY_ACCESS, GRANT_STORY_ACCESS, REVOKE_STORY_ACCESS, DELETE_STORY } from '@/graphql/story';
 import { notify } from '@/lib/toast';
+import {
+  parseScrapbookTheme,
+  SCRAPBOOK_BACKGROUNDS,
+  SCRAPBOOK_FONTS,
+} from '@/features/story/utils/scrapbookTheme';
 
 interface StorySettingsPanelProps {
   story: any;
@@ -24,32 +29,6 @@ const STATUS_OPTIONS = [
   { value: 'PUBLISHED', label: 'Published', color: 'emerald' },
   { value: 'ARCHIVED', label: 'Archived', color: 'gray' },
 ];
-
-const DEFAULT_SCRAPBOOK_THEME = {
-  background: 'red_candy',
-  font: 'default',
-};
-
-const SCRAPBOOK_BACKGROUNDS = [
-  { value: 'red_candy', label: 'Red Candy', desc: 'Lembut dan romantis', className: 'from-[#FFE5E8] to-[#FFFAF7]' },
-  { value: 'warm_paper', label: 'Warm Paper', desc: 'Album kertas hangat', className: 'from-[#F8E7C9] to-[#FFF8EA]' },
-  { value: 'rose_album', label: 'Rose Album', desc: 'Scrapbook bunga mawar', className: 'from-[#FFD6DC] to-[#FFF0F3]' },
-  { value: 'night_letter', label: 'Night Letter', desc: 'Lavender lembut, gelap saat dark mode', className: 'from-[#E7DCFF] to-[#F7F2FF]' },
-];
-
-const SCRAPBOOK_FONTS = [
-  { value: 'default', label: 'Modern Clean', desc: 'Tetap rapi dan mudah dibaca' },
-  { value: 'serif', label: 'Literary Serif', desc: 'Rasa buku klasik' },
-  { value: 'handwriting', label: 'Elegant Handwriting', desc: 'Tulisan tangan halus untuk scrapbook' },
-];
-
-function parseScrapbookTheme(value?: string) {
-  try {
-    return { ...DEFAULT_SCRAPBOOK_THEME, ...(value ? JSON.parse(value) : {}) };
-  } catch {
-    return DEFAULT_SCRAPBOOK_THEME;
-  }
-}
 
 export default function StorySettingsPanel({ story, onClose, onUpdate, onDelete }: StorySettingsPanelProps) {
   const [title, setTitle] = useState(story.title || '');

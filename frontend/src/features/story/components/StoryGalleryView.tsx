@@ -52,7 +52,7 @@ export default function StoryGalleryView({ nodes }: StoryGalleryViewProps) {
             onClick={() => setSelectedImage(img)}
             className="block w-full mb-3 rounded-xl overflow-hidden group relative break-inside-avoid"
           >
-            <img src={img.imageUrl} alt={img.caption || ''} className="w-full object-cover rounded-xl transition-transform group-hover:scale-[1.02]" />
+            <img src={img.imageUrl} alt={img.caption || ''} loading="lazy" decoding="async" className="w-full object-cover rounded-xl transition-transform group-hover:scale-[1.02]" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-end p-3">
               <div>
                 <p className="text-[10px] text-white/90 font-medium truncate">{img.nodeTitle || 'Untitled'}</p>
@@ -70,7 +70,7 @@ export default function StoryGalleryView({ nodes }: StoryGalleryViewProps) {
             <X className="w-5 h-5 text-white" />
           </button>
           <div className="max-w-[85vw] max-h-[85vh]" onClick={e => e.stopPropagation()}>
-            <img src={selectedImage.imageUrl} alt="" className="max-w-full max-h-[80vh] object-contain rounded-xl" />
+            <img src={selectedImage.imageUrl} alt="" loading="lazy" decoding="async" className="max-w-full max-h-[80vh] object-contain rounded-xl" />
             <div className="mt-3 text-center">
               <p className="text-sm text-white/90 font-medium">{selectedImage.nodeTitle}</p>
               {selectedImage.caption && <p className="text-xs text-white/60 mt-1">{selectedImage.caption}</p>}

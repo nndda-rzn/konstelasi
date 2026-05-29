@@ -1,33 +1,42 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutGrid, BookOpen, Image as ImageIcon,
-  Camera, LogOut, Sparkles,
-} from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+  LayoutGrid,
+  BookOpen,
+  Image as ImageIcon,
+  Camera,
+  LogOut,
+  Sparkles,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 const NAV_ITEMS = [
-  { href: '/canvas',     label: 'Canvas',      desc: 'Ruang utama',     icon: LayoutGrid },
-  { href: '/story',      label: 'Stories',     desc: 'Kumpulan cerita', icon: BookOpen   },
-  { href: '/gallery',    label: 'Gallery',     desc: 'Koleksi foto',    icon: ImageIcon  },
-  { href: '/photobooth', label: 'Photo Booth', desc: 'Ambil momen',     icon: Camera     },
+  { href: "/canvas", label: "Canvas", desc: "Ruang utama", icon: LayoutGrid },
+  { href: "/story", label: "Stories", desc: "Kumpulan cerita", icon: BookOpen },
+  { href: "/gallery", label: "Gallery", desc: "Koleksi foto", icon: ImageIcon },
+  {
+    href: "/photobooth",
+    label: "Photo Booth",
+    desc: "Ambil momen",
+    icon: Camera,
+  },
 ];
 
 export default function GlobalSidebar() {
   const pathname = usePathname();
-  const router   = useRouter();
+  const router = useRouter();
 
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push('/login');
+    router.push("/login");
   };
 
   const isActive = (href: string) =>
-    href === '/canvas'
-      ? pathname === '/canvas' || pathname === '/'
+    href === "/canvas"
+      ? pathname === "/canvas" || pathname === "/"
       : pathname.startsWith(href);
 
   return (
@@ -42,7 +51,9 @@ export default function GlobalSidebar() {
           <div className="flex items-center gap-2.5">
             <Sparkles className="h-5 w-5 shrink-0 text-[#E63946]" />
             <div>
-              <p className="text-sm font-black tracking-[-0.02em] text-candy">Konstelasi</p>
+              <p className="text-sm font-black tracking-[-0.02em] text-candy">
+                Konstelasi
+              </p>
               <p className="text-[10px] text-[#8C7783] mt-0.5">Visual Diary</p>
             </div>
           </div>
@@ -61,27 +72,35 @@ export default function GlobalSidebar() {
                 href={href}
                 className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group overflow-hidden ${
                   active
-                    ? 'bg-white shadow-[0_1px_8px_rgba(230,57,70,0.10)]'
-                    : 'hover:bg-[#FFF5F5]/80'
+                    ? "bg-white shadow-[0_1px_8px_rgba(230,57,70,0.10)]"
+                    : "hover:bg-[#FFF5F5]/80"
                 }`}
               >
                 {active && (
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-[#E63946]" />
                 )}
-                <Icon className={`h-4 w-4 shrink-0 transition-colors duration-150 ${
-                  active ? 'text-[#E63946]' : 'text-[#8C7783] group-hover:text-[#E63946]'
-                }`} />
-                <div className="min-w-0 flex-1">
-                  <span className={`text-[13px] transition-colors duration-150 block leading-tight ${
+                <Icon
+                  className={`h-4 w-4 shrink-0 transition-colors duration-150 ${
                     active
-                      ? 'font-semibold text-[#E63946]'
-                      : 'font-medium text-[#6D5561] group-hover:text-[#3F2A35]'
-                  }`}>
+                      ? "text-[#E63946]"
+                      : "text-[#8C7783] group-hover:text-[#E63946]"
+                  }`}
+                />
+                <div className="min-w-0 flex-1">
+                  <span
+                    className={`text-[13px] transition-colors duration-150 block leading-tight ${
+                      active
+                        ? "font-semibold text-[#E63946]"
+                        : "font-medium text-[#6D5561] group-hover:text-[#3F2A35]"
+                    }`}
+                  >
                     {label}
                   </span>
-                  <span className={`text-[10px] block mt-0.5 leading-none ${
-                    active ? 'text-[#E63946]/60' : 'text-[#A8949C]'
-                  }`}>
+                  <span
+                    className={`text-[10px] block mt-0.5 leading-none ${
+                      active ? "text-[#E63946]/60" : "text-[#A8949C]"
+                    }`}
+                  >
                     {desc}
                   </span>
                 </div>
@@ -114,7 +133,7 @@ export default function GlobalSidebar() {
               key={href}
               href={href}
               className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all ${
-                active ? 'text-[#E63946]' : 'text-[#8C7783]'
+                active ? "text-[#E63946]" : "text-[#8C7783]"
               }`}
             >
               <Icon className="h-5 w-5" />

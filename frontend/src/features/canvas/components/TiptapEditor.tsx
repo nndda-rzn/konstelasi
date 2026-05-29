@@ -6,11 +6,45 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Link from '@tiptap/extension-link';
+import TextAlign from '@tiptap/extension-text-align';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { FontFamily } from '@tiptap/extension-font-family';
 import { common, createLowlight } from 'lowlight';
-import { Bold, Italic, Strikethrough, List, ListOrdered, Quote, Heading2, Heading3, Code, CheckSquare, Link as LinkIcon, Minus } from 'lucide-react';
+import { Bold, Italic, Strikethrough, List, ListOrdered, Quote, Heading2, Heading3, Code, CheckSquare, Link as LinkIcon, Minus, AlignLeft, AlignCenter, AlignRight, Type as TypeIcon } from 'lucide-react';
 import { useEffect } from 'react';
+import { FONT_OPTIONS, findFontOption } from '@/features/canvas/utils/fontOptions';
 
 const lowlight = createLowlight(common);
+
+function FontFamilyPicker({ editor }: { editor: any }) {
+  const current = editor.getAttributes('textStyle').fontFamily as string | undefined;
+  const activeOption = findFontOption(current);
+
+  const handleChange = (value: string) => {
+    if (value === '') {
+      editor.chain().focus().unsetFontFamily().run();
+    } else {
+      editor.chain().focus().setFontFamily(value).run();
+    }
+  };
+
+  return (
+    <select
+      value={activeOption.value}
+      onChange={(e) => handleChange(e.target.value)}
+      className="text-xs px-2 py-1 rounded-lg bg-white/70 border border-[#FFB4A2]/20 text-[#5A3E4C]/70 hover:text-[#5A3E4C] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/30 focus:border-[#FF8FA3]/30 transition-all cursor-pointer"
+      style={{ fontFamily: activeOption.value || undefined }}
+      title="Pilih font"
+      aria-label="Pilih font"
+    >
+      {FONT_OPTIONS.map((opt) => (
+        <option key={opt.label} value={opt.value} style={{ fontFamily: opt.value || undefined }}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  );
+}
 
 interface TiptapEditorProps {
   content: string;
@@ -139,6 +173,40 @@ const MenuBar = ({ editor }: { editor: any }) => {
       >
         <Minus className="w-3.5 h-3.5" />
       </button>
+
+      <div className="w-px h-4 bg-[#FFB4A2]/15 mx-1" />
+
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+        className={btnClass(editor.isActive({ textAlign: 'left' }))}
+        title="Rata kiri"
+        aria-label="Rata kiri"
+      >
+        <AlignLeft className="w-3.5 h-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+        className={btnClass(editor.isActive({ textAlign: 'center' }))}
+        title="Rata tengah"
+        aria-label="Rata tengah"
+      >
+        <AlignCenter className="w-3.5 h-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().setTextAlign('right').run()}
+        className={btnClass(editor.isActive({ textAlign: 'right' }))}
+        title="Rata kanan"
+        aria-label="Rata kanan"
+      >
+        <AlignRight className="w-3.5 h-3.5" />
+      </button>
+
+      <div className="w-px h-4 bg-[#FFB4A2]/15 mx-1" />
+
+      <FontFamilyPicker editor={editor} />
     </div>
   );
 };
@@ -164,6 +232,15 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
         HTMLAttributes: {
           class: 'text-[#FF8FA3] underline cursor-pointer',
         },
+      }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right'],
+        defaultAlignment: 'left',
+      }),
+      TextStyle,
+      FontFamily.configure({
+        types: ['textStyle'],
       }),
     ],
     content: content,

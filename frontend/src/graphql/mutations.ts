@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client/core';
+import { gql } from "@apollo/client/core";
 
 export const CREATE_NOTE = gql`
   mutation CreateNote($input: CreateNoteInput!) {
@@ -22,9 +22,20 @@ export const CREATE_NOTE = gql`
       eventDate
       eventLocation
       createdAt
-      canvas { id name }
-      tags { id name color }
-      images { id imageUrl caption }
+      canvas {
+        id
+        name
+      }
+      tags {
+        id
+        name
+        color
+      }
+      images {
+        id
+        imageUrl
+        caption
+      }
     }
   }
 `;
@@ -65,8 +76,12 @@ export const CREATE_NOTE_LINK = gql`
   mutation CreateNoteLink($input: CreateNoteLinkInput!) {
     createNoteLink(input: $input) {
       id
-      source { id }
-      target { id }
+      source {
+        id
+      }
+      target {
+        id
+      }
       sourceHandle
       targetHandle
       type
@@ -101,6 +116,7 @@ export const UPDATE_NOTE_CONTENT = gql`
       content
       color
       mood
+      titleFont
       type
       isArchived
       isLocked
@@ -109,9 +125,20 @@ export const UPDATE_NOTE_CONTENT = gql`
       eventDate
       eventLocation
       createdAt
-      canvas { id name }
-      tags { id name color }
-      images { id imageUrl caption }
+      canvas {
+        id
+        name
+      }
+      tags {
+        id
+        name
+        color
+      }
+      images {
+        id
+        imageUrl
+        caption
+      }
     }
   }
 `;
@@ -186,7 +213,10 @@ export const MOVE_CANVAS = gql`
     moveCanvas(id: $id, parentId: $parentId) {
       id
       level
-      parent { id name }
+      parent {
+        id
+        name
+      }
     }
   }
 `;
@@ -205,7 +235,11 @@ export const RESTORE_NOTE_VERSION = gql`
 `;
 
 export const CREATE_STORY_VERSION = gql`
-  mutation CreateStoryVersion($storyId: String!, $label: String, $notes: String) {
+  mutation CreateStoryVersion(
+    $storyId: String!
+    $label: String
+    $notes: String
+  ) {
     createStoryVersion(storyId: $storyId, label: $label, notes: $notes) {
       id
       version

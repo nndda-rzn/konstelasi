@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono, Caveat, Dancing_Script, Playfair_Display, Lora } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -11,6 +11,32 @@ const inter = Inter({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const dancingScript = Dancing_Script({
+  variable: "--font-dancing",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
+});
+
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -31,7 +57,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${geistMono.variable} ${caveat.variable} ${dancingScript.variable} ${playfair.variable} ${lora.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300">
         <ThemeProvider>

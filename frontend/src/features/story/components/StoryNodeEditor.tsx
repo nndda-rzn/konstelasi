@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react';
 import { X, Trash2, Lock, Unlock, MapPin, Clock, Heart, Save, Loader2, Calendar, ImagePlus, Maximize2, Minimize2, Hourglass } from 'lucide-react';
 import { useMutation } from '@apollo/client/react';
-import { UPDATE_NOTE_CONTENT, DELETE_NOTE, ADD_NOTE_IMAGE, DELETE_NOTE_IMAGE } from '@/graphql/mutations';
+import { UPDATE_NOTE_CONTENT, DELETE_NOTE } from '@/graphql/mutations';
 import { TOGGLE_NODE_LOCK } from '@/graphql/story';
 import { notify } from '@/lib/toast';
-import { createClient } from '@/lib/supabase/client';
 import TiptapEditor from '@/features/canvas/components/TiptapEditor';
+import { useNoteImageUpload } from '@/features/canvas/hooks/useNoteImageUpload';
 
 const NODE_TYPE_OPTIONS = [
   { value: 'scene', label: 'Scene', color: '#FF6B8B' },
@@ -70,8 +70,6 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
   const [eventDate, setEventDate] = useState(note?.eventDate ? note.eventDate.split('T')[0] : '');
   const [eventLocation, setEventLocation] = useState(note?.eventLocation || '');
   const [unlockDate, setUnlockDate] = useState(toDateTimeInputValue(note?.unlockDate));
-  const [images, setImages] = useState<any[]>(note?.images || []);
-  const [uploading, setUploading] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -83,8 +81,12 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
   const [updateContent] = useMutation<any>(UPDATE_NOTE_CONTENT);
   const [deleteNote] = useMutation<any>(DELETE_NOTE);
   const [toggleLock] = useMutation<any>(TOGGLE_NODE_LOCK);
-  const [addNoteImage] = useMutation<any>(ADD_NOTE_IMAGE);
-  const [deleteNoteImage] = useMutation<any>(DELETE_NOTE_IMAGE);
+
+  const { images, setImages, uploading, uploadFromInputEvent, deleteImage } = useNoteImageUpload({
+    noteId: note?.id,
+    initialImages: note?.images || [],
+    onImagesChange: (newImages) => onUpdateCache(note.id, title, content, newImages),
+  });
 
   // Auto-save debounce
   useEffect(() => {
@@ -138,49 +140,6 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
       try { setMetadata(note.storyMetadata ? JSON.parse(note.storyMetadata) : {}); } catch { setMetadata({}); }
     }
   }, [note?.id]);
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      const userId = user?.id || 'anonymous';
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-      const filePath = `${userId}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage.from('notes_images').upload(filePath, file);
-      if (uploadError) throw uploadError;
-
-      const { data: publicUrlData } = supabase.storage.from('notes_images').getPublicUrl(filePath);
-      const { data } = await addNoteImage({ variables: { input: { noteId: note.id, imageUrl: publicUrlData.publicUrl, caption: '' } } });
-      if (data?.addNoteImage) {
-        const newImages = [...images, data.addNoteImage];
-        setImages(newImages);
-        onUpdateCache(note.id, title, content, newImages);
-        notify.success('Gambar berhasil diunggah');
-      }
-    } catch (err: any) {
-      notify.error('Gagal mengunggah: ' + err.message);
-    } finally {
-      setUploading(false);
-      e.target.value = '';
-    }
-  };
-
-  const handleRemoveImage = async (imageId: string) => {
-    try {
-      await deleteNoteImage({ variables: { id: imageId } });
-      const newImages = images.filter((img: any) => img.id !== imageId);
-      setImages(newImages);
-      onUpdateCache(note.id, title, content, newImages);
-      notify.success('Gambar dihapus');
-    } catch (err: any) {
-      notify.error('Gagal menghapus gambar');
-    }
-  };
 
   const handleToggleLock = async () => {
     try {
@@ -371,8 +330,8 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
             <div className="grid grid-cols-3 gap-2 mb-2">
               {images.map((img: any) => (
                 <div key={img.id} className="relative group rounded-lg overflow-hidden aspect-square">
-                  <img src={img.imageUrl} alt={img.caption || ''} className="w-full h-full object-cover" />
-                  <button onClick={() => handleRemoveImage(img.id)}
+                  <img src={img.imageUrl} alt={img.caption || ''} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                  <button onClick={() => deleteImage(img.id)}
                     className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity">
                     <X className="w-3 h-3" />
                   </button>
@@ -383,7 +342,7 @@ export default function StoryNodeEditor({ note, onClose, onUpdateCache, onDelete
           <label className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-dashed border-[#FFB8C0]/30 hover:border-[#FF6B8B]/50 hover:bg-[#FF6B8B]/5 cursor-pointer transition-all">
             {uploading ? <Loader2 className="w-4 h-4 text-[#FF6B8B] animate-spin" /> : <ImagePlus className="w-4 h-4 text-[#FF6B8B]/60" />}
             <span className="text-[10px] text-[#5A3E4C]/40">{uploading ? 'Mengunggah...' : 'Tambah Gambar'}</span>
-            <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
+            <input type="file" accept="image/*" onChange={uploadFromInputEvent} className="hidden" disabled={uploading} />
           </label>
           </>
           )}

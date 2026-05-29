@@ -102,9 +102,16 @@ function StoryNode({ data, selected }: any) {
           </div>
         ) : data.content && (
           <div className="px-3 pb-2">
-            <p className="text-[11px] text-[#5A3E4C]/70 dark:text-[#e2d9f3]/50 line-clamp-2 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: data.content.replace(/<[^>]+>/g, '').slice(0, 80) }}
-            />
+            <p className="text-[11px] text-[#5A3E4C]/70 dark:text-[#e2d9f3]/50 line-clamp-3 leading-relaxed whitespace-pre-line">
+              {data.content
+                .replace(/<\/(p|div|h[1-6]|li|blockquote)>/gi, '\n')
+                .replace(/<br\s*\/?>/gi, '\n')
+                .replace(/<[^>]+>/g, '')
+                .replace(/\n{2,}/g, '\n')
+                .replace(/[ \t]+/g, ' ')
+                .trim()
+                .slice(0, 120)}
+            </p>
           </div>
         )}
 
@@ -126,7 +133,7 @@ function StoryNode({ data, selected }: any) {
         {!isTimeLocked && data.images?.length > 0 && (
           <div className="px-3 pb-2">
             <div className="w-full h-16 rounded-lg overflow-hidden">
-              <img src={data.images[0].imageUrl} alt="" className="w-full h-full object-cover" />
+              <img src={data.images[0].imageUrl} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
             </div>
           </div>
         )}

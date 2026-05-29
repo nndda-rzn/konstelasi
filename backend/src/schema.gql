@@ -246,6 +246,7 @@ type Note {
   storyNodeType: String
   tags: [Tag]
   title: String!
+  titleFont: String
   type: String!
   unlockDate: DateTime
   updatedAt: DateTime!
@@ -434,6 +435,7 @@ input UpdateNoteContentInput {
   mood: String
   tagIds: [String!]
   title: String
+  titleFont: String
   type: String
   unlockDate: String
 }

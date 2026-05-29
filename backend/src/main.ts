@@ -26,11 +26,15 @@ async function bootstrap() {
       await em.flush();
     }
     
-    // Attempt to drop strict RLS from storage to allow guest uploads
+    // Attempt to drop strict RLS from storage to allow guest uploads.
+    // Drop both old (Authenticated/Owner) and new (Public) policies first
+    // so this block stays idempotent across server restarts.
     await em.getConnection().execute(`
       DROP POLICY IF EXISTS "Authenticated Upload" ON storage.objects;
+      DROP POLICY IF EXISTS "Public Upload" ON storage.objects;
       CREATE POLICY "Public Upload" ON storage.objects FOR INSERT WITH CHECK ( bucket_id = 'notes_images' );
       DROP POLICY IF EXISTS "Owner Deletion" ON storage.objects;
+      DROP POLICY IF EXISTS "Public Deletion" ON storage.objects;
       CREATE POLICY "Public Deletion" ON storage.objects FOR DELETE USING ( bucket_id = 'notes_images' );
     `);
   } catch (e) {

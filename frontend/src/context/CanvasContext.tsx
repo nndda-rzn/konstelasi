@@ -1,8 +1,14 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { useQuery, useMutation } from '@apollo/client/react';
-import { gql } from '@apollo/client/core';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
+import { useQuery, useMutation } from "@apollo/client/react";
+import { gql } from "@apollo/client/core";
 
 export const CANVASES_QUERY = gql`
   query GetUserCanvases {
@@ -12,7 +18,10 @@ export const CANVASES_QUERY = gql`
       description
       level
       order
-      parent { id name }
+      parent {
+        id
+        name
+      }
       createdAt
       updatedAt
     }
@@ -20,13 +29,20 @@ export const CANVASES_QUERY = gql`
 `;
 
 export const CREATE_CANVAS_MUTATION = gql`
-  mutation CreateCanvas($name: String!, $description: String, $parentId: String) {
+  mutation CreateCanvas(
+    $name: String!
+    $description: String
+    $parentId: String
+  ) {
     createCanvas(name: $name, description: $description, parentId: $parentId) {
       id
       name
       description
       level
-      parent { id name }
+      parent {
+        id
+        name
+      }
     }
   }
 `;
@@ -47,7 +63,7 @@ export const DELETE_CANVAS_MUTATION = gql`
   }
 `;
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 interface Canvas {
   id: string;
@@ -63,8 +79,16 @@ interface CanvasContextType {
   selectedCanvasId: string | null;
   loading: boolean;
   setSelectedCanvasId: (id: string | null) => void;
-  createCanvas: (name: string, description?: string, parentId?: string) => Promise<void>;
-  updateCanvas: (id: string, name: string, description?: string) => Promise<void>;
+  createCanvas: (
+    name: string,
+    description?: string,
+    parentId?: string,
+  ) => Promise<void>;
+  updateCanvas: (
+    id: string,
+    name: string,
+    description?: string,
+  ) => Promise<void>;
   deleteCanvas: (id: string) => Promise<void>;
 }
 
@@ -73,7 +97,7 @@ const CanvasContext = createContext<CanvasContextType | undefined>(undefined);
 export const useCanvas = () => {
   const context = useContext(CanvasContext);
   if (!context) {
-    throw new Error('useCanvas must be used within a CanvasProvider');
+    throw new Error("useCanvas must be used within a CanvasProvider");
   }
   return context;
 };
@@ -83,8 +107,13 @@ export const CanvasProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedCanvasId, setSelectedCanvasId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const { data, loading: queryLoading, error, refetch } = useQuery<any>(CANVASES_QUERY, {
-    fetchPolicy: 'cache-and-network',
+  const {
+    data,
+    loading: queryLoading,
+    error,
+    refetch,
+  } = useQuery<any>(CANVASES_QUERY, {
+    fetchPolicy: "cache-and-network",
     ssr: false,
   });
 
@@ -102,7 +131,7 @@ export const CanvasProvider = ({ children }: { children: React.ReactNode }) => {
       refetch();
     },
     onError: (error) => {
-      console.error('Failed to create canvas:', error);
+      console.error("Failed to create canvas:", error);
     },
   });
 
@@ -111,7 +140,7 @@ export const CanvasProvider = ({ children }: { children: React.ReactNode }) => {
       refetch();
     },
     onError: (error) => {
-      console.error('Failed to update canvas:', error);
+      console.error("Failed to update canvas:", error);
     },
   });
 
@@ -120,7 +149,9 @@ export const CanvasProvider = ({ children }: { children: React.ReactNode }) => {
       refetch();
       // If the deleted canvas was the selected one, select the first available canvas
       if (selectedCanvasId) {
-        const remainingCanvases = data?.canvases?.filter((c: Canvas) => c.id !== selectedCanvasId) || [];
+        const remainingCanvases =
+          data?.canvases?.filter((c: Canvas) => c.id !== selectedCanvasId) ||
+          [];
         if (remainingCanvases.length > 0) {
           setSelectedCanvasId(remainingCanvases[0].id);
         } else {
@@ -129,43 +160,52 @@ export const CanvasProvider = ({ children }: { children: React.ReactNode }) => {
       }
     },
     onError: (error) => {
-      console.error('Failed to delete canvas:', error);
+      console.error("Failed to delete canvas:", error);
     },
   });
 
   const canvases = data?.canvases || [];
 
-  const handleCreateCanvas = useCallback(async (name: string, description?: string, parentId?: string) => {
-    await createCanvas({
-      variables: {
-        name,
-        description,
-        parentId,
-      },
-    });
-  }, [createCanvas]);
+  const handleCreateCanvas = useCallback(
+    async (name: string, description?: string, parentId?: string) => {
+      await createCanvas({
+        variables: {
+          name,
+          description,
+          parentId,
+        },
+      });
+    },
+    [createCanvas],
+  );
 
-  const handleUpdateCanvas = useCallback(async (id: string, name: string, description?: string) => {
-    await updateCanvas({
-      variables: {
-        id,
-        name,
-        description,
-      },
-    });
-  }, [updateCanvas]);
+  const handleUpdateCanvas = useCallback(
+    async (id: string, name: string, description?: string) => {
+      await updateCanvas({
+        variables: {
+          id,
+          name,
+          description,
+        },
+      });
+    },
+    [updateCanvas],
+  );
 
-  const handleDeleteCanvas = useCallback(async (id: string) => {
-    await deleteCanvas({
-      variables: {
-        id,
-      },
-    });
-  }, [deleteCanvas]);
+  const handleDeleteCanvas = useCallback(
+    async (id: string) => {
+      await deleteCanvas({
+        variables: {
+          id,
+        },
+      });
+    },
+    [deleteCanvas],
+  );
 
   useEffect(() => {
     if (error) {
-      console.error('Error fetching canvases:', error);
+      console.error("Error fetching canvases:", error);
     }
   }, [error]);
 
@@ -180,8 +220,6 @@ export const CanvasProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <CanvasContext.Provider value={value}>
-      {children}
-    </CanvasContext.Provider>
+    <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>
   );
 };

@@ -3,11 +3,13 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import {
   ReactFlow,
+  ReactFlowProvider,
   MiniMap,
   Controls,
   Background,
   useNodesState,
   useEdgesState,
+  useReactFlow,
   addEdge,
   Connection,
   ConnectionMode,
@@ -16,6 +18,7 @@ import {
   NodeChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { toast } from 'sonner';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { GET_NOTES } from '@/graphql/queries';
 import { CREATE_NOTE, BATCH_UPDATE_NOTES, CREATE_NOTE_LINK, DELETE_NOTE_LINK, UPDATE_NOTE_LINK, DELETE_NOTE } from '@/graphql/mutations';
@@ -23,7 +26,8 @@ import NoteNode from '@/features/canvas/components/NoteNode';
 import SemanticEdge from '@/features/canvas/components/SemanticEdge';
 import NoteEditorSidebar from './NoteEditorSidebar';
 import TimelineView from '@/features/canvas/components/TimelineView';
-import { Loader2, Sparkles, Search, Download, LayoutTemplate, List, Tag as TagIcon, Clock, BarChart3, Archive, Wand2 } from 'lucide-react';
+import ThreadView from '@/features/canvas/components/ThreadView';
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toPng } from 'html-to-image';
 import { useCanvas } from '@/context/CanvasContext';
@@ -37,6 +41,19 @@ import ExportPanel from '@/features/canvas/panels/ExportPanel';
 import CalendarPanel from '@/features/canvas/panels/CalendarPanel';
 import AdvancedAnalyticsPanel from '@/features/canvas/panels/AdvancedAnalyticsPanel';
 import { useAutoLayout } from '@/features/canvas/hooks/useAutoLayout';
+import { usePositionPersistence } from '@/features/canvas/hooks/usePositionPersistence';
+import { useEdgeOperations } from '@/features/canvas/hooks/useEdgeOperations';
+import { useFocusRestore } from '@/features/canvas/hooks/useFocusRestore';
+import { useCanvasHistory } from '@/features/canvas/hooks/useCanvasHistory';
+import { useKeyboardNavigation } from '@/features/canvas/hooks/useKeyboardNavigation';
+import { useNoteCreation } from '@/features/canvas/hooks/useNoteCreation';
+import type { Note, GetNotesData, CreateNoteResponse, DeleteNoteResponse, BatchUpdateNotesResponse } from '@/features/canvas/types';
+import { notesToFlow } from '@/features/canvas/utils/notesToFlow';
+import CanvasToolbar from '@/features/canvas/components/CanvasToolbar';
+import CanvasFooter from '@/features/canvas/components/CanvasFooter';
+import CanvasEmptyState from '@/features/canvas/components/CanvasEmptyState';
+import CanvasSkeleton from '@/features/canvas/components/CanvasSkeleton';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 const nodeTypes = {
   default: NoteNode,
@@ -46,26 +63,31 @@ const edgeTypes = {
   semanticEdge: SemanticEdge,
 };
 
-export default function DiaryCanvas() {
+function DiaryCanvasInner() {
   const router = useRouter();
   const { selectedCanvasId } = useCanvas();
   const { selectedTagFilters } = useTags();
+  const { screenToFlowPosition } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
-  const [selectedNote, setSelectedNote] = useState<any>(null);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'canvas' | 'thread' | 'timeline'>('canvas');
-  const [showTagPanel, setShowTagPanel] = useState(false);
-  const [showSearchPanel, setShowSearchPanel] = useState(false);
-  const [showStatsPanel, setShowStatsPanel] = useState(false);
-  const [showArchivePanel, setShowArchivePanel] = useState(false);
-  const [showExportPanel, setShowExportPanel] = useState(false);
-  const [showCalendarPanel, setShowCalendarPanel] = useState(false);
+  type ActivePanel = 'tag' | 'search' | 'stats' | 'archive' | 'export' | 'calendar' | null;
+  const [activePanel, setActivePanel] = useState<ActivePanel>(null);
+  const [pendingDelete, setPendingDelete] = useState<Node[]>([]);
+  const { saveFocus, restoreFocus } = useFocusRestore();
+  const togglePanel = useCallback((panel: Exclude<ActivePanel, null>) => {
+    saveFocus();
+    setActivePanel((current) => (current === panel ? null : panel));
+  }, [saveFocus]);
+  const closePanel = useCallback(() => {
+    setActivePanel(null);
+    restoreFocus();
+  }, [restoreFocus]);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const pendingNodeLayoutChanges = useRef<Map<string, any>>(new Map());
-  const saveNodeLayoutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { data, loading, error, refetch } = useQuery<any>(GET_NOTES, {
+  const { data, loading, error, refetch } = useQuery<GetNotesData>(GET_NOTES, {
     variables: { 
       canvasId: selectedCanvasId || undefined,
       tagIds: selectedTagFilters.length > 0 ? selectedTagFilters : undefined,
@@ -74,84 +96,59 @@ export default function DiaryCanvas() {
     ssr: false
   });
   
-  const [createNote] = useMutation<any>(CREATE_NOTE);
-  const [batchUpdateNotes] = useMutation<any>(BATCH_UPDATE_NOTES);
+  const [createNote] = useMutation<CreateNoteResponse>(CREATE_NOTE);
+  const [batchUpdateNotes] = useMutation<BatchUpdateNotesResponse>(BATCH_UPDATE_NOTES);
   const { applyAutoLayout } = useAutoLayout({
     nodes: data?.getNotes || [],
-    onApplied: () => { refetch(); },
+    // No refetch needed - BATCH_UPDATE_NOTES returns updated notes,
+    // and Apollo's cache normalization auto-merges position changes
+    // by __typename:id.
+    onApplied: () => {},
   });
-  const [createNoteLink] = useMutation<any>(CREATE_NOTE_LINK);
-  const [deleteNoteLink] = useMutation<any>(DELETE_NOTE_LINK);
-  const [updateNoteLink] = useMutation<any>(UPDATE_NOTE_LINK);
-  const [deleteNote] = useMutation<any>(DELETE_NOTE);
+  const [deleteNote] = useMutation<DeleteNoteResponse>(DELETE_NOTE);
 
-  const flushPendingNodeLayoutChanges = useCallback(() => {
-    const inputsArray = Array.from(pendingNodeLayoutChanges.current.values());
-    pendingNodeLayoutChanges.current.clear();
-    saveNodeLayoutTimer.current = null;
+  const { pushSnapshot, undo, redo, canUndo, canRedo } = useCanvasHistory();
+  const navigateRef = useRef<(id: string) => void>(() => {});
+  useKeyboardNavigation(nodes, selectedNote?.id ?? null, navigateRef);
 
-    if (inputsArray.length === 0) return;
+  const { onConnect: onConnectBase, onEdgesDelete: onEdgesDeleteBase, handleEdgeLabelChange } = useEdgeOperations({
+    setEdges,
+    getSourceColor: useCallback(
+      (sourceId: string) => {
+        const sourceNode = nodes.find((n) => n.id === sourceId);
+        return sourceNode?.data?.color;
+      },
+      [nodes]
+    ),
+  });
 
-    batchUpdateNotes({
-      variables: { inputs: inputsArray }
-    }).catch((err) => {
-      console.error('Failed to save note layout changes:', err);
-    });
-  }, [batchUpdateNotes]);
+  const handleConnect = useCallback(
+    (connection: Connection) => {
+      pushSnapshot(nodes, edges);
+      onConnectBase(connection);
+    },
+    [pushSnapshot, nodes, edges, onConnectBase]
+  );
 
-  useEffect(() => {
-    return () => {
-      if (saveNodeLayoutTimer.current) clearTimeout(saveNodeLayoutTimer.current);
-      flushPendingNodeLayoutChanges();
-    };
-  }, [flushPendingNodeLayoutChanges]);
+  const handleEdgesDelete = useCallback(
+    (edgesToDelete: Edge[]) => {
+      pushSnapshot(nodes, edges);
+      onEdgesDeleteBase(edgesToDelete);
+    },
+    [pushSnapshot, nodes, edges, onEdgesDeleteBase]
+  );
+
+  const { queueChanges: queueLayoutChanges } = usePositionPersistence({
+    batchUpdate: batchUpdateNotes,
+  });
 
   useEffect(() => {
     if (data && data.getNotes) {
-      const initialNodes = data.getNotes.map((note: any) => ({
-        id: note.id,
-        type: 'default',
-        position: { x: note.positionX, y: note.positionY },
-        data: { 
-          title: note.title, 
-          content: note.content,
-          images: note.images,
-          color: note.color || 'default',
-          type: note.type || 'default',
-          mood: note.mood || '',
-          incomingEdges: note.incomingEdges,
-          outgoingEdges: note.outgoingEdges,
-          tags: note.tags || [],
-          createdAt: note.createdAt || new Date().toISOString(),
-          isSearching: searchQuery !== '',
-          isMatch: true,
-          onDoubleClick: () => handleNodeDoubleClick(note.id)
-        },
-        style: {
-          width: note.width || undefined,
-          height: note.height || undefined,
-        }
-      }));
-
-      const initialEdges: Edge[] = [];
-      data.getNotes.forEach((note: any) => {
-        note.outgoingEdges.forEach((edge: any) => {
-          initialEdges.push({
-            id: edge.id,
-            type: 'semanticEdge',
-            source: edge.source.id,
-            target: edge.target.id,
-            sourceHandle: edge.sourceHandle,
-            targetHandle: edge.targetHandle,
-            data: {
-              label: edge.label || '',
-              color: note.color || 'default',
-              onLabelChange: handleEdgeLabelChange
-            }
-          });
-        });
+      const { nodes: initialNodes, edges: initialEdges } = notesToFlow(data.getNotes, {
+        searchQuery,
+        onNodeDoubleClick: handleNodeDoubleClick,
+        onEdgeLabelChange: handleEdgeLabelChange,
       });
-
       setNodes(initialNodes);
       setEdges(initialEdges);
     }
@@ -175,25 +172,25 @@ export default function DiaryCanvas() {
     }));
   }, [searchQuery, setNodes]);
 
-  // Global Keyboard Shortcuts
+  // Global keyboard shortcut: Ctrl/Cmd+F to focus search.
+  // Note: 'N' shortcut is registered later, after handleCreateAtCenter is defined.
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+F or Cmd+F for Global Search
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
-        e.preventDefault(); // Prevent browser default search
+        e.preventDefault();
         searchInputRef.current?.focus();
       }
     };
-    
+
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, []);
 
   const handleNodeDoubleClick = (nodeId: string) => {
-    let note = data?.getNotes?.find((n: any) => n.id === nodeId);
+    let note = data?.getNotes?.find((n: Note) => n.id === nodeId);
     
     setNodes((currentNodes) => {
-      const localNode = currentNodes.find((n: any) => n.id === nodeId);
+      const localNode = currentNodes.find((n) => n.id === nodeId);
       
       if (!note && localNode) {
         note = {
@@ -223,14 +220,16 @@ export default function DiaryCanvas() {
       }
       
       if (note) {
-        setTimeout(() => setSelectedNote(note), 0);
+        const finalNote = note;
+        setTimeout(() => setSelectedNote(finalNote), 0);
       }
       return currentNodes;
     });
   };
+  navigateRef.current = handleNodeDoubleClick;
 
-  const handleUpdateCache = (nodeId: string, newTitle?: string, newContent?: string, newImages?: any[], color?: string, mood?: string) => {
-    setNodes((nds: any[]) => nds.map(n => {
+  const handleUpdateCache = (nodeId: string, newTitle?: string, newContent?: string, newImages?: Note['images'], color?: string, mood?: string) => {
+    setNodes((nds) => nds.map(n => {
       if (n.id === nodeId) {
         return {
           ...n,
@@ -248,29 +247,39 @@ export default function DiaryCanvas() {
     }));
   };
 
-  const handleNodesDelete = useCallback(
+  const performNodesDelete = useCallback(
     (nodesToDelete: Node[]) => {
+      pushSnapshot(nodes, edges);
       nodesToDelete.forEach(node => {
-        deleteNote({ variables: { id: node.id } }).catch(console.error);
+        deleteNote({ variables: { id: node.id } })
+          .then(() => toast.success('Note dihapus'))
+          .catch((err) => {
+            console.error(err);
+            toast.error('Gagal menghapus note');
+          });
       });
       setSelectedNote(null);
     },
-    [deleteNote]
+    [deleteNote, pushSnapshot, nodes, edges]
   );
 
-  const handleEdgesDelete = useCallback(
-    (edgesToDelete: Edge[]) => {
-      edgesToDelete.forEach(edge => {
-        deleteNoteLink({ variables: { id: edge.id } }).catch(console.error);
-      });
+  const handleNodesDelete = useCallback(
+    (nodesToDelete: Node[]) => {
+      // Multi-delete: ask for confirmation to avoid accidental data loss.
+      if (nodesToDelete.length > 1) {
+        setPendingDelete(nodesToDelete);
+        return;
+      }
+      performNodesDelete(nodesToDelete);
     },
-    [deleteNoteLink]
+    [performNodesDelete]
   );
+
 
   const handleDeleteSuccess = (nodeId: string) => {
     setSelectedNote(null);
-    setNodes((nds: any[]) => nds.filter((n) => n.id !== nodeId));
-    setEdges((eds: any[]) => eds.filter(e => e.source !== nodeId && e.target !== nodeId));
+    setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+    setEdges((eds) => eds.filter(e => e.source !== nodeId && e.target !== nodeId));
   };
 
   const downloadImage = () => {
@@ -291,201 +300,62 @@ export default function DiaryCanvas() {
     });
   };
 
-  const handleEdgeLabelChange = async (edgeId: string, newLabel: string) => {
-    setEdges((eds) => eds.map((e) => {
-      if (e.id === edgeId) {
-        return { ...e, data: { ...e.data, label: newLabel } };
-      }
-      return e;
-    }));
-
-    try {
-      await updateNoteLink({
-        variables: {
-          input: { id: edgeId, label: newLabel }
-        }
-      });
-    } catch (err) {
-      console.error("Failed to update edge label", err);
-    }
-  };
-
   const handleNodesChange = useCallback(
     (changes: NodeChange<Node>[]) => {
       onNodesChange(changes);
-
-      changes.forEach((change: any) => {
-        const isFinalPosition = change.type === 'position' && change.dragging === false && change.position;
-        const isFinalDimensions = change.type === 'dimensions' && change.resizing === false && change.dimensions;
-        if (!isFinalPosition && !isFinalDimensions) return;
-
-        const pending = pendingNodeLayoutChanges.current;
-        const input = pending.get(change.id) || { id: change.id };
-
-        if (isFinalPosition) {
-          input.positionX = change.position.x;
-          input.positionY = change.position.y;
-        }
-
-        if (isFinalDimensions) {
-          input.width = change.dimensions.width;
-          input.height = change.dimensions.height;
-        }
-
-        pending.set(change.id, input);
-      });
-
-      if (pendingNodeLayoutChanges.current.size === 0) return;
-      if (saveNodeLayoutTimer.current) clearTimeout(saveNodeLayoutTimer.current);
-      saveNodeLayoutTimer.current = setTimeout(flushPendingNodeLayoutChanges, 500);
+      queueLayoutChanges(changes);
     },
-    [onNodesChange, flushPendingNodeLayoutChanges]
+    [onNodesChange, queueLayoutChanges]
   );
 
-  const onConnect = useCallback(
-    async (params: Connection) => {
-      const sourceNode = nodes.find((n: any) => n.id === params.source);
-      
-      const newEdge = { 
-        ...params, 
-        id: `temp-${Date.now()}`,
-        type: 'semanticEdge',
-        data: {
-          label: '',
-          color: sourceNode?.data?.color || 'default',
-          onLabelChange: handleEdgeLabelChange
-        },
-        sourceHandle: params.sourceHandle,
-        targetHandle: params.targetHandle
-      };
-      setEdges((eds) => addEdge(newEdge, eds));
-      
-      try {
-        const { data } = await createNoteLink({
-          variables: {
-            input: {
-              sourceId: params.source,
-              targetId: params.target,
-              sourceHandle: params.sourceHandle,
-              targetHandle: params.targetHandle
-            }
-          },
-          update(cache, { data: { createNoteLink } }) {
-            try {
-              const existingData: any = cache.readQuery({ query: GET_NOTES });
-              if (existingData && existingData.getNotes) {
-                const newData = {
-                  getNotes: existingData.getNotes.map((note: any) => {
-                    if (note.id === params.source) {
-                      // Filter out the edge if it already exists (handling both fully resolved objects and Apollo __ref pointers)
-                      const cleanedEdges = note.outgoingEdges.filter((e: any) => {
-                        if (e.id && e.id === createNoteLink.id) return false;
-                        if (e.__ref && typeof e.__ref === 'string' && e.__ref.includes(createNoteLink.id)) return false;
-                        return true;
-                      });
-                      
-                      return {
-                        ...note,
-                        outgoingEdges: [...cleanedEdges, createNoteLink]
-                      };
-                    }
-                    return note;
-                  })
-                };
-                cache.writeQuery({ query: GET_NOTES, data: newData });
-              }
-            } catch (e) {
-              console.error("Cache update failed", e);
-            }
-          }
-        });
-        
-        if (data?.createNoteLink) {
-          setEdges((eds) => {
-            const edgeExists = eds.some(e => e.id === data.createNoteLink.id && e.id !== newEdge.id);
-            if (edgeExists) {
-              // Edge already existed! Remove the temp edge and visually update the existing one.
-              return eds
-                .filter(e => e.id !== newEdge.id)
-                .map(e => e.id === data.createNoteLink.id 
-                  ? { ...e, sourceHandle: params.sourceHandle, targetHandle: params.targetHandle } 
-                  : e
-                );
-            }
-            // It's a new edge, rename the temp ID to the real database ID
-            return eds.map(e => e.id === newEdge.id ? { ...e, id: data.createNoteLink.id } : e);
-          });
-        }
-      } catch (err) {
-        console.error("Failed to create link", err);
-        setEdges((eds) => eds.filter(e => e.id !== newEdge.id));
+  const { createNoteFromEvent: handleCanvasContextMenu, createNoteAtCenter: handleCreateAtCenter } =
+    useNoteCreation();
+
+  // Keyboard shortcut: 'N' to create new note (only when not typing).
+  useEffect(() => {
+    const handleN = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isTyping = !!target && (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      );
+      if (!isTyping && !e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        handleCreateAtCenter();
       }
-    },
-    [setEdges, createNoteLink]
-  );
+    };
 
-  const onEdgesDelete = useCallback(
-    (edgesToDelete: Edge[]) => {
-      edgesToDelete.forEach((edge) => {
-        if (!edge.id.startsWith('temp-')) {
-          deleteNoteLink({ variables: { id: edge.id } });
-        }
-      });
-    },
-    [deleteNoteLink]
-  );
+    window.addEventListener('keydown', handleN);
+    return () => window.removeEventListener('keydown', handleN);
+  }, [handleCreateAtCenter]);
 
-  const handleCanvasContextMenu = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    const bounds = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - bounds.left;
-    const y = e.clientY - bounds.top;
+  // Undo/Redo keyboard shortcuts: Ctrl+Z / Ctrl+Shift+Z
+  useEffect(() => {
+    const handleUndoRedo = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== 'z') return;
+      const target = e.target as HTMLElement | null;
+      const isTyping = !!target && (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      );
+      if (isTyping) return;
+      e.preventDefault();
+      if (e.shiftKey) {
+        const snapshot = redo();
+        if (snapshot) { setNodes(snapshot.nodes); setEdges(snapshot.edges); }
+      } else {
+        const snapshot = undo();
+        if (snapshot) { setNodes(snapshot.nodes); setEdges(snapshot.edges); }
+      }
+    };
 
-    try {
-      const { data } = await createNote({
-        variables: {
-          input: {
-            title: "New Note",
-            positionX: x,
-            positionY: y
-          }
-        },
-        update(cache, { data: { createNote } }) {
-          try {
-            const existingData: any = cache.readQuery({ query: GET_NOTES });
-            if (existingData && existingData.getNotes) {
-              cache.writeQuery({
-                query: GET_NOTES,
-                data: {
-                  getNotes: [
-                    ...existingData.getNotes,
-                    { ...createNote, content: '', images: [], outgoingEdges: [], incomingEdges: [], tags: [], createdAt: new Date().toISOString() }
-                  ]
-                }
-              });
-            }
-          } catch (e) {
-            console.error("Cache update failed", e);
-          }
-        }
-      });
+    window.addEventListener('keydown', handleUndoRedo);
+    return () => window.removeEventListener('keydown', handleUndoRedo);
+  }, [undo, redo, setNodes, setEdges]);
 
-    } catch (err) {
-      console.error("Failed to create node", err);
-    }
-  };
-
-  if (loading) return (
-    <div className="flex h-screen w-full items-center justify-center bg-[#FFFAF7]">
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative">
-          <div className="absolute inset-0 rounded-full bg-[#FFB4A2]/20 blur-xl animate-pulse" />
-          <Loader2 className="relative animate-spin w-12 h-12 text-[#FF8FA3]" />
-        </div>
-        <p className="text-[#5A3E4C]/40 text-sm font-medium tracking-wider uppercase">Loading your constellation...</p>
-      </div>
-    </div>
-  );
+  if (loading) return <CanvasSkeleton />;
 
   if (error) return (
     <div className="flex flex-col items-center justify-center h-screen bg-[#FFFAF7] space-y-4">
@@ -505,118 +375,22 @@ export default function DiaryCanvas() {
       <div className="absolute -bottom-[20%] -left-[10%] w-[40%] h-[40%] bg-[#FFB4A2]/15 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[10000ms]" />
 
       {/* ── Header ── */}
-      <div className="absolute top-0 left-0 right-0 h-16 bg-[#FFFAF7]/60 backdrop-blur-3xl border-b border-[#FFB4A2]/10 z-10 flex items-center justify-between px-6">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF8FA3] to-[#FFB4A2] flex items-center justify-center shadow-lg shadow-pink-300/30">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-[#FF8FA3] via-[#FFB4A2] to-[#FFD6A5] bg-clip-text text-transparent tracking-tight">
-              Konstelasi
-            </h1>
-          </div>
-          
-          <div className="hidden md:flex items-center relative ml-4">
-            <Search className="w-4 h-4 text-[#5A3E4C]/30 absolute left-3 z-10" />
-            <input 
-              ref={searchInputRef}
-              type="text" 
-              placeholder="Search thoughts (Ctrl+F)" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setShowSearchPanel(true)}
-              className="w-64 bg-white/60 border border-[#FFB4A2]/15 rounded-full pl-9 pr-4 py-1.5 text-sm text-[#5A3E4C] placeholder-[#5A3E4C]/30 focus:outline-none focus:ring-1 focus:ring-[#FF8FA3]/40 focus:border-[#FF8FA3]/40 transition-all hover:bg-white/80"
-            />
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <div className="flex items-center bg-white/60 border border-[#FFB4A2]/15 rounded-xl p-1">
-            <button
-              onClick={() => setViewMode('canvas')}
-              className={`p-1.5 rounded-lg transition-all ${viewMode === 'canvas' ? 'bg-white text-[#5A3E4C] shadow-sm' : 'text-[#5A3E4C]/40 hover:text-[#5A3E4C]/70'}`}
-              title="Canvas View"
-            >
-              <LayoutTemplate className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('thread')}
-              className={`p-1.5 rounded-lg transition-all ${viewMode === 'thread' ? 'bg-white text-[#5A3E4C] shadow-sm' : 'text-[#5A3E4C]/40 hover:text-[#5A3E4C]/70'}`}
-              title="Thread View"
-            >
-              <List className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('timeline')}
-              className={`p-1.5 rounded-lg transition-all ${viewMode === 'timeline' ? 'bg-white text-[#5A3E4C] shadow-sm' : 'text-[#5A3E4C]/40 hover:text-[#5A3E4C]/70'}`}
-              title="Timeline View"
-            >
-              <Clock className="w-4 h-4" />
-            </button>
-          </div>
-
-          <button 
-            onClick={() => setShowExportPanel(!showExportPanel)}
-            title="Export"
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 ${showExportPanel ? 'bg-[#FF8FA3]/10 border-[#FF8FA3]/30 text-[#FF8FA3]' : 'bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C]'}`}
-          >
-            <Download className="w-4 h-4" />
-            <span className="text-sm font-medium hidden sm:inline">Export</span>
-          </button>
-
-          <button 
-            onClick={() => setShowTagPanel(!showTagPanel)}
-            title="Tags"
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 ${showTagPanel ? 'bg-[#FF8FA3]/10 border-[#FF8FA3]/30 text-[#FF8FA3]' : 'bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C]'}`}
-          >
-            <TagIcon className="w-4 h-4" />
-            <span className="text-sm font-medium hidden sm:inline">Tags</span>
-            {selectedTagFilters.length > 0 && (
-              <span className="w-4 h-4 rounded-full bg-[#FF8FA3] text-white text-[10px] flex items-center justify-center font-bold">{selectedTagFilters.length}</span>
-            )}
-          </button>
-
-          <button 
-            onClick={() => setShowStatsPanel(!showStatsPanel)}
-            title="Statistik"
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 ${showStatsPanel ? 'bg-[#FF8FA3]/10 border-[#FF8FA3]/30 text-[#FF8FA3]' : 'bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C]'}`}
-          >
-            <BarChart3 className="w-4 h-4" />
-          </button>
-
-          <button 
-            onClick={() => setShowCalendarPanel(!showCalendarPanel)}
-            title="Kalender"
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 ${showCalendarPanel ? 'bg-[#FF8FA3]/10 border-[#FF8FA3]/30 text-[#FF8FA3]' : 'bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C]'}`}
-          >
-            <Clock className="w-4 h-4" />
-          </button>
-
-          <button 
-            onClick={() => setShowArchivePanel(!showArchivePanel)}
-            title="Arsip"
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 ${showArchivePanel ? 'bg-[#FF8FA3]/10 border-[#FF8FA3]/30 text-[#FF8FA3]' : 'bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#5A3E4C]'}`}
-          >
-            <Archive className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={() => applyAutoLayout()}
-            title="Auto-Organize: rapikan node otomatis"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 bg-white/60 hover:bg-white/80 border-[#FFB4A2]/15 hover:border-[#FF8FA3]/30 text-[#5A3E4C]/70 hover:text-[#FF8FA3]"
-          >
-            <Wand2 className="w-4 h-4" />
-            <span className="text-sm font-medium hidden sm:inline">Auto Layout</span>
-          </button>
-
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 border border-[#FFB4A2]/15 shadow-inner text-xs font-medium text-[#5A3E4C]/50 backdrop-blur-md">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#FF8FA3] shadow-[0_0_8px_rgba(255,143,163,0.6)] animate-pulse" />
-            Auto-saving
-          </div>
-
-          <StreakWidget />
-        </div>
-      </div>
+      <CanvasToolbar
+        searchInputRef={searchInputRef}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        activePanel={activePanel}
+        onTogglePanel={togglePanel}
+        onActivateSearchPanel={() => setActivePanel('search')}
+        selectedTagFiltersCount={selectedTagFilters.length}
+        onApplyAutoLayout={() => applyAutoLayout()}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={() => { const s = undo(); if (s) { setNodes(s.nodes); setEdges(s.edges); } }}
+        onRedo={() => { const s = redo(); if (s) { setNodes(s.nodes); setEdges(s.edges); } }}
+      />
 
       {/* ── Canvas or Thread View ── */}
       <div className="w-full h-full pt-16 relative z-0" onContextMenu={handleCanvasContextMenu}>
@@ -627,7 +401,7 @@ export default function DiaryCanvas() {
             edgeTypes={edgeTypes}
             onNodesChange={handleNodesChange}
             onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
+            onConnect={handleConnect}
             onNodesDelete={handleNodesDelete}
             onEdgesDelete={handleEdgesDelete}
             connectionMode={ConnectionMode.Loose}
@@ -649,61 +423,11 @@ export default function DiaryCanvas() {
             />
           </ReactFlow>
         ) : (
-          <div className="w-full h-full overflow-y-auto pb-32">
-            <div className="max-w-2xl mx-auto py-12 px-6 flex flex-col gap-8">
-              {nodes
-                .filter((node: any) => node.data.isMatch)
-                .sort((a: any, b: any) => {
-                  const dateA = new Date(a.data.createdAt || 0).getTime();
-                  const dateB = new Date(b.data.createdAt || 0).getTime();
-                  return dateA - dateB;
-                })
-                .map((node: any) => {
-                  // Determine alignment based on tags
-                  // Assuming tags like "crush", "dia", "him", "her", or specific quotes mean the other person
-                  const tags = node.data.tags || [];
-                  const isOtherPerson = tags.some((t: any) => 
-                    ['crush', 'dia', 'him', 'her', 'quote', 'kutipan'].includes(t.name.toLowerCase())
-                  );
-                  const alignClass = isOtherPerson ? 'justify-start' : 'justify-end';
-                  const radiusClass = isOtherPerson ? 'rounded-tl-sm' : 'rounded-tr-sm';
-
-                  return (
-                    <div 
-                      key={node.id} 
-                      className={`flex ${alignClass} animate-in fade-in slide-in-from-bottom-4 duration-500 w-full`}
-                    >
-                      <div className="flex flex-col max-w-[85%]">
-                        {/* Optionally show incoming relations in thread view */}
-                        {node.data.incomingEdges && node.data.incomingEdges.length > 0 && (
-                          <div className={`text-xs text-[#5A3E4C]/30 mb-1 px-2 flex flex-col gap-0.5 ${isOtherPerson ? 'items-start' : 'items-end'}`}>
-                            {node.data.incomingEdges.map((edge: any, i: number) => (
-                              <span key={i} className="flex items-center gap-1">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                                Reply to: {edge.source?.title || 'a thought'}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
-                        <div 
-                          className={`cursor-pointer transition-transform hover:scale-[1.02]`}
-                          onClick={() => handleNodeDoubleClick(node.id)}
-                        >
-                          <NoteNode data={{...node.data, _threadAlign: isOtherPerson ? 'left' : 'right'}} isConnectable={false} selected={selectedNote?.id === node.id} viewMode={viewMode} />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                
-                {nodes.filter((node: any) => node.data.isMatch).length === 0 && (
-                  <div className="text-center text-[#5A3E4C]/30 py-20">
-                    No thoughts match your search.
-                  </div>
-                )}
-            </div>
-          </div>
+          <ThreadView
+            nodes={nodes}
+            selectedNoteId={selectedNote?.id}
+            onNodeClick={handleNodeDoubleClick}
+          />
         )}
 
         {viewMode === 'timeline' && data?.getNotes && (
@@ -714,12 +438,12 @@ export default function DiaryCanvas() {
           />
         )}
 
-        {/* Floating Hint */}
-        {viewMode === 'canvas' && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-2.5 bg-white/70 backdrop-blur-xl border border-[#FFB4A2]/15 text-[#5A3E4C]/50 text-sm rounded-full shadow-lg pointer-events-none tracking-wide font-light flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#FF8FA3] shadow-[0_0_8px_rgba(255,143,163,0.6)] animate-pulse" />
-            Right-click anywhere to create a new thought
-          </div>
+        {/* Footer: hint + FAB */}
+        {viewMode === 'canvas' && <CanvasFooter onCreate={handleCreateAtCenter} />}
+
+        {/* Empty state overlay (only when canvas has no notes) */}
+        {viewMode === 'canvas' && !loading && nodes.length === 0 && (
+          <CanvasEmptyState onCreate={handleCreateAtCenter} />
         )}
       </div>
 
@@ -728,7 +452,7 @@ export default function DiaryCanvas() {
         <NoteEditorSidebar 
           note={selectedNote}
           allNotes={data?.getNotes || []}
-          onClose={() => setSelectedNote(null)}
+          onClose={() => { setSelectedNote(null); restoreFocus(); }}
           onUpdateCache={handleUpdateCache}
           onDeleteSuccess={handleDeleteSuccess}
           onNavigate={(id) => handleNodeDoubleClick(id)}
@@ -736,53 +460,74 @@ export default function DiaryCanvas() {
       )}
 
       {/* ── Tag Panel ── */}
-      {showTagPanel && (
-        <TagPanel onClose={() => setShowTagPanel(false)} />
+      {activePanel === 'tag' && (
+        <TagPanel onClose={closePanel} />
       )}
 
       {/* ── Search Panel ── */}
-      {showSearchPanel && data?.getNotes && (
+      {activePanel === 'search' && data?.getNotes && (
         <SearchPanel
           notes={data.getNotes}
-          onNoteClick={(noteId) => { handleNodeDoubleClick(noteId); setShowSearchPanel(false); }}
-          onClose={() => setShowSearchPanel(false)}
+          onNoteClick={(noteId) => { handleNodeDoubleClick(noteId); closePanel(); }}
+          onClose={closePanel}
         />
       )}
 
       {/* ── Stats Panel ── */}
-      {showStatsPanel && data?.getNotes && (
+      {activePanel === 'stats' && data?.getNotes && (
         <AdvancedAnalyticsPanel
-          isOpen={showStatsPanel}
+          isOpen={true}
           notes={data.getNotes}
-          onClose={() => setShowStatsPanel(false)}
+          onClose={closePanel}
         />
       )}
 
       {/* ── Archive Panel ── */}
       <ArchivePanel
-        isOpen={showArchivePanel}
-        onClose={() => setShowArchivePanel(false)}
+        isOpen={activePanel === 'archive'}
+        onClose={closePanel}
         onRestoreSuccess={() => refetch()}
       />
 
       {/* ── Export Panel ── */}
-      {showExportPanel && data?.getNotes && (
+      {activePanel === 'export' && data?.getNotes && (
         <ExportPanel
-          isOpen={showExportPanel}
-          onClose={() => setShowExportPanel(false)}
+          isOpen={true}
+          onClose={closePanel}
           notes={data.getNotes}
         />
       )}
 
       {/* ── Calendar Panel ── */}
-      {showCalendarPanel && data?.getNotes && (
+      {activePanel === 'calendar' && data?.getNotes && (
         <CalendarPanel
-          isOpen={showCalendarPanel}
-          onClose={() => setShowCalendarPanel(false)}
+          isOpen={true}
+          onClose={closePanel}
           notes={data.getNotes}
-          onNoteClick={(noteId) => { handleNodeDoubleClick(noteId); setShowCalendarPanel(false); }}
+          onNoteClick={(noteId) => { handleNodeDoubleClick(noteId); closePanel(); }}
         />
       )}
+
+      <ConfirmDialog
+        open={pendingDelete.length > 0}
+        title={`Hapus ${pendingDelete.length} catatan?`}
+        description="Aksi ini akan menghapus semua catatan terpilih beserta koneksinya. Tindakan ini tidak bisa dibatalkan."
+        confirmLabel="Hapus semua"
+        variant="danger"
+        onCancel={() => setPendingDelete([])}
+        onConfirm={() => {
+          performNodesDelete(pendingDelete);
+          setPendingDelete([]);
+        }}
+      />
     </div>
+  );
+}
+
+export default function DiaryCanvas() {
+  return (
+    <ReactFlowProvider>
+      <DiaryCanvasInner />
+    </ReactFlowProvider>
   );
 }

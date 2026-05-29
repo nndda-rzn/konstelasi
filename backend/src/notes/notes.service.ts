@@ -114,6 +114,10 @@ export class NotesService {
     if (input.color !== undefined) note.color = input.color;
     if (input.type !== undefined) note.type = input.type;
     if (input.mood !== undefined) (note as any).mood = input.mood;
+    if (input.titleFont !== undefined) {
+      // Empty string clears the font (back to default).
+      (note as any).titleFont = input.titleFont || null;
+    }
     if (input.eventDate !== undefined) (note as any).eventDate = input.eventDate ? new Date(input.eventDate) : null;
     if (input.eventLocation !== undefined) (note as any).eventLocation = input.eventLocation || null;
     if (input.unlockDate !== undefined) {

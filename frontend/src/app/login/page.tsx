@@ -1,14 +1,22 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import Link from 'next/link';
-import { ArrowRight, Gem, Loader2, Lock, Mail, Sparkles, Star } from 'lucide-react';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Gem,
+  Loader2,
+  Lock,
+  Mail,
+  Sparkles,
+  Star,
+} from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -28,7 +36,7 @@ export default function LoginPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push('/canvas');
+      router.push("/canvas");
       router.refresh();
     }
   };
@@ -56,7 +64,8 @@ export default function LoginPage() {
               Ruang pribadi untuk merangkai cerita dengan tenang.
             </h1>
             <p className="mt-5 max-w-lg text-sm leading-7 text-[#5A3E4C]/62">
-              Lanjutkan catatan, story, dan time capsule dalam tampilan yang lembut, rapi, dan tetap personal.
+              Lanjutkan catatan, story, dan time capsule dalam tampilan yang
+              lembut, rapi, dan tetap personal.
             </p>
 
             <div className="mt-10 grid gap-4">
@@ -66,14 +75,19 @@ export default function LoginPage() {
                   Studio focus
                 </div>
                 <p className="text-sm leading-6 text-[#5A3E4C]/70">
-                  Tempat masuk yang terasa ringan, namun tetap matang untuk menulis hal personal.
+                  Tempat masuk yang terasa ringan, namun tetap matang untuk
+                  menulis hal personal.
                 </p>
               </div>
 
               <div className="max-w-md rounded-[1.8rem] border border-white/55 bg-gradient-to-br from-white/88 via-[#FFF4EC]/75 to-[#FFE5E8]/62 p-5 shadow-[0_18px_52px_rgba(157,2,8,0.12)] backdrop-blur-xl">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-[0.28em] text-[#9D0208]/68">Konstelasi</span>
-                  <span className="rounded-full bg-[#9D0208]/8 px-2.5 py-1 text-[10px] font-bold text-[#9D0208]">Private</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.28em] text-[#9D0208]/68">
+                    Konstelasi
+                  </span>
+                  <span className="rounded-full bg-[#9D0208]/8 px-2.5 py-1 text-[10px] font-bold text-[#9D0208]">
+                    Private
+                  </span>
                 </div>
                 <div className="mt-5 flex items-center gap-3">
                   <div className="h-3 w-3 rounded-full bg-[#B8860B] shadow-[0_0_18px_rgba(184,134,11,0.45)]" />
@@ -83,9 +97,15 @@ export default function LoginPage() {
                   <div className="h-3 w-3 rounded-full bg-[#E63946] shadow-[0_0_18px_rgba(230,57,70,0.45)]" />
                 </div>
                 <div className="mt-5 flex gap-2 text-[10px] font-semibold text-[#5A3E4C]/48">
-                  <span className="rounded-full border border-[#E6B8A2]/40 bg-white/50 px-2.5 py-1">Notes</span>
-                  <span className="rounded-full border border-[#E6B8A2]/40 bg-white/50 px-2.5 py-1">Stories</span>
-                  <span className="rounded-full border border-[#E6B8A2]/40 bg-white/50 px-2.5 py-1">Capsule</span>
+                  <span className="rounded-full border border-[#E6B8A2]/40 bg-white/50 px-2.5 py-1">
+                    Notes
+                  </span>
+                  <span className="rounded-full border border-[#E6B8A2]/40 bg-white/50 px-2.5 py-1">
+                    Stories
+                  </span>
+                  <span className="rounded-full border border-[#E6B8A2]/40 bg-white/50 px-2.5 py-1">
+                    Capsule
+                  </span>
                 </div>
               </div>
             </div>
@@ -102,7 +122,9 @@ export default function LoginPage() {
               <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[1.4rem] bg-gradient-to-br from-[#FFF4D8] via-[#E86A76] to-[#9D0208] shadow-[0_16px_36px_rgba(157,2,8,0.20)]">
                 <Gem className="h-7 w-7 text-white" />
               </div>
-              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#9D0208]/62">Private access</p>
+              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#9D0208]/62">
+                Private access
+              </p>
               <h2 className="mt-2 text-3xl font-black tracking-[-0.03em] text-candy">
                 Selamat datang kembali
               </h2>
@@ -120,7 +142,12 @@ export default function LoginPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="email" className="mb-2 block text-[11px] font-bold uppercase tracking-[0.24em] text-[#5A3E4C]/45">Email</label>
+                  <label
+                    htmlFor="email"
+                    className="mb-2 block text-[11px] font-bold uppercase tracking-[0.24em] text-[#5A3E4C]/45"
+                  >
+                    Email
+                  </label>
                   <div className="group flex items-center gap-3 rounded-2xl border border-[#E6B8A2]/35 bg-white/68 px-4 py-3 shadow-inner transition-all hover:bg-white/85 focus-within:border-[#9D0208]/35 focus-within:ring-4 focus-within:ring-[#E6B8A2]/22">
                     <Mail className="h-4 w-4 text-[#9D0208]/48 transition-colors group-focus-within:text-[#9D0208]" />
                     <input
@@ -137,7 +164,12 @@ export default function LoginPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="mb-2 block text-[11px] font-bold uppercase tracking-[0.24em] text-[#5A3E4C]/45">Password</label>
+                  <label
+                    htmlFor="password"
+                    className="mb-2 block text-[11px] font-bold uppercase tracking-[0.24em] text-[#5A3E4C]/45"
+                  >
+                    Password
+                  </label>
                   <div className="group flex items-center gap-3 rounded-2xl border border-[#E6B8A2]/35 bg-white/68 px-4 py-3 shadow-inner transition-all hover:bg-white/85 focus-within:border-[#9D0208]/35 focus-within:ring-4 focus-within:ring-[#E6B8A2]/22">
                     <Lock className="h-4 w-4 text-[#9D0208]/48 transition-colors group-focus-within:text-[#9D0208]" />
                     <input
@@ -178,8 +210,11 @@ export default function LoginPage() {
             </div>
 
             <p className="relative mt-5 text-center text-sm text-[#5A3E4C]/55">
-              Belum punya akun?{' '}
-              <Link href="/register" className="font-bold text-[#E63946] transition-colors hover:text-[#9D0208]">
+              Belum punya akun?{" "}
+              <Link
+                href="/register"
+                className="font-bold text-[#E63946] transition-colors hover:text-[#9D0208]"
+              >
                 Buat akun baru
               </Link>
             </p>

@@ -1,16 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Trash2, ImagePlus, Loader2, Tag as TagIcon, Archive, History, Pencil } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { useMutation } from '@apollo/client/react';
-import { UPDATE_NOTE_CONTENT, DELETE_NOTE, ADD_NOTE_IMAGE, DELETE_NOTE_IMAGE, ARCHIVE_NOTE } from '@/graphql/mutations';
+import { UPDATE_NOTE_CONTENT, DELETE_NOTE, ARCHIVE_NOTE } from '@/graphql/mutations';
 import TiptapEditor from '@/features/canvas/components/TiptapEditor';
+import SaveIndicator from '@/features/canvas/components/SaveIndicator';
+import ContentStats from '@/features/canvas/components/ContentStats';
+import NoteTimestamps from '@/features/canvas/components/NoteTimestamps';
+import TitleFontPicker from '@/features/canvas/components/TitleFontPicker';
 import VersionPanel from '@/features/canvas/panels/VersionPanel';
 import DrawingCanvas from './DrawingCanvas';
 import BacklinksPanel from '@/features/notes/components/BacklinksPanel';
 import { notify, toast } from '@/lib/toast';
 import { useTags } from '@/context/TagContext';
+import { useNoteImageUpload } from '@/features/canvas/hooks/useNoteImageUpload';
 
 interface NoteEditorSidebarProps {
   note: any;
@@ -25,20 +29,47 @@ export default function NoteEditorSidebar({ note, allNotes = [], onClose, onDele
   const [title, setTitle] = useState(note?.title || '');
   const [content, setContent] = useState(note?.content || '');
   const [color, setColor] = useState(note?.color || 'default');
-  const [images, setImages] = useState<any[]>(note?.images || []);
-  const [uploading, setUploading] = useState(false);
   const [noteTags, setNoteTags] = useState<any[]>(note?.tags || []);
   const [noteType, setNoteType] = useState<string>(note?.type || 'text');
   const [mood, setMood] = useState<string>(note?.mood || '');
   const [showVersions, setShowVersions] = useState(false);
-  const [showDrawing, setShowDrawing] = useState(false);  
-  const supabase = createClient();
+  const [showDrawing, setShowDrawing] = useState(false);
   const { tags, assignTagsToNote, removeTagFromNote } = useTags();
   const [updateNoteContent] = useMutation<any>(UPDATE_NOTE_CONTENT);
   const [deleteNote] = useMutation<any>(DELETE_NOTE);
-  const [addNoteImage] = useMutation<any>(ADD_NOTE_IMAGE);
-  const [deleteNoteImage] = useMutation<any>(DELETE_NOTE_IMAGE);
   const [archiveNote] = useMutation<any>(ARCHIVE_NOTE);
+  const titleRef = useRef<HTMLInputElement>(null);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  // Title font is now persisted in the backend `note.titleFont` field
+  // so it syncs across devices, surveys versioning, exports, and sharing.
+  const [titleFont, setTitleFont] = useState<string>(note?.titleFont || '');
+
+  // Auto-focus title input when sidebar opens (for new notes / fresh open).
+  useEffect(() => {
+    if (note?.id) {
+      // Slight delay to allow sidebar transition to settle.
+      const timer = setTimeout(() => titleRef.current?.focus(), 120);
+      return () => clearTimeout(timer);
+    }
+  }, [note?.id]);
+
+  // Esc closes the sidebar (unless user is in nested modal/drawing).
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (showVersions || showDrawing) return;
+      onClose();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose, showVersions, showDrawing]);
+
+  const { images, setImages, uploading, uploadFromInputEvent, deleteImage } = useNoteImageUpload({
+    noteId: note?.id,
+    initialImages: note?.images || [],
+    onImagesChange: (newImages) => onUpdateCache(note.id, title, content, newImages),
+  });
 
   useEffect(() => {
     setTitle(note?.title || '');
@@ -48,13 +79,22 @@ export default function NoteEditorSidebar({ note, allNotes = [], onClose, onDele
     setNoteTags(note?.tags || []);
     setNoteType(note?.type || 'text');
     setMood(note?.mood || '');
+    setTitleFont(note?.titleFont || '');
   }, [note]);
 
   useEffect(() => {
     if (!note) return;
     
     const handler = setTimeout(() => {
-      if (title !== note.title || content !== note.content || color !== (note.color || 'default') || noteType !== (note.type || 'text') || mood !== (note.mood || '')) {
+      const isDirty =
+        title !== note.title ||
+        content !== note.content ||
+        color !== (note.color || 'default') ||
+        noteType !== (note.type || 'text') ||
+        mood !== (note.mood || '') ||
+        titleFont !== (note.titleFont || '');
+      if (isDirty) {
+        setSaveStatus('saving');
         updateNoteContent({
           variables: {
             input: {
@@ -63,16 +103,22 @@ export default function NoteEditorSidebar({ note, allNotes = [], onClose, onDele
               content,
               color,
               type: noteType,
-              mood
+              mood,
+              titleFont,
             }
           }
-        });
+        })
+          .then(() => {
+            setSaveStatus('saved');
+            setLastSavedAt(Date.now());
+          })
+          .catch(() => setSaveStatus('error'));
         onUpdateCache(note.id, title, content, undefined, color, mood);
       }
     }, 800);
 
     return () => clearTimeout(handler);
-  }, [title, content, color, noteType, mood, note, updateNoteContent, onUpdateCache]);
+  }, [title, content, color, noteType, mood, titleFont, note, updateNoteContent, onUpdateCache]);
 
   const handleDeleteNode = () => {
     toast('Hapus catatan ini beserta semua linknya?', {
@@ -118,77 +164,11 @@ export default function NoteEditorSidebar({ note, allNotes = [], onClose, onDele
     onDeleteSuccess(note.id);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const userId = user?.id || 'anonymous';
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-      const filePath = `${userId}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('notes_images')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: publicUrlData } = supabase.storage
-        .from('notes_images')
-        .getPublicUrl(filePath);
-
-      const publicUrl = publicUrlData.publicUrl;
-
-      const { data } = await addNoteImage({
-        variables: {
-          input: {
-            noteId: note.id,
-            imageUrl: publicUrl,
-            caption: '',
-          }
-        }
-      });
-
-      if (data?.addNoteImage) {
-        const newImages = [...images, data.addNoteImage];
-        setImages(newImages);
-        onUpdateCache(note.id, title, content, newImages);
-      }
-
-    } catch (err: any) {
-      notify.error("Gagal mengunggah gambar: " + err.message);
-    } finally {
-      setUploading(false);
-      e.target.value = '';
-    }
-  };
-
   const handleRemoveImage = (imageId: string) => {
     toast('Hapus gambar ini?', {
       action: {
         label: 'Hapus',
-        onClick: async () => {
-          const imgToDelete = images.find(img => img.id === imageId);
-          if (imgToDelete) {
-            try {
-              const urlParts = imgToDelete.imageUrl.split('/notes_images/');
-              if (urlParts.length === 2) {
-                const filePath = urlParts[1];
-                await supabase.storage.from('notes_images').remove([filePath]);
-              }
-            } catch (e) {
-              console.error("Failed to delete physical image", e);
-            }
-          }
-
-          await deleteNoteImage({ variables: { id: imageId } });
-          const newImages = images.filter(img => img.id !== imageId);
-          setImages(newImages);
-          onUpdateCache(note.id, title, content, newImages);
-        },
+        onClick: () => deleteImage(imageId),
       },
     });
   };
@@ -246,23 +226,29 @@ export default function NoteEditorSidebar({ note, allNotes = [], onClose, onDele
       {/* ── Content ── */}
       <div className="flex-1 overflow-y-auto p-5 space-y-6">
         <div>
-          <label className="block text-xs font-semibold text-[#5A3E4C]/40 uppercase tracking-wider mb-2">Title</label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-xs font-semibold text-[#5A3E4C]/40 uppercase tracking-wider">Title</label>
+            <TitleFontPicker value={titleFont} onChange={setTitleFont} />
+          </div>
           <input
+            ref={titleRef}
             type="text"
             className="w-full bg-white/60 border border-[#FFB4A2]/20 rounded-xl text-[#4A2F3C] text-lg font-semibold px-4 py-3 placeholder-[#5A3E4C]/30 focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/30 focus:border-[#FF8FA3]/30 transition-all hover:bg-white/80"
+            style={titleFont ? { fontFamily: titleFont } : undefined}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Untitled Note"
           />
+          <NoteTimestamps createdAt={note?.createdAt} updatedAt={note?.updatedAt} />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#5A3E4C]/40 uppercase tracking-wider mb-2">Content</label>
           <TiptapEditor content={content} onChange={setContent} />
-          <p className="text-[11px] text-[#5A3E4C]/30 mt-2 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/60 animate-pulse" />
-            Auto-saved
-          </p>
+          <div className="flex items-center justify-between mt-2 gap-2">
+            <SaveIndicator status={saveStatus} lastSavedAt={lastSavedAt} />
+            <ContentStats content={content} />
+          </div>
           {showVersions && (
             <VersionPanel
               noteId={note.id}
@@ -391,7 +377,7 @@ export default function NoteEditorSidebar({ note, allNotes = [], onClose, onDele
           <div className="grid grid-cols-2 gap-2.5 mb-4">
             {images.map((img) => (
               <div key={img.id} className="relative group rounded-xl overflow-hidden border border-[#FFB4A2]/15 bg-[#FFF5F0]/50">
-                <img src={img.imageUrl} alt={img.caption || 'Note attachment'} className="object-cover w-full h-24 opacity-80 group-hover:opacity-100 transition-opacity" />
+                <img src={img.imageUrl} alt={img.caption || 'Note attachment'} loading="lazy" decoding="async" className="object-cover w-full h-24 opacity-80 group-hover:opacity-100 transition-opacity" />
                 <button 
                   onClick={() => handleRemoveImage(img.id)}
                   className="absolute top-1.5 right-1.5 bg-[#FF6B9D]/80 hover:bg-[#FF6B9D] text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm"
@@ -412,7 +398,7 @@ export default function NoteEditorSidebar({ note, allNotes = [], onClose, onDele
               type="file" 
               accept="image/*" 
               className="hidden" 
-              onChange={handleImageUpload}
+              onChange={uploadFromInputEvent}
               disabled={uploading}
             />
           </label>

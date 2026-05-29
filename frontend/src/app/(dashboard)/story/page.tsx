@@ -2,27 +2,17 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@apollo/client/react';
-import { Plus, BookOpen, Heart, User, Compass, Star, Sparkles, Lock, Globe, Users, Calendar, Hourglass } from 'lucide-react';
+import { useQuery, useMutation } from '@apollo/client/react';
+import { Plus, BookOpen, Lock, Globe, Users, Calendar, Hourglass, Sparkles } from 'lucide-react';
 import { ApolloWrapper } from '@/lib/apollo/ApolloWrapper';
 import { Providers } from '@/lib/Providers';
 import { StoryProvider, useStory } from '@/context/StoryContext';
-import { GET_ON_THIS_DAY_MEMORIES } from '@/graphql/story';
-
-const STORY_TYPES = [
-  { value: 'love_story', label: 'Love Story', icon: Heart, color: '#E63946', desc: 'Cerita tentang perasaan & hubungan' },
-  { value: 'biography', label: 'Biography', icon: User, color: '#B5EAD7', desc: 'Kisah hidup seseorang' },
-  { value: 'memory_collection', label: 'Memories', icon: Star, color: '#C7CEEA', desc: 'Koleksi momen & kenangan' },
-  { value: 'adventure', label: 'Adventure', icon: Compass, color: '#FFD6A5', desc: 'Petualangan bersama' },
-  { value: 'character_study', label: 'Character', icon: Sparkles, color: '#E0BBE4', desc: 'Mengenal seseorang lebih dalam' },
-  { value: 'custom', label: 'Custom', icon: BookOpen, color: '#FFB8C0', desc: 'Cerita bebas sesuka hati' },
-];
-
-const PRIVACY_OPTIONS = [
-  { value: 'private', label: 'Private', icon: Lock, desc: 'Hanya Anda yang bisa melihat' },
-  { value: 'friends_only', label: 'Friends Only', icon: Users, desc: 'Hanya teman yang diundang' },
-  { value: 'public', label: 'Public', icon: Globe, desc: 'Siapa saja bisa melihat' },
-];
+import { GET_ON_THIS_DAY_MEMORIES, ADD_NODE_TO_STORY } from '@/graphql/story';
+import { CREATE_NOTE, CREATE_NOTE_LINK } from '@/graphql/mutations';
+import StoryWizard, { STORY_TYPES, type StoryWizardFormData } from '@/features/story/components/StoryWizard';
+import StoryEmptyState from '@/features/story/components/StoryEmptyState';
+import StorySkeleton from '@/features/story/components/StorySkeleton';
+import { getTemplateFor } from '@/features/story/templates';
 
 function stripHtml(value?: string | null) {
   return value?.replace(/<[^>]+>/g, '').trim() || '';
@@ -35,6 +25,9 @@ function formatMemoryDate(value: string) {
 function StoryDashboard() {
   const router = useRouter();
   const { stories, loading, createStory } = useStory();
+  const [createNote] = useMutation<any>(CREATE_NOTE);
+  const [createNoteLink] = useMutation<any>(CREATE_NOTE_LINK);
+  const [addNodeToStory] = useMutation<any>(ADD_NODE_TO_STORY);
   const { data: onThisDayData, loading: onThisDayLoading } = useQuery<any>(GET_ON_THIS_DAY_MEMORIES, {
     fetchPolicy: 'cache-and-network',
   });
@@ -58,9 +51,65 @@ function StoryDashboard() {
       description: formData.description || undefined,
       storyType: formData.storyType.toUpperCase(),
     });
-    if (story) {
-      router.push(`/story/${story.id}`);
+    if (!story) return;
+
+    // Apply template (if available) by creating starter nodes & links.
+    // Failures here are non-fatal: user still gets an empty story.
+    const template = getTemplateFor(formData.storyType);
+    if (template) {
+      try {
+        const created: { templateIdx: number; noteId: string }[] = [];
+        // Use a base position offset so nodes appear near the canvas origin.
+        const BASE_X = 400;
+        const BASE_Y = 200;
+
+        for (let i = 0; i < template.nodes.length; i++) {
+          const tNode = template.nodes[i];
+          const noteRes = await createNote({
+            variables: {
+              input: {
+                title: tNode.title,
+                positionX: BASE_X + tNode.position.x,
+                positionY: BASE_Y + tNode.position.y,
+                mood: tNode.mood,
+              },
+            },
+          });
+          const noteId = (noteRes.data as any)?.createNote?.id;
+          if (!noteId) continue;
+          await addNodeToStory({
+            variables: {
+              storyId: story.id,
+              noteId,
+              nodeType: tNode.nodeType,
+            },
+          });
+          created.push({ templateIdx: i, noteId });
+        }
+
+        // Wire up sequential connections based on `connectFromPrevious`.
+        for (let i = 1; i < created.length; i++) {
+          const tNode = template.nodes[created[i].templateIdx];
+          if (!tNode.connectFromPrevious) continue;
+          const prev = created[i - 1];
+          const curr = created[i];
+          await createNoteLink({
+            variables: {
+              input: {
+                sourceId: prev.noteId,
+                targetId: curr.noteId,
+                sourceHandle: 'right',
+                targetHandle: 'left',
+              },
+            },
+          });
+        }
+      } catch (err) {
+        console.error('Failed to apply template:', err);
+      }
     }
+
+    router.push(`/story/${story.id}`);
   };
 
   return (
@@ -150,21 +199,9 @@ function StoryDashboard() {
 
         {/* Story Grid */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-6 h-6 border-2 border-[#E63946] border-t-transparent rounded-full animate-spin" />
-          </div>
+          <StorySkeleton />
         ) : stories.length === 0 ? (
-          <div className="text-center py-20">
-            <BookOpen className="w-12 h-12 text-[#FFB8C0]/40 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-[#4A2F3C]/60 dark:text-[#e2d9f3]/50 mb-2">Belum ada story</h3>
-            <p className="text-sm text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 mb-6">Mulai ceritakan kisah pertama Anda</p>
-            <button
-              onClick={() => setShowWizard(true)}
-              className="px-5 py-2.5 rounded-xl bg-[#E63946]/10 hover:bg-[#E63946]/20 text-[#E63946] font-medium text-sm transition-all"
-            >
-              Buat Story Pertama
-            </button>
-          </div>
+          <StoryEmptyState onCreate={() => setShowWizard(true)} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {stories.map((story: any) => {
@@ -216,130 +253,6 @@ function StoryDashboard() {
           onCreate={handleCreate}
         />
       )}
-    </div>
-  );
-}
-
-function StoryWizard({ formData, setFormData, wizardStep, setWizardStep, onClose, onCreate }: any) {
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="w-[520px] max-w-[90vw] bg-white dark:bg-[#2a2438] rounded-2xl border border-[#FFB8C0]/20 dark:border-[#E63946]/10 shadow-2xl overflow-hidden">
-        {/* Progress */}
-        <div className="flex gap-1 px-6 pt-5">
-          {[0, 1, 2].map(i => (
-            <div key={i} className={`flex-1 h-1 rounded-full transition-all ${i <= wizardStep ? 'bg-[#E63946]' : 'bg-[#FFB8C0]/15'}`} />
-          ))}
-        </div>
-
-        <div className="p-6">
-          {/* Step 0: Story Type */}
-          {wizardStep === 0 && (
-            <div>
-              <h2 className="text-lg font-bold text-[#4A2F3C] dark:text-[#e2d9f3] mb-1">Pilih Jenis Cerita</h2>
-              <p className="text-xs text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40 mb-5">Tentukan jenis cerita yang ingin Anda buat</p>
-              <div className="grid grid-cols-2 gap-2.5">
-                {STORY_TYPES.map(type => {
-                  const Icon = type.icon;
-                  return (
-                    <button
-                      key={type.value}
-                      onClick={() => setFormData({ ...formData, storyType: type.value })}
-                      className={`p-3.5 rounded-xl border text-left transition-all ${formData.storyType === type.value ? 'border-[#E63946] bg-[#E63946]/5 shadow-sm' : 'border-[#FFB8C0]/15 hover:border-[#E63946]/30'}`}
-                    >
-                      <Icon className="w-5 h-5 mb-2" style={{ color: type.color }} />
-                      <p className="text-xs font-semibold text-[#4A2F3C] dark:text-[#e2d9f3]">{type.label}</p>
-                      <p className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30 mt-0.5">{type.desc}</p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Step 1: Title & Description */}
-          {wizardStep === 1 && (
-            <div>
-              <h2 className="text-lg font-bold text-[#4A2F3C] dark:text-[#e2d9f3] mb-1">Detail Cerita</h2>
-              <p className="text-xs text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40 mb-5">Beri nama dan deskripsi untuk cerita Anda</p>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-1.5">Judul *</label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={e => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Judul cerita Anda..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#E63946]/50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-1.5">Subtitle</label>
-                  <input
-                    type="text"
-                    value={formData.subtitle}
-                    onChange={e => setFormData({ ...formData, subtitle: e.target.value })}
-                    placeholder="Subtitle opsional..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#E63946]/50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold mb-1.5">Deskripsi</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={e => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Ceritakan sedikit tentang story ini..."
-                    rows={3}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#FFB8C0]/20 bg-white/50 dark:bg-[#1a1625]/50 text-sm text-[#4A2F3C] dark:text-[#e2d9f3] placeholder:text-[#5A3E4C]/30 focus:outline-none focus:border-[#E63946]/50 resize-none"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Privacy */}
-          {wizardStep === 2 && (
-            <div>
-              <h2 className="text-lg font-bold text-[#4A2F3C] dark:text-[#e2d9f3] mb-1">Privasi</h2>
-              <p className="text-xs text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40 mb-5">Siapa yang bisa melihat cerita ini?</p>
-              <div className="space-y-2.5">
-                {PRIVACY_OPTIONS.map(opt => {
-                  const Icon = opt.icon;
-                  return (
-                    <button
-                      key={opt.value}
-                      onClick={() => setFormData({ ...formData, privacyLevel: opt.value })}
-                      className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-all ${formData.privacyLevel === opt.value ? 'border-[#E63946] bg-[#E63946]/5' : 'border-[#FFB8C0]/15 hover:border-[#E63946]/30'}`}
-                    >
-                      <Icon className={`w-5 h-5 ${formData.privacyLevel === opt.value ? 'text-[#E63946]' : 'text-[#5A3E4C]/40'}`} />
-                      <div>
-                        <p className="text-sm font-medium text-[#4A2F3C] dark:text-[#e2d9f3]">{opt.label}</p>
-                        <p className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">{opt.desc}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-[#FFB8C0]/10 dark:border-[#E63946]/10">
-          <button
-            onClick={wizardStep === 0 ? onClose : () => setWizardStep(wizardStep - 1)}
-            className="px-4 py-2 text-sm text-[#5A3E4C]/60 dark:text-[#e2d9f3]/50 hover:text-[#5A3E4C] transition-colors"
-          >
-            {wizardStep === 0 ? 'Batal' : 'Kembali'}
-          </button>
-          <button
-            onClick={wizardStep === 2 ? onCreate : () => setWizardStep(wizardStep + 1)}
-            disabled={wizardStep === 1 && !formData.title.trim()}
-            className="px-5 py-2 rounded-xl bg-candy-primary text-white text-sm font-medium transition-all shadow-candy hover:shadow-candy-lg disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {wizardStep === 2 ? 'Buat Story' : 'Lanjut'}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 // Queries
 export const GET_STORIES = gql`
@@ -54,10 +54,42 @@ export const GET_STORY = gql`
         isTimeLocked
         eventDate
         eventLocation
-        images { id imageUrl caption }
-        tags { id name color }
-        outgoingEdges { id source { id } target { id } sourceHandle targetHandle label color }
-        incomingEdges { id source { id } target { id } sourceHandle targetHandle label color }
+        images {
+          id
+          imageUrl
+          caption
+        }
+        tags {
+          id
+          name
+          color
+        }
+        outgoingEdges {
+          id
+          source {
+            id
+          }
+          target {
+            id
+          }
+          sourceHandle
+          targetHandle
+          label
+          color
+        }
+        incomingEdges {
+          id
+          source {
+            id
+          }
+          target {
+            id
+          }
+          sourceHandle
+          targetHandle
+          label
+          color
+        }
         createdAt
       }
       createdAt
@@ -98,7 +130,10 @@ export const GET_PUBLIC_STORY = gql`
       theme
       authorNote
       scrapbookTheme
-      user { id email }
+      user {
+        id
+        email
+      }
       nodes {
         id
         title
@@ -117,10 +152,42 @@ export const GET_PUBLIC_STORY = gql`
         isTimeLocked
         eventDate
         eventLocation
-        images { id imageUrl caption }
-        tags { id name color }
-        outgoingEdges { id source { id } target { id } sourceHandle targetHandle label color }
-        incomingEdges { id source { id } target { id } sourceHandle targetHandle label color }
+        images {
+          id
+          imageUrl
+          caption
+        }
+        tags {
+          id
+          name
+          color
+        }
+        outgoingEdges {
+          id
+          source {
+            id
+          }
+          target {
+            id
+          }
+          sourceHandle
+          targetHandle
+          label
+          color
+        }
+        incomingEdges {
+          id
+          source {
+            id
+          }
+          target {
+            id
+          }
+          sourceHandle
+          targetHandle
+          label
+          color
+        }
         createdAt
       }
       createdAt
@@ -133,7 +200,10 @@ export const GET_STORY_ACCESS = gql`
   query GetStoryAccess($storyId: String!) {
     getStoryAccess(storyId: $storyId) {
       id
-      grantedTo { id email }
+      grantedTo {
+        id
+        email
+      }
       accessLevel
       grantedAt
       expiresAt
@@ -182,10 +252,17 @@ export const DELETE_STORY = gql`
 `;
 
 export const GRANT_STORY_ACCESS = gql`
-  mutation GrantStoryAccess($storyId: String!, $email: String!, $level: AccessLevel!) {
+  mutation GrantStoryAccess(
+    $storyId: String!
+    $email: String!
+    $level: AccessLevel!
+  ) {
     grantStoryAccess(storyId: $storyId, email: $email, level: $level) {
       id
-      grantedTo { id email }
+      grantedTo {
+        id
+        email
+      }
       accessLevel
       grantedAt
     }
@@ -199,8 +276,18 @@ export const REVOKE_STORY_ACCESS = gql`
 `;
 
 export const ADD_NODE_TO_STORY = gql`
-  mutation AddNodeToStory($storyId: String!, $noteId: String!, $nodeType: String, $metadata: String) {
-    addNodeToStory(storyId: $storyId, noteId: $noteId, nodeType: $nodeType, metadata: $metadata) {
+  mutation AddNodeToStory(
+    $storyId: String!
+    $noteId: String!
+    $nodeType: String
+    $metadata: String
+  ) {
+    addNodeToStory(
+      storyId: $storyId
+      noteId: $noteId
+      nodeType: $nodeType
+      metadata: $metadata
+    ) {
       id
       storyNodeType
       storyMetadata
@@ -250,7 +337,10 @@ export const GET_BOOKMARKS = gql`
   query GetBookmarks($storyId: String!) {
     getBookmarks(storyId: $storyId) {
       id
-      node { id title }
+      node {
+        id
+        title
+      }
       createdAt
     }
   }
@@ -264,7 +354,10 @@ export const GET_STORY_ANALYTICS = gql`
       totalTimeSpent
       totalBookmarks
       totalBadges
-      badgeBreakdown { type count }
+      badgeBreakdown {
+        type
+        count
+      }
     }
   }
 `;

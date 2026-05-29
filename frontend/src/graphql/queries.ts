@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client/core';
+import { gql } from "@apollo/client/core";
 
 export const GET_NOTES = gql`
   query GetNotes($canvasId: String, $tagIds: [String!]) {
@@ -13,6 +13,7 @@ export const GET_NOTES = gql`
       height
       color
       mood
+      titleFont
       isArchived
       createdAt
       canvas {
@@ -32,8 +33,12 @@ export const GET_NOTES = gql`
       }
       outgoingEdges {
         id
-        source { id }
-        target { id }
+        source {
+          id
+        }
+        target {
+          id
+        }
         sourceHandle
         targetHandle
         type
@@ -150,8 +155,14 @@ export const GET_ALL_MEDIA = gql`
         title
         mood
         storyNodeType
-        canvas { id name }
-        story { id title }
+        canvas {
+          id
+          name
+        }
+        story {
+          id
+          title
+        }
       }
     }
   }
@@ -167,10 +178,20 @@ export const GET_WRITING_STATISTICS = gql`
       readingTimeMinutes
       writingDays
       maxWritingStreak
-      nodeTypeBreakdown { type count }
-      moodBreakdown { mood count }
+      nodeTypeBreakdown {
+        type
+        count
+      }
+      moodBreakdown {
+        mood
+        count
+      }
       mostCommonMood
-      longestNode { id title wordCount }
+      longestNode {
+        id
+        title
+        wordCount
+      }
       firstWriteDate
       lastWriteDate
     }
@@ -180,12 +201,34 @@ export const GET_WRITING_STATISTICS = gql`
 export const GET_EMOTIONAL_ARC = gql`
   query GetEmotionalArc($storyId: String!) {
     getEmotionalArc(storyId: $storyId) {
-      dataPoints { index nodeId title mood score nodeType createdAt }
+      dataPoints {
+        index
+        nodeId
+        title
+        mood
+        score
+        nodeType
+        createdAt
+      }
       overallMood
       overallScore
       emotionalRange
-      peaks { index nodeId title mood score nodeType }
-      valleys { index nodeId title mood score nodeType }
+      peaks {
+        index
+        nodeId
+        title
+        mood
+        score
+        nodeType
+      }
+      valleys {
+        index
+        nodeId
+        title
+        mood
+        score
+        nodeType
+      }
       trend
     }
   }
@@ -195,16 +238,34 @@ export const GET_MEMORY_TIMELINE = gql`
   query GetMemoryTimeline($storyId: String!) {
     getMemoryTimeline(storyId: $storyId) {
       timelineItems {
-        nodeId title nodeType mood
-        eventDate eventLocation writeDate
-        daysSinceEvent daysSinceWritten content
+        nodeId
+        title
+        nodeType
+        mood
+        eventDate
+        eventLocation
+        writeDate
+        daysSinceEvent
+        daysSinceWritten
+        content
       }
       totalWithEventDate
       totalWithoutEventDate
-      oldestMemory { title eventDate daysSince }
-      newestMemory { title eventDate daysSince }
+      oldestMemory {
+        title
+        eventDate
+        daysSince
+      }
+      newestMemory {
+        title
+        eventDate
+        daysSince
+      }
       avgDaysSinceEvent
-      monthlyDistribution { month count }
+      monthlyDistribution {
+        month
+        count
+      }
     }
   }
 `;
@@ -227,15 +288,35 @@ export const GET_CHARACTER_PROFILE = gql`
   query GetCharacterProfile($storyId: String!) {
     getCharacterProfile(storyId: $storyId) {
       characters {
-        nodeId name description mood
-        totalMentions totalWords
-        moodDistribution { mood count }
-        nodeTypesAppearing { type count }
-        appearances { nodeId title nodeType mood createdAt }
-        firstAppearance lastAppearance
+        nodeId
+        name
+        description
+        mood
+        totalMentions
+        totalWords
+        moodDistribution {
+          mood
+          count
+        }
+        nodeTypesAppearing {
+          type
+          count
+        }
+        appearances {
+          nodeId
+          title
+          nodeType
+          mood
+          createdAt
+        }
+        firstAppearance
+        lastAppearance
       }
       totalCharacters
-      mostMentioned { name mentions }
+      mostMentioned {
+        name
+        mentions
+      }
     }
   }
 `;

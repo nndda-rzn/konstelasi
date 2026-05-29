@@ -53,6 +53,15 @@ export class Note {
   @Property({ nullable: true })
   mood?: string;
 
+  /**
+   * Font family for the note title (CSS value, e.g.
+   * "var(--font-caveat), cursive"). Null/undefined means
+   * fall back to the default UI font.
+   */
+  @Field(() => String, { nullable: true })
+  @Property({ nullable: true })
+  titleFont?: string;
+
   // Fitur Grouping (Self-Relation)
   @Field(() => Note, { nullable: true })
   @ManyToOne(() => Note, { nullable: true })
