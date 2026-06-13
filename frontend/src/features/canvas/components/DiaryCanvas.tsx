@@ -317,7 +317,7 @@ function DiaryCanvasInner() {
     return <CanvasError message={error.message} onRetry={() => refetch()} />;
 
   return (
-    <div className="w-full h-screen relative bg-[#F7F1EA] overflow-hidden">
+    <div className="w-full h-screen relative bg-[#F7F1EA]">
       {/* Subtle warm ambient glows (no pink) */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(201,154,69,0.06),_transparent_60%)] pointer-events-none" />
       <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] bg-[#C99A45]/8 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[8000ms]" />
