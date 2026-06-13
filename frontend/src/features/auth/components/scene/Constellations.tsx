@@ -63,7 +63,7 @@ function ConstellationGroup({
       starPositions[i * 3 + 0] = s.x * data.scale;
       starPositions[i * 3 + 1] = s.y * data.scale;
       starPositions[i * 3 + 2] = (s.z ?? 0) * data.scale;
-      starSizes[i] = (s.size ?? 1) * 4;
+      starSizes[i] = (s.size ?? 1) * 6;
     });
 
     const linePositions = new Float32Array(data.lines.length * 6);
@@ -89,12 +89,13 @@ function ConstellationGroup({
     const starM = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
+      blending: THREE.AdditiveBlending,
       uniforms: { uOpacity: { value: 1 } },
       vertexShader: `
         attribute float aSize;
         void main() {
           vec4 mv = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = aSize * (260.0 / -mv.z);
+          gl_PointSize = aSize * (420.0 / -mv.z);
           gl_Position = projectionMatrix * mv;
         }
       `,
@@ -104,8 +105,10 @@ function ConstellationGroup({
           vec2 c = gl_PointCoord - 0.5;
           float d = length(c);
           if (d > 0.5) discard;
-          float a = smoothstep(0.5, 0.0, d);
-          gl_FragColor = vec4(1.0, 0.85, 0.45, a * uOpacity);
+          float core = smoothstep(0.5, 0.0, d);
+          float halo = smoothstep(0.5, 0.15, d) * 0.6;
+          float a = (core + halo) * uOpacity;
+          gl_FragColor = vec4(1.0, 0.85, 0.45, a);
         }
       `,
     });
@@ -114,7 +117,7 @@ function ConstellationGroup({
   }, [data]);
 
   useEffect(() => {
-    if (lineMatRef.current) lineMatRef.current.opacity = opacity * 0.55;
+    if (lineMatRef.current) lineMatRef.current.opacity = opacity * 0.7;
     if (starMatRef.current) starMatRef.current.uniforms.uOpacity.value = opacity;
   }, [opacity]);
 
@@ -134,18 +137,14 @@ function ConstellationGroup({
     return [x, y, z];
   }, [data]);
 
-  const lookAt = useMemo<[number, number, number]>(() => {
-    return [groupPos[0] * 2, groupPos[1] * 2, groupPos[2] * 2];
-  }, [groupPos]);
-
   return (
     <group position={groupPos}>
-      <primitive object={starGeo} attach="geometry" />
-      <primitive object={starMat} attach="material" ref={starMatRef} />
-      <points />
-      <lineSegments
-        geometry={lineGeo}
-      >
+      <points>
+        <primitive object={starGeo} attach="geometry" />
+        <primitive object={starMat} attach="material" ref={starMatRef} />
+      </points>
+      <lineSegments>
+        <primitive object={lineGeo} attach="geometry" />
         <lineBasicMaterial
           ref={lineMatRef}
           color={GOLD}
@@ -153,7 +152,6 @@ function ConstellationGroup({
           depthWrite={false}
         />
       </lineSegments>
-      <group lookAt={lookAt} />
     </group>
   );
 }
