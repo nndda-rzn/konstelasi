@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Gem, Loader2, Lock, Mail, Sparkles } from "lucide-react";
+import { ArrowRight, Gem, Loader2, Mail, Sparkles } from "lucide-react";
 import { InputField } from "./InputField";
 import { PinInput } from "./PinInput";
 
