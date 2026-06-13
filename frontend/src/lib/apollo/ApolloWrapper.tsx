@@ -15,12 +15,6 @@ const authLink = setContext(async (_, { headers }) => {
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
 
-  if (!token) {
-    console.warn('[Apollo] No access_token in session. Session:', session ? 'exists but no token' : 'null');
-  } else {
-    console.log('[Apollo] Token found, length:', token.length, 'prefix:', token.slice(0, 20));
-  }
-
   return {
     headers: {
       ...headers,
