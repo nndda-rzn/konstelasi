@@ -58,7 +58,7 @@ export default function RegisterPage() {
   const pinMismatch = Boolean(confirmPin) && pin !== confirmPin;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#2A0A14] relative overflow-hidden text-white">
+    <div className="flex min-h-screen items-center justify-center relative overflow-hidden text-white">
       <AuthBackground />
 
       {/* ── Animated background orbs ── */}
