@@ -2,110 +2,106 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-// Support both ES256 (new Supabase) and HS256 (legacy)
-const SUPPORTED_ALGORITHMS = ['ES256', 'HS256'] as const;
-
-// Helper: try to parse JWK from env (JSON string)
-function getJwk(): Record<string, any> | null {
-  const jwkStr = process.env.SUPABASE_JWK;
-  if (!jwkStr) return null;
-  try {
-    return JSON.parse(jwkStr);
-  } catch {
-    return null;
-  }
+interface CachedKeys {
+  keys: any[];
+  fetchedAt: number;
 }
 
-function getLegacySecret(): string | null {
-  return process.env.SUPABASE_JWT_SECRET || null;
-}
-
-/**
- * JwtStrategy - Verifies Supabase access tokens using either:
- *   1. ES256 via `jose` library (new Supabase JWT Signing Keys)
- *   2. HS256 via legacy SUPABASE_JWT_SECRET (fallback)
- *
- * Token algorithm is auto-detected from the JWT header.
- *
- * To get the JWK:
- *   1. Go to Supabase Dashboard → Settings → JWT Keys → JWT Signing Keys
- *   2. Copy the public key (JSON format)
- *   3. Set it as SUPABASE_JWK env variable
- */
 @Injectable()
 export class JwtStrategy {
-  private jwk: Record<string, any> | null;
   private legacySecret: string | null;
+  private supabaseUrl: string | null;
+  private cachedKeys: CachedKeys | null = null;
+  private keyCacheTTL = 60 * 60 * 1000; // 1 hour
 
   constructor() {
-    this.jwk = getJwk();
-    this.legacySecret = getLegacySecret();
+    this.legacySecret = process.env.SUPABASE_JWT_SECRET || null;
+    this.supabaseUrl = process.env.SUPABASE_URL || null;
 
     console.log('[JwtStrategy] initialized:');
-    console.log('  JWK loaded:', this.jwk ? `yes (kid: ${this.jwk.kid})` : 'no');
-    console.log('  Legacy secret loaded:', this.legacySecret ? `yes (length: ${this.legacySecret.length})` : 'no');
+    console.log('  SUPABASE_URL:', this.supabaseUrl || 'not set');
+    console.log('  Legacy secret:', this.legacySecret ? 'loaded' : 'not set');
 
-    if (!this.jwk && !this.legacySecret) {
+    if (!this.supabaseUrl && !this.legacySecret) {
       throw new Error(
-        'Neither SUPABASE_JWK nor SUPABASE_JWT_SECRET is configured.\n' +
-          'For ES256: set SUPABASE_JWK from Dashboard → JWT Keys → JWT Signing Keys → copy JWK.\n' +
-          'For HS256: set SUPABASE_JWT_SECRET from Dashboard → JWT Keys → Legacy JWT Secret.',
+        'Configure at least one of:\n' +
+          '  SUPABASE_URL (auto-fetch ES256 keys from /auth/v1/.well-known/jwks.json)\n' +
+          '  SUPABASE_JWT_SECRET (legacy HS256 verification)\n' +
+          'Set these in backend/.env',
       );
     }
   }
 
   /**
-   * Verify a Bearer token. Returns the decoded payload on success.
-   * Called by GqlAuthGuard.
+   * Fetch JWKS from Supabase and cache.
+   * Endpoint: https://<project>.supabase.co/auth/v1/.well-known/jwks.json
    */
+  private async getJwks(): Promise<any[]> {
+    if (this.cachedKeys && Date.now() - this.cachedKeys.fetchedAt < this.keyCacheTTL) {
+      return this.cachedKeys.keys;
+    }
+
+    if (!this.supabaseUrl) throw new Error('SUPABASE_URL not configured');
+
+    const url = `${this.supabaseUrl}/auth/v1/.well-known/jwks.json`;
+    console.log('[JwtStrategy] fetching JWKS from:', url);
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      this.cachedKeys = { keys: data.keys || [], fetchedAt: Date.now() };
+      console.log('[JwtStrategy] JWKS loaded, keys:', this.cachedKeys.keys.length);
+      return this.cachedKeys.keys;
+    } catch (err) {
+      console.error('[JwtStrategy] Failed to fetch JWKS:', err.message);
+      throw new Error('Failed to fetch JWKS from Supabase. Check SUPABASE_URL.');
+    }
+  }
+
   async verifyToken(token: string): Promise<Record<string, any>> {
     const { decodeProtectedHeader } = await import('jose');
 
-    // Decode header to detect algorithm
     const header = decodeProtectedHeader(token);
     const alg = header.alg;
-    console.log('[JwtStrategy] token algorithm:', alg, '| kid:', header.kid);
+    const kid = header.kid as string | undefined;
+    console.log('[JwtStrategy] token alg:', alg, '| kid:', kid);
 
-    if (alg === 'ES256' && this.jwk) {
-      // ES256 verification with JWK
-      const { jwtVerify } = await import('jose');
-      const key = await import('jose').then((j) =>
-        j.importJWK(this.jwk!, 'ES256'),
-      );
-      const { payload } = await jwtVerify(token, key, {
+    if (alg === 'ES256') {
+      // Find matching key from JWKS
+      const keys = await this.getJwks();
+      const key = keys.find((k: any) => !kid || k.kid === kid);
+
+      if (!key) {
+        throw new UnauthorizedException(
+          `No matching key found for kid "${kid}". ` +
+            `Available keys: ${keys.map((k: any) => k.kid).join(', ')}`,
+        );
+      }
+
+      const { jwtVerify, importJWK } = await import('jose');
+      const cryptoKey = await importJWK(key, 'ES256');
+      const { payload } = await jwtVerify(token, cryptoKey, {
         algorithms: ['ES256'],
       });
-      console.log('[JwtStrategy] ES256 verified, payload:', {
-        sub: payload.sub,
-        aud: payload.aud,
-        role: payload.role,
-      });
+
+      console.log('[JwtStrategy] ES256 verified → sub:', payload.sub?.slice(0, 8));
       return payload as Record<string, any>;
     }
 
     if (alg === 'HS256' && this.legacySecret) {
-      // HS256 verification with legacy secret
       const { jwtVerify } = await import('jose');
       const key = new TextEncoder().encode(this.legacySecret);
       const { payload } = await jwtVerify(token, key, {
         algorithms: ['HS256'],
       });
-      console.log('[JwtStrategy] HS256 verified, payload:', {
-        sub: payload.sub,
-        aud: payload.aud,
-        role: payload.role,
-      });
+
+      console.log('[JwtStrategy] HS256 verified → sub:', payload.sub?.slice(0, 8));
       return payload as Record<string, any>;
     }
 
-    // Algorithm mismatch or missing config
     throw new UnauthorizedException(
-      `Token algorithm "${alg}" not supported. ` +
-        (alg === 'ES256' && !this.jwk
-          ? 'Configure SUPABASE_JWK env for ES256 verification.'
-          : alg === 'HS256' && !this.legacySecret
-            ? 'Configure SUPABASE_JWT_SECRET env for HS256 verification.'
-            : 'Check Supabase JWT configuration.'),
+      `Unsupported algorithm "${alg}". Set SUPABASE_URL for ES256 or SUPABASE_JWT_SECRET for HS256.`,
     );
   }
 }
