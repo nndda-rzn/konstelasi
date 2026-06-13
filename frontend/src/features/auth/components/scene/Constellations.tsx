@@ -15,14 +15,9 @@ interface ConstellationsProps {
 
 export function Constellations({ active }: ConstellationsProps) {
   const [index, setIndex] = useState(0);
-  const [opacity, setOpacity] = useState(active ? 0 : 1);
-  const elapsed = useRef(0);
 
   useEffect(() => {
-    if (!active) {
-      setOpacity(1);
-      return;
-    }
+    if (!active) return;
     const id = setTimeout(
       () => setIndex((i) => (i + 1) % CONSTELLATIONS.length),
       ROTATION_INTERVAL * 1000,
@@ -30,31 +25,19 @@ export function Constellations({ active }: ConstellationsProps) {
     return () => clearTimeout(id);
   }, [index, active]);
 
-  useEffect(() => {
-    if (active) elapsed.current = 0;
-  }, [index, active]);
-
-  useFrame((_, delta) => {
-    if (!active) {
-      setOpacity(1);
-      return;
-    }
-    elapsed.current += delta;
-    setOpacity(Math.min(1, elapsed.current / FADE_DURATION));
-  });
-
-  return <ConstellationGroup data={CONSTELLATIONS[index]!} opacity={opacity} />;
+  return <ConstellationGroup data={CONSTELLATIONS[index]!} active={active} />;
 }
 
 function ConstellationGroup({
   data,
-  opacity,
+  active,
 }: {
   data: ConstellationData;
-  opacity: number;
+  active: boolean;
 }) {
   const lineMatRef = useRef<THREE.LineBasicMaterial>(null);
   const starMatRef = useRef<THREE.ShaderMaterial>(null);
+  const elapsed = useRef(0);
 
   const { lineGeo, starGeo, starMat } = useMemo(() => {
     const starPositions = new Float32Array(data.stars.length * 3);
@@ -63,7 +46,7 @@ function ConstellationGroup({
       starPositions[i * 3 + 0] = s.x * data.scale;
       starPositions[i * 3 + 1] = s.y * data.scale;
       starPositions[i * 3 + 2] = (s.z ?? 0) * data.scale;
-      starSizes[i] = (s.size ?? 1) * 6;
+      starSizes[i] = (s.size ?? 1) * 8;
     });
 
     const linePositions = new Float32Array(data.lines.length * 6);
@@ -95,7 +78,7 @@ function ConstellationGroup({
         attribute float aSize;
         void main() {
           vec4 mv = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = aSize * (420.0 / -mv.z);
+          gl_PointSize = aSize * (600.0 / -mv.z);
           gl_Position = projectionMatrix * mv;
         }
       `,
@@ -117,11 +100,6 @@ function ConstellationGroup({
   }, [data]);
 
   useEffect(() => {
-    if (lineMatRef.current) lineMatRef.current.opacity = opacity * 0.7;
-    if (starMatRef.current) starMatRef.current.uniforms.uOpacity.value = opacity;
-  }, [opacity]);
-
-  useEffect(() => {
     return () => {
       lineGeo.dispose();
       starGeo.dispose();
@@ -129,13 +107,34 @@ function ConstellationGroup({
     };
   }, [lineGeo, starGeo, starMat]);
 
+  useEffect(() => {
+    elapsed.current = 0;
+  }, [data]);
+
+  useFrame((_, delta) => {
+    const opacity = active
+      ? Math.min(1, (elapsed.current += delta) / FADE_DURATION)
+      : 1;
+    if (lineMatRef.current) lineMatRef.current.opacity = opacity * 0.85;
+    if (starMatRef.current) starMatRef.current.uniforms.uOpacity.value = opacity;
+  });
+
+  // Camera at origin looks -Z. Convention: theta=0 = dead center front,
+  // positive theta = right, positive phi = up. Negate z so constellation
+  // is in front of the camera (not behind).
   const groupPos = useMemo<[number, number, number]>(() => {
     const r = SKY_RADIUS * 0.92;
-    const x = r * Math.cos(data.pivot.phi) * Math.cos(data.pivot.theta);
+    const x = r * Math.cos(data.pivot.phi) * Math.sin(data.pivot.theta);
     const y = r * Math.sin(data.pivot.phi);
-    const z = r * Math.cos(data.pivot.phi) * Math.sin(data.pivot.theta);
+    const z = -r * Math.cos(data.pivot.phi) * Math.cos(data.pivot.theta);
     return [x, y, z];
   }, [data]);
+
+  // Look back at the origin so the flat constellation patch faces the camera.
+  const lookAtOrigin = useMemo<[number, number, number]>(() => {
+    const dir = new THREE.Vector3(...groupPos).normalize().multiplyScalar(-1);
+    return [dir.x, dir.y, dir.z];
+  }, [groupPos]);
 
   return (
     <group position={groupPos}>
@@ -152,6 +151,7 @@ function ConstellationGroup({
           depthWrite={false}
         />
       </lineSegments>
+      <group onUpdate={(g) => g.lookAt(...lookAtOrigin)} />
     </group>
   );
 }
