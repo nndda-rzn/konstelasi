@@ -1,41 +1,35 @@
-'use client';
+"use client";
 
 import {
   ArrowLeft,
-  Settings,
-  Lock,
-  Globe,
-  Users,
-  LayoutGrid,
-  Clock,
   BookOpen,
-  Image,
-  List,
-  Film,
+  Clock,
   Download,
-  Sparkles,
-  Search,
+  Film,
+  Image as ImageIcon,
+  LayoutGrid,
+  List,
+  Lock,
+  Settings,
   Share2,
-  Check,
-} from 'lucide-react';
-import { useState } from 'react';
-import ScrapbookThemePicker from '@/features/story/components/ScrapbookThemePicker';
+  Sparkles,
+  Users,
+} from "lucide-react";
+import ScrapbookThemePicker from "@/features/story/components/ScrapbookThemePicker";
+import { ViewModeTabs, type StoryViewMode } from "./storyHeader/ViewModeTabs";
+import { StoryTitleSection } from "./storyHeader/StoryTitleSection";
+import { StorySearchBar } from "./storyHeader/StorySearchBar";
+import { StoryHeaderActions } from "./storyHeader/StoryHeaderActions";
 
-export type StoryViewMode =
-  | 'canvas'
-  | 'timeline'
-  | 'reading'
-  | 'gallery'
-  | 'outline'
-  | 'cinematic';
+export type { StoryViewMode } from "./storyHeader/ViewModeTabs";
 
 const VIEW_MODES: Array<{ mode: StoryViewMode; icon: any; label: string }> = [
-  { mode: 'canvas', icon: LayoutGrid, label: 'Canvas' },
-  { mode: 'timeline', icon: Clock, label: 'Timeline' },
-  { mode: 'reading', icon: BookOpen, label: 'Reading' },
-  { mode: 'gallery', icon: Image, label: 'Gallery' },
-  { mode: 'outline', icon: List, label: 'Outline' },
-  { mode: 'cinematic', icon: Film, label: 'Cinematic' },
+  { mode: "canvas", icon: LayoutGrid, label: "Canvas" },
+  { mode: "timeline", icon: Clock, label: "Timeline" },
+  { mode: "reading", icon: BookOpen, label: "Reading" },
+  { mode: "gallery", icon: ImageIcon, label: "Gallery" },
+  { mode: "outline", icon: List, label: "Outline" },
+  { mode: "cinematic", icon: Film, label: "Cinematic" },
 ];
 
 interface Props {
@@ -53,9 +47,7 @@ interface Props {
   onViewModeChange: (mode: StoryViewMode) => void;
   showSettings: boolean;
   onToggleSettings: () => void;
-  /** Toggle status between draft/published (parent owns the mutation). */
-  onToggleStatus?: (nextStatus: 'DRAFT' | 'PUBLISHED') => void;
-  /** Current scrapbookTheme JSON value + change handler. */
+  onToggleStatus?: (nextStatus: "DRAFT" | "PUBLISHED") => void;
   scrapbookTheme?: string | null;
   onScrapbookThemeChange?: (nextJson: string) => void;
   showInsightsMenu: boolean;
@@ -67,217 +59,70 @@ interface Props {
   onBack: () => void;
 }
 
-export default function StoryHeader({
-  story,
-  scrapbookFontClass,
-  searchQuery,
-  onSearchQueryChange,
-  viewMode,
-  onViewModeChange,
-  showSettings,
-  onToggleSettings,
-  onToggleStatus,
-  scrapbookTheme,
-  onScrapbookThemeChange,
-  showInsightsMenu,
-  onToggleInsights,
-  activeInsight,
-  showExport,
-  onToggleExport,
-  onAddScene,
-  onBack,
-}: Props) {
-  const [linkCopied, setLinkCopied] = useState(false);
-  const isShareable = story?.privacyLevel === 'public' || story?.privacyLevel === 'friends_only';
-
-  const handleShare = async () => {
-    if (!story?.id || typeof window === 'undefined') return;
-    const url = `${window.location.origin}/story/${story.id}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      setLinkCopied(true);
-      setTimeout(() => setLinkCopied(false), 2000);
-    } catch {
-      // Fallback: select and copy via prompt
-      window.prompt('Copy link:', url);
-    }
-  };
-
-  const PrivIcon =
-    story?.privacyLevel === 'private'
-      ? Lock
-      : story?.privacyLevel === 'friends_only'
-        ? Users
-        : Globe;
+export default function StoryHeader(props: Props) {
+  const {
+    story,
+    scrapbookFontClass,
+    searchQuery,
+    onSearchQueryChange,
+    viewMode,
+    onViewModeChange,
+    showSettings,
+    onToggleSettings,
+    onToggleStatus,
+    scrapbookTheme,
+    onScrapbookThemeChange,
+    showInsightsMenu,
+    onToggleInsights,
+    activeInsight,
+    showExport,
+    onToggleExport,
+    onAddScene,
+    onBack,
+  } = props;
 
   return (
-    <div className="flex items-center justify-between px-5 py-3 border-b border-[#FFB8C0]/10 dark:border-[#E63946]/10 bg-white/80 dark:bg-[#1a1625]/80 backdrop-blur-xl z-10">
-      <div className="flex items-center gap-3">
+    <div className="border-b border-[#E6B8A2]/15 dark:border-[#E63946]/10 bg-white/72 dark:bg-[#1a1625]/72 backdrop-blur-2xl shadow-sm">
+      <div className="px-6 py-3 flex items-center gap-3">
         <button
           onClick={onBack}
-          aria-label="Kembali ke daftar story"
-          className="p-2 rounded-lg hover:bg-[#FFB8C0]/10 transition-colors"
+          className="p-2 text-[#5A3E4C]/30 dark:text-[#e2d9f3]/30 hover:text-[#5A3E4C]/60 dark:hover:text-[#e2d9f3]/60 hover:bg-[#FFB4A2]/10 dark:hover:bg-[#E63946]/10 rounded-lg transition-all"
         >
-          <ArrowLeft className="w-4 h-4 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60" />
-        </button>
-        <div>
-          <h1 className={`text-sm font-bold text-[#4A2F3C] dark:text-[#e2d9f3] ${scrapbookFontClass}`}>
-            {story?.title || 'Loading...'}
-          </h1>
-          {story?.subtitle && (
-            <p className="text-[10px] text-[#5A3E4C]/40 dark:text-[#e2d9f3]/30">{story.subtitle}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-1.5 ml-3">
-          <PrivIcon className="w-3 h-3 text-[#5A3E4C]/30" />
-          {onToggleStatus ? (
-            <button
-              onClick={() => {
-                const isDraft = story?.status?.toLowerCase() === 'draft';
-                onToggleStatus(isDraft ? 'PUBLISHED' : 'DRAFT');
-              }}
-              title={
-                story?.status?.toLowerCase() === 'draft'
-                  ? 'Klik untuk publish story'
-                  : 'Klik untuk kembalikan ke draft'
-              }
-              className={`text-[10px] px-1.5 py-0.5 rounded-full transition-all hover:scale-105 hover:shadow-sm ${
-                story?.status?.toLowerCase() === 'draft'
-                  ? 'bg-amber-50 text-amber-600 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400'
-                  : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400'
-              }`}
-            >
-              {story?.status?.toLowerCase()}
-            </button>
-          ) : (
-            <span
-              className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                story?.status?.toLowerCase() === 'draft'
-                  ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
-                  : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
-              }`}
-            >
-              {story?.status}
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <div className="hidden md:flex items-center relative">
-          <Search className="w-3.5 h-3.5 text-[#5A3E4C]/30 absolute left-2.5 z-10" />
-          <input
-            type="text"
-            placeholder="Cari scene..."
-            value={searchQuery}
-            onChange={(e) => onSearchQueryChange(e.target.value)}
-            aria-label="Cari scene"
-            className="w-44 bg-white/60 dark:bg-[#1a1625]/60 border border-[#FFB8C0]/15 rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#4A2F3C] dark:text-[#e2d9f3] placeholder-[#5A3E4C]/30 focus:outline-none focus:ring-1 focus:ring-[#E63946]/40 focus:border-[#E63946]/40 transition-all"
-          />
-        </div>
-
-        <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[#FFB8C0]/10 dark:bg-[#E63946]/10">
-          {VIEW_MODES.map(({ mode, icon: ModeIcon, label }) => (
-            <button
-              key={mode}
-              onClick={() => onViewModeChange(mode)}
-              title={label}
-              aria-label={`Tampilan ${label}`}
-              aria-pressed={viewMode === mode}
-              className={`p-1.5 rounded-md transition-all ${
-                viewMode === mode
-                  ? 'bg-white dark:bg-[#2a2438] shadow-sm text-[#E63946]'
-                  : 'text-[#5A3E4C]/40 dark:text-[#e2d9f3]/40 hover:text-[#5A3E4C]/70'
-              }`}
-            >
-              <ModeIcon className="w-3.5 h-3.5" />
-            </button>
-          ))}
-        </div>
-
-        <button
-          onClick={onAddScene}
-          className="px-3 py-1.5 rounded-xl bg-[#E63946]/10 hover:bg-[#E63946]/20 text-[#E63946] text-xs font-medium transition-all"
-        >
-          + Add Scene
+          <ArrowLeft className="w-4 h-4" />
         </button>
 
-        <div
-          className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/60 dark:bg-[#1a1625]/60 border border-[#FFB8C0]/15 text-[10px] font-medium text-[#5A3E4C]/50 dark:text-[#e2d9f3]/40"
-          role="status"
-          aria-live="polite"
-        >
-          <div className="w-1.5 h-1.5 rounded-full bg-[#E63946] shadow-[0_0_8px_rgba(230,57,70,0.6)] animate-pulse" />
-          Auto-saving
-        </div>
+        <StoryTitleSection
+          story={story}
+          scrapbookFontClass={scrapbookFontClass}
+        />
 
-        <button
-          onClick={onToggleSettings}
-          aria-label="Buka setelan story"
-          aria-pressed={showSettings}
-          className={`p-2 rounded-lg transition-all ${
-            showSettings
-              ? 'bg-[#E63946]/10 text-[#E63946]'
-              : 'hover:bg-[#FFB8C0]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'
-          }`}
-        >
-          <Settings className="w-4 h-4" />
-        </button>
+        <ViewModeTabs
+          viewMode={viewMode}
+          onViewModeChange={onViewModeChange}
+          modes={VIEW_MODES}
+        />
 
-        {onScrapbookThemeChange && (
-          <ScrapbookThemePicker
-            value={scrapbookTheme}
-            onChange={onScrapbookThemeChange}
-          />
-        )}
+        <div className="flex-1" />
 
-        {isShareable && (
-          <button
-            onClick={handleShare}
-            aria-label={linkCopied ? 'Link tersalin' : 'Salin link share'}
-            title={linkCopied ? 'Link tersalin!' : 'Salin link untuk dibagikan'}
-            className={`p-2 rounded-lg transition-all ${
-              linkCopied
-                ? 'bg-emerald-500/10 text-emerald-600'
-                : 'hover:bg-[#FFB8C0]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'
-            }`}
-          >
-            {linkCopied ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <Share2 className="w-4 h-4" />
-            )}
-          </button>
-        )}
+        <StorySearchBar
+          query={searchQuery}
+          onChange={onSearchQueryChange}
+        />
 
-        <button
-          onClick={onToggleInsights}
-          aria-label="Buka panel insights"
-          aria-pressed={showInsightsMenu}
-          className={`p-2 rounded-lg transition-all relative ${
-            activeInsight
-              ? 'bg-[#7C83FD]/10 text-[#7C83FD]'
-              : 'hover:bg-[#FFB8C0]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'
-          }`}
-        >
-          <Sparkles className="w-4 h-4" />
-          {activeInsight && (
-            <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#7C83FD]" />
-          )}
-        </button>
-
-        <button
-          onClick={onToggleExport}
-          aria-label="Buka panel export"
-          aria-pressed={showExport}
-          className={`p-2 rounded-lg transition-all ${
-            showExport
-              ? 'bg-[#E63946]/10 text-[#E63946]'
-              : 'hover:bg-[#FFB8C0]/10 text-[#5A3E4C]/60 dark:text-[#e2d9f3]/60'
-          }`}
-        >
-          <Download className="w-4 h-4" />
-        </button>
+        <StoryHeaderActions
+          scrapbookTheme={scrapbookTheme}
+          onScrapbookThemeChange={onScrapbookThemeChange}
+          onToggleInsights={onToggleInsights}
+          showInsightsMenu={showInsightsMenu}
+          activeInsight={activeInsight}
+          onToggleExport={onToggleExport}
+          showExport={showExport}
+          onAddScene={onAddScene}
+          showSettings={showSettings}
+          onToggleSettings={onToggleSettings}
+          storyStatus={story?.status}
+          onToggleStatus={onToggleStatus}
+        />
       </div>
     </div>
   );
