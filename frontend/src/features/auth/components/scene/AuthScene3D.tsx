@@ -13,6 +13,17 @@ interface AuthScene3DProps {
   reducedMotion: boolean;
 }
 
+// ── Bright anchor stars (2 muted gold + 2 soft white) ──
+// All on the left/center hemisphere, far from the login form on the right.
+const BRIGHT_STARS = [
+  { position: [-3.0, 1.8, -7], size: 0.14, color: new THREE.Color("#D99A2B") },
+  { position: [-4.8, 0.3, -12], size: 0.13, color: new THREE.Color("#D99A2B") },
+  { position: [1.5, -2.2, -9], size: 0.12, color: new THREE.Color("#F8F4EF") },
+  { position: [-1.0, 3.2, -11], size: 0.11, color: new THREE.Color("#F8F4EF") },
+];
+
+const BRIGHT_STARS_MOBILE = BRIGHT_STARS.slice(0, 2);
+
 export function AuthScene3D({ isMobile, reducedMotion }: AuthScene3DProps) {
   return (
     <Canvas
@@ -28,8 +39,9 @@ export function AuthScene3D({ isMobile, reducedMotion }: AuthScene3DProps) {
       <ParallaxRig>
         <Skybox />
         <StarField
-          count={isMobile ? 140 : 380}
+          count={isMobile ? 180 : 420}
           enableTwinkle={!isMobile && !reducedMotion}
+          brightStars={isMobile ? BRIGHT_STARS_MOBILE : BRIGHT_STARS}
         />
         <Constellations active={!reducedMotion} />
         {!isMobile && !reducedMotion && <Meteors active />}

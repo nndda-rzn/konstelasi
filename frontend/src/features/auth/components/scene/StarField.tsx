@@ -5,28 +5,35 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { SKY_RADIUS } from "./data/constellations";
 
-// Night-sky star colors: soft white, soft blue-white, muted gold.
 const SOFT_WHITE = new THREE.Color("#F8F4EF");
 const BLUE_WHITE = new THREE.Color("#C9D4E8");
 const MUTED_GOLD = new THREE.Color("#D99A2B");
+
+interface BrightStarDef {
+  position: number[];
+  size: number;
+  color: THREE.Color;
+}
 
 interface StarFieldProps {
   count: number;
   enableTwinkle: boolean;
   seed?: number;
+  /** Dedicated bright anchor stars rendered as a separate points layer. */
+  brightStars?: BrightStarDef[];
 }
 
 /**
- * StarField - Points-based night-sky star field.
+ * StarField - Points-based night-sky star field with optional bright anchors.
  *
- * Most stars are small and dim; only ~6% are bright. Colors stay in the
- * soft white / blue-white / muted gold range to read as a real night sky
- * rather than colorful particle noise. Twinkle is very subtle and can be
- * disabled (mobile / reduced-motion).
+ * Random stars: small/dim (6% bright), instant appear, low alpha.
+ * Bright stars: larger dedicated focal points, subtle glow, fade in after constellations.
+ * Twinkle is very subtle and can be disabled (mobile / reduced-motion).
  */
-export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
+export function StarField({ count, enableTwinkle, seed = 42, brightStars }: StarFieldProps) {
   const matRef = useRef<THREE.ShaderMaterial>(null);
 
+  // ── Random background stars ──────────────────────────────
   const { geometry, material } = useMemo(() => {
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
@@ -57,7 +64,6 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
       colors[i * 3 + 1] = c.g;
       colors[i * 3 + 2] = c.b;
 
-      // ~6% bright stars, the rest small and dim.
       const bright = rng() < 0.06;
       sizes[i] = bright ? 2.0 + rng() * 1.4 : 0.7 + rng() * 0.9;
       baseAlpha[i] = bright ? 0.7 + rng() * 0.3 : 0.25 + rng() * 0.35;
@@ -90,7 +96,6 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
         uniform float uPixelRatio;
         varying vec3 vColor;
         varying float vAlpha;
-
         void main() {
           vColor = color;
           float tw = 1.0;
@@ -106,7 +111,6 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
       fragmentShader: `
         varying vec3 vColor;
         varying float vAlpha;
-
         void main() {
           vec2 c = gl_PointCoord - 0.5;
           float d = length(c);
@@ -120,17 +124,104 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
     return { geometry: geo, material: mat };
   }, [count, enableTwinkle, seed]);
 
+  // ── Bright anchor stars (separate layer) ─────────────────
+  const { geometry: brightGeo, material: brightMat } = useMemo(() => {
+    if (!brightStars || brightStars.length === 0) {
+      return { geometry: null, material: null };
+    }
+
+    const positions = new Float32Array(brightStars.length * 3);
+    const colors = new Float32Array(brightStars.length * 3);
+    const sizes = new Float32Array(brightStars.length);
+
+    brightStars.forEach((bs, i) => {
+      positions[i * 3 + 0] = bs.position[0];
+      positions[i * 3 + 1] = bs.position[1];
+      positions[i * 3 + 2] = bs.position[2];
+      colors[i * 3 + 0] = bs.color.r;
+      colors[i * 3 + 1] = bs.color.g;
+      colors[i * 3 + 2] = bs.color.b;
+      sizes[i] = bs.size;
+    });
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    geo.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
+
+    const mat = new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      vertexColors: true,
+      blending: THREE.NormalBlending,
+      uniforms: {
+        uTime: { value: 0 },
+        uPixelRatio: { value: 1 },
+        uFade: { value: 0 },
+      },
+      vertexShader: `
+        attribute float aSize;
+        uniform float uPixelRatio;
+        varying vec3 vColor;
+        varying float vFade;
+        void main() {
+          vColor = color;
+          vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = aSize * uPixelRatio * (400.0 / -mv.z);
+          gl_Position = projectionMatrix * mv;
+          vFade = 1.0;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vFade;
+        uniform float uFade;
+        void main() {
+          vec2 c = gl_PointCoord - 0.5;
+          float d = length(c);
+          if (d > 0.5) discard;
+          float core = smoothstep(0.5, 0.0, d);
+          float halo = smoothstep(0.5, 0.2, d) * 0.5;
+          float a = (core + halo) * uFade;
+          gl_FragColor = vec4(vColor, a);
+        }
+      `,
+    });
+
+    return { geometry: geo, material: mat };
+  }, [brightStars]);
+
   useFrame((state) => {
-    if (!matRef.current) return;
-    matRef.current.uniforms.uTime.value = state.clock.elapsedTime;
-    matRef.current.uniforms.uPixelRatio.value = state.gl.getPixelRatio();
+    const pr = state.gl.getPixelRatio();
+
+    if (matRef.current) {
+      matRef.current.uniforms.uTime.value = state.clock.elapsedTime;
+      matRef.current.uniforms.uPixelRatio.value = pr;
+    }
+
+    // Bright stars: fade in at 1.5s and reach full at 2.0s
+    if (brightMat) {
+      const now = performance.now() / 1000;
+      brightMat.uniforms.uTime.value = state.clock.elapsedTime;
+      brightMat.uniforms.uPixelRatio.value = pr;
+      brightMat.uniforms.uFade.value = THREE.MathUtils.clamp((now - 1.2) / 0.6, 0, 1);
+    }
   });
 
   return (
-    <points renderOrder={0}>
-      <primitive object={geometry} attach="geometry" />
-      <primitive object={material} attach="material" ref={matRef} />
-    </points>
+    <>
+      <points renderOrder={0}>
+        <primitive object={geometry} attach="geometry" />
+        <primitive object={material} attach="material" ref={matRef} />
+      </points>
+
+      {brightGeo && brightMat && (
+        <points renderOrder={1}>
+          <primitive object={brightGeo} attach="geometry" />
+          <primitive object={brightMat} attach="material" />
+        </points>
+      )}
+    </>
   );
 }
 
