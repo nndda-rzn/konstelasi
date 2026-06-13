@@ -45,6 +45,7 @@ import type { Note, BatchUpdateNotesResponse, DeleteNoteResponse } from '../type
 import NoteNode from './NoteNode';
 import SemanticEdge from './SemanticEdge';
 import NoteEditorSidebar from './NoteEditorSidebar';
+import { CanvasError } from './diaryCanvas/CanvasError';
 import TimelineView from './TimelineView';
 import ThreadView from './ThreadView';
 import CanvasToolbar from './CanvasToolbar';
@@ -268,25 +269,25 @@ function DiaryCanvasInner() {
 
   // Export canvas as PNG
   const downloadImage = useCallback(() => {
-    const canvasElement = document.querySelector('.react-flow') as HTMLElement;
+    const canvasElement = document.querySelector(".react-flow") as HTMLElement;
     if (!canvasElement) return;
 
     toPng(canvasElement, {
-      backgroundColor: '#09090b',
+      backgroundColor: "#09090b",
       quality: 1,
       pixelRatio: 2,
     })
       .then((dataUrl) => {
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.setAttribute(
-          'download',
-          `Konstelasi_Export_${new Date().toISOString().split('T')[0]}.png`
+          "download",
+          `Konstelasi_Export_${new Date().toISOString().split("T")[0]}.png`
         );
-        a.setAttribute('href', dataUrl);
+        a.setAttribute("href", dataUrl);
         a.click();
       })
       .catch((err) => {
-        console.error('Failed to export canvas', err);
+        console.error("Failed to export canvas", err);
       });
   }, []);
 
@@ -313,18 +314,7 @@ function DiaryCanvasInner() {
   if (loading) return <CanvasSkeleton />;
 
   if (error)
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-[#FFFAF7] space-y-4">
-        <div className="text-[#FF6B9D] font-medium text-lg">Error loading canvas</div>
-        <p className="text-[#5A3E4C]/50 text-sm">{error.message}</p>
-        <button
-          onClick={() => refetch()}
-          className="px-6 py-2.5 bg-gradient-to-r from-[#FF8FA3] to-[#FFB4A2] hover:from-[#FF7A8A] hover:to-[#FF8FA3] text-white rounded-xl font-medium transition-all shadow-lg shadow-pink-300/30 hover:shadow-pink-300/50"
-        >
-          Retry
-        </button>
-      </div>
-    );
+    return <CanvasError message={error.message} onRetry={() => refetch()} />;
 
   return (
     <div className="w-full h-screen relative bg-[#FFFAF7] overflow-hidden">
