@@ -1,24 +1,23 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Pause, Play, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   useCinematicPlayer,
   useCinematicKeyboard,
 } from "./cinematic/useCinematicPlayer";
+import { NODE_TYPE_LABELS, getNodeTypeLabel } from "./cinematic/nodeTypeLabel";
+import { ProgressTrack } from "./cinematic/ProgressTrack";
+import {
+  CinematicHeaderTitle,
+  CinematicHeaderActions,
+} from "./cinematic/CinematicHeaderParts";
+import {
+  CinematicContentHeader,
+  CinematicContentBody,
+} from "./cinematic/CinematicContentParts";
 
-const NODE_TYPE_LABELS: Record<string, string> = {
-  scene: "Scene",
-  memory: "Memory",
-  character: "Character",
-  dialogue: "Dialogue",
-  moment: "Moment",
-  feeling: "Feeling",
-  timeline_event: "Event",
-  media: "Media",
-  quote: "Quote",
-  reflection: "Reflection",
-};
+export { NODE_TYPE_LABELS };
 
 interface CinematicViewProps {
   nodes: any[];
@@ -63,41 +62,57 @@ export default function CinematicView({
   const node = sortedNodes[currentIndex];
   const cover = node.images?.[0]?.imageUrl;
   const stripped = (node.content || "").replace(/<[^>]+>/g, "").trim();
+  const nodeTypeLabel = getNodeTypeLabel(node.storyNodeType);
 
   return (
     <div className="fixed inset-0 z-[200] bg-black overflow-hidden select-none">
       <BackgroundImage node={node} cover={cover} durationMs={durationMs} />
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/60" />
 
-      <ProgressBars
+      <ProgressTrack
         total={sortedNodes.length}
         currentIndex={currentIndex}
         progress={progress}
       />
 
-      <CinematicHeader
-        storyTitle={storyTitle}
-        currentIndex={currentIndex}
-        total={sortedNodes.length}
-        isPaused={isPaused}
-        onTogglePause={togglePause}
-        onClose={onClose}
-      />
+      <div className="absolute top-8 left-4 right-4 z-10 flex items-center justify-between">
+        <CinematicHeaderTitle
+          storyTitle={storyTitle}
+          currentIndex={currentIndex}
+          total={sortedNodes.length}
+        />
+        <CinematicHeaderActions
+          isPaused={isPaused}
+          onTogglePause={togglePause}
+          onClose={onClose}
+        />
+      </div>
 
       <AnimatePresence mode="wait">
-        <CinematicContent
+        <motion.div
           key={node.id}
-          node={node}
-          stripped={stripped}
-        />
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.55, ease: "easeOut" }}
+          className="absolute bottom-0 left-0 right-0 z-10 p-8 md:p-12 max-w-3xl mx-auto"
+        >
+          <CinematicContentHeader
+            nodeType={node.storyNodeType}
+            nodeTypeLabel={nodeTypeLabel}
+          />
+          <CinematicContentBody
+            title={node.title}
+            stripped={stripped}
+            mood={node.mood}
+          />
+        </motion.div>
       </AnimatePresence>
 
       <ClickZones onPrev={goPrev} onNext={goNext} />
     </div>
   );
 }
-
-// === Sub-components ===
 
 function BackgroundImage({
   node,
@@ -134,123 +149,6 @@ function BackgroundImage({
         />
       )}
     </AnimatePresence>
-  );
-}
-
-function ProgressBars({
-  total,
-  currentIndex,
-  progress,
-}: {
-  total: number;
-  currentIndex: number;
-  progress: number;
-}) {
-  return (
-    <div className="absolute top-4 left-4 right-4 z-10 flex gap-1">
-      {Array.from({ length: total }).map((_, i) => (
-        <div
-          key={i}
-          className="flex-1 h-0.5 bg-white/20 rounded-full overflow-hidden"
-        >
-          <div
-            className="h-full bg-white rounded-full transition-all"
-            style={{
-              width:
-                i < currentIndex
-                  ? "100%"
-                  : i === currentIndex
-                  ? `${progress}%`
-                  : "0%",
-            }}
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function CinematicHeader({
-  storyTitle,
-  currentIndex,
-  total,
-  isPaused,
-  onTogglePause,
-  onClose,
-}: {
-  storyTitle: string;
-  currentIndex: number;
-  total: number;
-  isPaused: boolean;
-  onTogglePause: () => void;
-  onClose: () => void;
-}) {
-  return (
-    <div className="absolute top-8 left-4 right-4 z-10 flex items-center justify-between">
-      <div className="text-white/80">
-        <p className="text-[10px] uppercase tracking-[0.3em] font-semibold opacity-70">
-          {storyTitle}
-        </p>
-        <p className="text-[11px] mt-1 font-medium">
-          {currentIndex + 1} / {total}
-        </p>
-      </div>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={onTogglePause}
-          className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white/80 transition-colors backdrop-blur-md"
-          title={isPaused ? "Lanjutkan (P)" : "Jeda (P)"}
-        >
-          {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-        </button>
-        <button
-          onClick={onClose}
-          className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white/80 transition-colors backdrop-blur-md"
-          title="Tutup (Esc)"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function CinematicContent({
-  node,
-  stripped,
-}: {
-  node: any;
-  stripped: string;
-}) {
-  return (
-    <motion.div
-      key={node.id}
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.55, ease: "easeOut" }}
-      className="absolute bottom-0 left-0 right-0 z-10 p-8 md:p-12 max-w-3xl mx-auto"
-    >
-      {node.storyNodeType && (
-        <span className="inline-block text-[10px] uppercase tracking-[0.3em] font-semibold text-white/60 mb-3">
-          {NODE_TYPE_LABELS[node.storyNodeType] ||
-            node.storyNodeType.replace("_", " ")}
-        </span>
-      )}
-      <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight mb-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-        {node.title || "Untitled"}
-      </h2>
-      {stripped && (
-        <p className="text-sm md:text-base text-white/85 leading-relaxed line-clamp-4 max-w-2xl">
-          {stripped.length > 280 ? stripped.slice(0, 280) + "..." : stripped}
-        </p>
-      )}
-      {node.mood && (
-        <span className="inline-block mt-4 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-[10px] font-medium text-white/80 capitalize">
-          {node.mood}
-        </span>
-      )}
-    </motion.div>
   );
 }
 
