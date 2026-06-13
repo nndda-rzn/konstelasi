@@ -39,9 +39,9 @@ export function Meteors({ active }: MeteorsProps) {
     };
   }, [geometry]);
 
-  useFrame((state) => {
+  useFrame(() => {
     if (!active) return;
-    const t = state.clock.elapsedTime;
+    const t = performance.now() / 1000;
 
     if (t >= nextShotTime.current) {
       const interval =
@@ -53,9 +53,8 @@ export function Meteors({ active }: MeteorsProps) {
     const pos = geometry.attributes.position as THREE.BufferAttribute;
     pos.array.fill(0);
     let liveCount = 0;
-    const now = performance.now() / 1000;
     shots.forEach((shot) => {
-      const age = now - shot.startTime;
+      const age = t - shot.startTime;
       if (age < 0 || age > METEOR_DURATION) return;
       const head = shot.origin
         .clone()
@@ -78,7 +77,8 @@ export function Meteors({ active }: MeteorsProps) {
   });
 
   return (
-    <lineSegments geometry={geometry} renderOrder={2}>
+    <lineSegments renderOrder={2}>
+      <primitive object={geometry} attach="geometry" />
       <lineBasicMaterial
         ref={matRef}
         color={"#FFF4D8"}
