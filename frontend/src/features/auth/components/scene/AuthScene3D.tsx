@@ -22,13 +22,13 @@ export function AuthScene3D({ isMobile, reducedMotion }: AuthScene3DProps) {
         powerPreference: "high-performance",
         alpha: false,
       }}
-      camera={{ position: [0, 0, 0.1], fov: 65, near: 0.1, far: 200 }}
-      style={{ position: "absolute", inset: 0, background: "#070812" }}
+      camera={{ position: [0, 0, 0.1], fov: 60, near: 0.1, far: 200 }}
+      style={{ position: "absolute", inset: 0, background: "#05060D" }}
     >
       <ParallaxRig>
         <Skybox />
         <StarField
-          count={isMobile ? 80 : 250}
+          count={isMobile ? 140 : 380}
           enableTwinkle={!isMobile && !reducedMotion}
         />
         <Constellations active={!reducedMotion} />

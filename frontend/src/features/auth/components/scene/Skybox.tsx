@@ -6,11 +6,11 @@ import { SKY_RADIUS } from "./data/constellations";
 
 // Deep night-sky palette: navy / violet-black with a faint warm ember
 // near the very bottom. Intentionally NOT red-dominant.
-const ZENITH = new THREE.Color("#070812");
+const ZENITH = new THREE.Color("#05060D");
 const UPPER = new THREE.Color("#090A16");
 const MID = new THREE.Color("#100714");
 const HORIZON = new THREE.Color("#160A13");
-const EMBER = new THREE.Color("#2A0E16");
+const EMBER = new THREE.Color("#241019");
 
 /**
  * Skybox - Inward-facing sphere with a custom gradient shader.

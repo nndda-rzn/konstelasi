@@ -1,157 +1,183 @@
 "use client";
 
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { CONSTELLATIONS, type ConstellationData, SKY_RADIUS } from "./data/constellations";
+import {
+  CONSTELLATION_DEFS,
+  type ConstellationDef,
+} from "./data/constellations";
+import { makeStarTexture } from "./three-utils";
 
-// Soft white-gold lines, low opacity. No harsh red.
-const LINE_COLOR = new THREE.Color("#EBE3D4");
-const ROTATION_INTERVAL = 14;
-const FADE_DURATION = 1.8;
-const LINE_MAX_OPACITY = 0.3;
+const LINE_GOLD = new THREE.Color("#F2B84B");
 
 interface ConstellationsProps {
   active: boolean;
 }
 
+/**
+ * Constellations - Renders all constellation definitions simultaneously
+ * as fixed celestial patterns (data-driven). Stars use a glow sprite;
+ * lines use additive LineSegments. Subtle group-level twinkle/drift.
+ */
 export function Constellations({ active }: ConstellationsProps) {
-  const [index, setIndex] = useState(0);
+  const texture = useMemo(() => makeStarTexture(64), []);
+  useEffect(() => () => texture.dispose(), [texture]);
 
-  useEffect(() => {
-    if (!active) return;
-    const id = setTimeout(
-      () => setIndex((i) => (i + 1) % CONSTELLATIONS.length),
-      ROTATION_INTERVAL * 1000,
-    );
-    return () => clearTimeout(id);
-  }, [index, active]);
-
-  return <ConstellationGroup data={CONSTELLATIONS[index]!} active={active} />;
+  return (
+    <>
+      {CONSTELLATION_DEFS.map((def) => (
+        <ConstellationGroup
+          key={def.name}
+          def={def}
+          texture={texture}
+          active={active}
+        />
+      ))}
+    </>
+  );
 }
 
 function ConstellationGroup({
-  data,
+  def,
+  texture,
   active,
 }: {
-  data: ConstellationData;
+  def: ConstellationDef;
+  texture: THREE.Texture;
   active: boolean;
 }) {
-  const lineMatRef = useRef<THREE.LineBasicMaterial>(null);
+  const groupRef = useRef<THREE.Group>(null);
   const starMatRef = useRef<THREE.ShaderMaterial>(null);
   const elapsed = useRef(0);
 
-  const { lineGeo, starGeo, starMat } = useMemo(() => {
-    const starPositions = new Float32Array(data.stars.length * 3);
-    const starSizes = new Float32Array(data.stars.length);
-    data.stars.forEach((s, i) => {
-      starPositions[i * 3 + 0] = s.x * data.scale;
-      starPositions[i * 3 + 1] = s.y * data.scale;
-      starPositions[i * 3 + 2] = (s.z ?? 0) * data.scale;
-      starSizes[i] = (s.size ?? 1) * 6;
+  const { starGeo, starMat, lineGeo, lineMat } = useMemo(() => {
+    const index = new Map(def.stars.map((s, i) => [s.id, i]));
+
+    const positions = new Float32Array(def.stars.length * 3);
+    const sizes = new Float32Array(def.stars.length);
+    const opacities = new Float32Array(def.stars.length);
+    def.stars.forEach((s, i) => {
+      positions[i * 3 + 0] = s.x * def.scale;
+      positions[i * 3 + 1] = s.y * def.scale;
+      positions[i * 3 + 2] = s.z * def.scale;
+      sizes[i] = s.size * def.scale;
+      opacities[i] = s.opacity;
     });
 
-    const linePositions = new Float32Array(data.lines.length * 6);
-    data.lines.forEach(([a, b], i) => {
-      const sa = data.stars[a];
-      const sb = data.stars[b];
-      if (!sa || !sb) return;
-      linePositions[i * 6 + 0] = sa.x * data.scale;
-      linePositions[i * 6 + 1] = sa.y * data.scale;
-      linePositions[i * 6 + 2] = (sa.z ?? 0) * data.scale;
-      linePositions[i * 6 + 3] = sb.x * data.scale;
-      linePositions[i * 6 + 4] = sb.y * data.scale;
-      linePositions[i * 6 + 5] = (sb.z ?? 0) * data.scale;
-    });
+    const sGeo = new THREE.BufferGeometry();
+    sGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    sGeo.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
+    sGeo.setAttribute("aOpacity", new THREE.BufferAttribute(opacities, 1));
 
-    const lineG = new THREE.BufferGeometry();
-    lineG.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
-
-    const starG = new THREE.BufferGeometry();
-    starG.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
-    starG.setAttribute("aSize", new THREE.BufferAttribute(starSizes, 1));
-
-    const starM = new THREE.ShaderMaterial({
+    // Custom shader points so each star keeps its own size + opacity,
+    // with a soft glow sprite and very subtle twinkle.
+    const sMat = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
-      blending: THREE.NormalBlending,
-      uniforms: { uOpacity: { value: 1 } },
+      blending: THREE.AdditiveBlending,
+      uniforms: {
+        uTime: { value: 0 },
+        uTex: { value: texture },
+        uPixelRatio: { value: 1 },
+        uFade: { value: 0 },
+      },
       vertexShader: `
         attribute float aSize;
+        attribute float aOpacity;
+        uniform float uTime;
+        uniform float uPixelRatio;
+        varying float vOpacity;
         void main() {
+          float tw = 0.85 + 0.15 * sin(uTime * 1.4 + position.x * 3.0 + position.y * 2.0);
+          vOpacity = aOpacity * tw;
           vec4 mv = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = aSize * (520.0 / -mv.z);
+          gl_PointSize = aSize * uPixelRatio * (900.0 / -mv.z);
           gl_Position = projectionMatrix * mv;
         }
       `,
       fragmentShader: `
-        uniform float uOpacity;
+        uniform sampler2D uTex;
+        uniform float uFade;
+        varying float vOpacity;
         void main() {
-          vec2 c = gl_PointCoord - 0.5;
-          float d = length(c);
-          if (d > 0.5) discard;
-          float core = smoothstep(0.5, 0.0, d);
-          float halo = smoothstep(0.5, 0.2, d) * 0.4;
-          float a = (core + halo) * uOpacity;
-          gl_FragColor = vec4(0.97, 0.92, 0.78, a);
+          vec4 t = texture2D(uTex, gl_PointCoord);
+          gl_FragColor = vec4(vec3(1.0, 0.95, 0.82), t.a * vOpacity * uFade);
         }
       `,
     });
 
-    return { lineGeo: lineG, starGeo: starG, starMat: starM };
-  }, [data]);
+    // Lines
+    const linePos: number[] = [];
+    def.connections.forEach(([from, to]) => {
+      const fi = index.get(from);
+      const ti = index.get(to);
+      if (fi === undefined || ti === undefined) return;
+      const a = def.stars[fi];
+      const b = def.stars[ti];
+      linePos.push(
+        a.x * def.scale,
+        a.y * def.scale,
+        a.z * def.scale,
+        b.x * def.scale,
+        b.y * def.scale,
+        b.z * def.scale,
+      );
+    });
+    const lGeo = new THREE.BufferGeometry();
+    lGeo.setAttribute(
+      "position",
+      new THREE.BufferAttribute(new Float32Array(linePos), 3),
+    );
+    const lMat = new THREE.LineBasicMaterial({
+      color: LINE_GOLD,
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+
+    return { starGeo: sGeo, starMat: sMat, lineGeo: lGeo, lineMat: lMat };
+  }, [def, texture]);
 
   useEffect(() => {
     return () => {
-      lineGeo.dispose();
       starGeo.dispose();
       starMat.dispose();
+      lineGeo.dispose();
+      lineMat.dispose();
     };
-  }, [lineGeo, starGeo, starMat]);
+  }, [starGeo, starMat, lineGeo, lineMat]);
 
-  useEffect(() => {
-    elapsed.current = 0;
-  }, [data]);
+  useFrame((state, delta) => {
+    const t = state.clock.elapsedTime;
+    // fade in once on mount
+    elapsed.current = Math.min(1, elapsed.current + delta * 0.6);
+    const fade = elapsed.current;
 
-  useFrame((_, delta) => {
-    const opacity = active
-      ? Math.min(1, (elapsed.current += delta) / FADE_DURATION)
-      : 1;
-    if (lineMatRef.current) lineMatRef.current.opacity = opacity * LINE_MAX_OPACITY;
-    if (starMatRef.current) starMatRef.current.uniforms.uOpacity.value = opacity * 0.9;
+    if (starMatRef.current) {
+      starMatRef.current.uniforms.uTime.value = t;
+      starMatRef.current.uniforms.uPixelRatio.value = state.gl.getPixelRatio();
+      starMatRef.current.uniforms.uFade.value = fade;
+    }
+    lineMat.opacity = def.lineOpacity * fade;
+
+    // very slow drift
+    if (groupRef.current && active) {
+      groupRef.current.rotation.z = Math.sin(t * 0.05) * 0.015;
+    }
   });
 
-  // Camera at origin looks -Z. theta=0 = front-center, +theta = right,
-  // +phi = up. Negate z so the constellation sits in front of the camera.
-  const groupPos = useMemo<[number, number, number]>(() => {
-    const r = SKY_RADIUS * 0.92;
-    const x = r * Math.cos(data.pivot.phi) * Math.sin(data.pivot.theta);
-    const y = r * Math.sin(data.pivot.phi);
-    const z = -r * Math.cos(data.pivot.phi) * Math.cos(data.pivot.theta);
-    return [x, y, z];
-  }, [data]);
-
-  const lookAtOrigin = useMemo<[number, number, number]>(() => {
-    const dir = new THREE.Vector3(...groupPos).normalize().multiplyScalar(-1);
-    return [dir.x, dir.y, dir.z];
-  }, [groupPos]);
-
   return (
-    <group position={groupPos}>
+    <group ref={groupRef} position={def.position}>
       <points>
         <primitive object={starGeo} attach="geometry" />
         <primitive object={starMat} attach="material" ref={starMatRef} />
       </points>
       <lineSegments>
         <primitive object={lineGeo} attach="geometry" />
-        <lineBasicMaterial
-          ref={lineMatRef}
-          color={LINE_COLOR}
-          transparent
-          depthWrite={false}
-        />
+        <primitive object={lineMat} attach="material" />
       </lineSegments>
-      <group onUpdate={(g) => g.lookAt(...lookAtOrigin)} />
     </group>
   );
 }
