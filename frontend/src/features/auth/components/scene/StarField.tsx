@@ -59,7 +59,7 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
       colors[i * 3 + 1] = c.g;
       colors[i * 3 + 2] = c.b;
 
-      sizes[i] = 0.5 + rng() * 1.4;
+      sizes[i] = 1.2 + rng() * 2.0;
       phases[i] = rng() * Math.PI * 2;
     }
 
@@ -73,6 +73,7 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
       transparent: true,
       depthWrite: false,
       vertexColors: true,
+      blending: THREE.AdditiveBlending,
       uniforms: {
         uTime: { value: 0 },
         uTwinkle: { value: enableTwinkle ? 1.0 : 0.0 },
@@ -91,11 +92,11 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
           vColor = color;
           float twinkle = 1.0;
           if (uTwinkle > 0.5) {
-            twinkle = 0.6 + 0.4 * sin(uTime * 1.6 + aPhase);
+            twinkle = 0.55 + 0.45 * sin(uTime * 1.6 + aPhase);
           }
           vAlpha = twinkle;
           vec4 mv = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = aSize * uPixelRatio * (260.0 / -mv.z);
+          gl_PointSize = aSize * uPixelRatio * (420.0 / -mv.z);
           gl_Position = projectionMatrix * mv;
         }
       `,
@@ -107,7 +108,9 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
           vec2 c = gl_PointCoord - 0.5;
           float d = length(c);
           if (d > 0.5) discard;
-          float a = smoothstep(0.5, 0.0, d) * vAlpha;
+          float core = smoothstep(0.5, 0.0, d);
+          float halo = smoothstep(0.5, 0.15, d) * 0.5;
+          float a = (core + halo) * vAlpha;
           gl_FragColor = vec4(vColor, a);
         }
       `,
@@ -122,9 +125,12 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
     matRef.current.uniforms.uPixelRatio.value = state.gl.getPixelRatio();
   });
 
-  return <points geometry={geometry} renderOrder={0} material={material} ref={(o) => {
-    if (o) matRef.current = o.material as THREE.ShaderMaterial;
-  }} />;
+  return (
+    <points renderOrder={0}>
+      <primitive object={geometry} attach="geometry" />
+      <primitive object={material} attach="material" ref={matRef} />
+    </points>
+  );
 }
 
 function mulberry32(a: number) {
