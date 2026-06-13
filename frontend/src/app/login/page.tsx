@@ -9,7 +9,7 @@ export default function LoginPage() {
   const { email, setEmail, pin, setPin, error, loading, submit } = useLogin();
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#070812] px-5 py-10 text-white sm:px-8">
+    <main className="relative flex h-[100dvh] items-center justify-center overflow-hidden bg-[#070812] px-5 py-6 text-white sm:px-8">
       {/* z-0: 3D night sky */}
       <AuthBackground />
 
