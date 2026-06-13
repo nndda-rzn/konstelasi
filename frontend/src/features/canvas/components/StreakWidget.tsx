@@ -30,7 +30,9 @@ export default function StreakWidget() {
         >
           {streak.currentStreak}
         </span>
-        <span className="text-[11px] text-[#9A8F95]">days</span>
+        <span className="text-[11px] text-[#9A8F95]">
+          {streak.currentStreak === 1 ? "day" : "days"}
+        </span>
       </div>
     </div>
   );
