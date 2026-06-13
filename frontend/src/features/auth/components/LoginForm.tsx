@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Gem, Loader2, Lock, Mail, Sparkles } from "lucide-react";
+import { ArrowRight, Gem, Loader2, Mail, Sparkles } from "lucide-react";
 import { InputField } from "./InputField";
+import { PinInput } from "./PinInput";
 
 interface LoginFormProps {
   email: string;
   setEmail: (v: string) => void;
-  password: string;
-  setPassword: (v: string) => void;
+  pin: string;
+  setPin: (v: string) => void;
   error: string | null;
   loading: boolean;
   onSubmit: (e: React.FormEvent) => void;
@@ -16,16 +17,19 @@ interface LoginFormProps {
 
 /**
  * LoginForm - Right-side login form with branded header.
+ * Uses email + 6-digit PIN (PIN-as-password Supabase).
  */
 export function LoginForm({
   email,
   setEmail,
-  password,
-  setPassword,
+  pin,
+  setPin,
   error,
   loading,
   onSubmit,
 }: LoginFormProps) {
+  const pinInvalid = Boolean(error) && pin.length > 0;
+
   return (
     <section className="mx-auto w-full max-w-md animate-fade-in-up">
       <div className="relative overflow-hidden rounded-[2rem] border border-white/65 bg-gradient-to-br from-white/92 via-white/72 to-[#FFF1E8]/58 p-6 shadow-[0_28px_90px_rgba(84,45,55,0.16)] backdrop-blur-2xl sm:p-8">
@@ -64,15 +68,20 @@ export function LoginForm({
               value={email}
               onChange={setEmail}
             />
-            <InputField
-              id="password"
-              label="Password"
-              type="password"
-              icon={<Lock className="h-4 w-4" />}
-              placeholder="••••••••"
-              value={password}
-              onChange={setPassword}
-            />
+            <div className="space-y-2">
+              <PinInput
+                id="pin"
+                label="PIN"
+                value={pin}
+                onChange={setPin}
+                error={pinInvalid}
+                autoFocus={false}
+                disabled={loading}
+              />
+              <p className="text-[11px] font-medium text-[#5A3E4C]/50">
+                6 digit angka rahasia.
+              </p>
+            </div>
           </div>
 
           <button
