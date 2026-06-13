@@ -31,25 +31,8 @@ const r = SKY_RADIUS;
 
 export const CONSTELLATIONS: ConstellationData[] = [
   {
-    name: "Crux",
-    pivot: { theta: Math.PI * 0.55, phi: -Math.PI * 0.28 },
-    scale: 1.4,
-    stars: [
-      { x: 0, y: 2.0, size: 1.2 },
-      { x: 0, y: -2.0, size: 1.2 },
-      { x: 1.0, y: 0, size: 1.4 },
-      { x: -1.0, y: 0, size: 1.4 },
-    ],
-    lines: [
-      [0, 2],
-      [2, 1],
-      [1, 3],
-      [3, 0],
-    ],
-  },
-  {
     name: "Orion",
-    pivot: { theta: Math.PI * 0.05, phi: -Math.PI * 0.05 },
+    pivot: { theta: 0, phi: 0 },
     scale: 1.5,
     stars: [
       { x: -2.0, y: 1.4, size: 1.0 },
@@ -71,8 +54,25 @@ export const CONSTELLATIONS: ConstellationData[] = [
     ],
   },
   {
+    name: "Crux",
+    pivot: { theta: -0.35 * Math.PI, phi: -0.2 * Math.PI },
+    scale: 1.4,
+    stars: [
+      { x: 0, y: 2.0, size: 1.2 },
+      { x: 0, y: -2.0, size: 1.2 },
+      { x: 1.0, y: 0, size: 1.4 },
+      { x: -1.0, y: 0, size: 1.4 },
+    ],
+    lines: [
+      [0, 2],
+      [2, 1],
+      [1, 3],
+      [3, 0],
+    ],
+  },
+  {
     name: "Scorpius",
-    pivot: { theta: Math.PI * 1.2, phi: -Math.PI * 0.25 },
+    pivot: { theta: 0.35 * Math.PI, phi: -0.15 * Math.PI },
     scale: 1.6,
     stars: [
       { x: 0, y: 2.0, size: 1.0 },
@@ -98,7 +98,7 @@ export const CONSTELLATIONS: ConstellationData[] = [
   },
   {
     name: "Ursa Major",
-    pivot: { theta: Math.PI * 1.5, phi: Math.PI * 0.4 },
+    pivot: { theta: -0.3 * Math.PI, phi: 0.3 * Math.PI },
     scale: 1.5,
     stars: [
       { x: 0, y: 0, size: 1.2 },
@@ -120,7 +120,7 @@ export const CONSTELLATIONS: ConstellationData[] = [
   },
   {
     name: "Cassiopeia",
-    pivot: { theta: Math.PI * 0.75, phi: Math.PI * 0.32 },
+    pivot: { theta: 0.3 * Math.PI, phi: 0.25 * Math.PI },
     scale: 1.3,
     stars: [
       { x: -2.0, y: 0, size: 1.0 },
