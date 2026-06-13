@@ -15,13 +15,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       );
     }
 
+    console.log('[JwtStrategy] secret length:', supabaseJwtSecret.length);
+    console.log('[JwtStrategy] secret prefix:', supabaseJwtSecret.slice(0, 12));
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: supabaseJwtSecret,
+      algorithms: ['HS256'],
     });
   }
 
   async validate(payload: any) {
+    console.log('[JwtStrategy] payload:', {
+      sub: payload?.sub,
+      aud: payload?.aud,
+      role: payload?.role,
+      iss: payload?.iss,
+      exp: payload?.exp,
+    });
     if (!payload.sub) {
       throw new UnauthorizedException('Invalid JWT Payload: missing subject (sub)');
     }
