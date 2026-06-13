@@ -82,18 +82,18 @@ export function PinInput({
   };
 
   const borderClass = error
-    ? "border-[#E63946]/55 ring-4 ring-[#E63946]/15"
-    : "border-[#E6B8A2]/35 focus-within:border-[#9D0208]/45 focus-within:ring-4 focus-within:ring-[#E6B8A2]/25";
+    ? "border-[#E63946]/55 ring-2 ring-[#E63946]/20"
+    : "border-white/12 focus-within:border-[#F2B84B]/75 focus-within:ring-2 focus-within:ring-[#F2B84B]/20";
 
   return (
     <div>
       <label
         htmlFor={`${id}-0`}
-        className="mb-2 block text-[11px] font-bold uppercase tracking-[0.24em] text-[#5A3E4C]/45"
+        className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#A99EA6]"
       >
         {label}
       </label>
-      <div className="flex gap-2 sm:gap-2.5">
+      <div className="flex gap-2.5">
         {Array.from({ length: PIN_LENGTH }).map((_, i) => {
           const digit = value[i] || "";
           const isFocused = focusedIndex === i;
@@ -118,7 +118,7 @@ export function PinInput({
               onFocus={() => setFocusedIndex(i)}
               onBlur={() => setFocusedIndex(null)}
               aria-label={`Digit ${i + 1} dari ${PIN_LENGTH}`}
-              className={`h-12 w-10 sm:h-14 sm:w-12 rounded-xl border bg-white/75 text-center text-lg sm:text-xl font-bold text-[#4A2F3C] caret-[#9D0208] shadow-inner outline-none transition-all placeholder:text-[#5A3E4C]/30 hover:bg-white/90 sm:rounded-2xl ${borderClass}`}
+              className={`h-[58px] w-full rounded-[15px] border bg-white/[0.08] text-center text-xl font-bold text-[#F8F4EF] caret-[#F2B84B] outline-none transition-all placeholder:text-[#F8F4EF]/30 ${borderClass}`}
             />
           );
         })}

@@ -23,7 +23,7 @@ export function AuthScene3D({ isMobile, reducedMotion }: AuthScene3DProps) {
         alpha: false,
       }}
       camera={{ position: [0, 0, 0.1], fov: 65, near: 0.1, far: 200 }}
-      style={{ position: "absolute", inset: 0, background: "#2A0A14" }}
+      style={{ position: "absolute", inset: 0, background: "#070812" }}
     >
       <ParallaxRig>
         <Skybox />

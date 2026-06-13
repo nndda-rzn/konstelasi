@@ -58,112 +58,126 @@ export default function RegisterPage() {
   const pinMismatch = Boolean(confirmPin) && pin !== confirmPin;
 
   return (
-    <div className="flex min-h-screen items-center justify-center relative overflow-hidden text-white">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#070812] px-5 py-10 text-white sm:px-8">
       <AuthBackground />
 
-      {/* ── Animated background orbs ── */}
-      <div className="absolute top-1/3 -right-32 w-96 h-96 rounded-full bg-[#FFCAD4]/15 blur-[100px] animate-orb-1" />
-      <div className="absolute bottom-1/3 -left-32 w-80 h-80 rounded-full bg-[#FFB4A2]/15 blur-[100px] animate-orb-2" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#E63946]/8 blur-[150px]" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-10"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% 30%, rgba(242,184,75,0.06) 0%, transparent 55%), radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.5) 0%, transparent 60%)",
+        }}
+      />
 
-      {/* ── Card ── */}
-      <div className="relative w-full max-w-md space-y-8 rounded-2xl bg-white/20 border border-white/30 p-10 shadow-2xl shadow-black/30 backdrop-blur-2xl animate-fade-in-up z-10">
-        {/* Accent line on top */}
-        <div className="absolute -top-px left-8 right-8 h-px bg-gradient-to-r from-transparent via-[#D9A441]/65 to-transparent" />
+      <div className="relative z-20 w-full max-w-[440px] animate-fade-in-up">
+        <div className="relative overflow-hidden rounded-[30px] border border-white/12 bg-[rgba(14,12,22,0.78)] p-9 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:p-10">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+          <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-[#F2B84B]/8 blur-[80px]" />
 
-        <div className="text-center">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#FF8FA3] to-[#FFB4A2] flex items-center justify-center mx-auto mb-4 shadow-lg shadow-pink-300/30">
-            <Sparkles className="w-6 h-6 text-white" />
+          <div className="relative flex flex-col items-center text-center">
+            <div className="mb-5 flex h-[68px] w-[68px] items-center justify-center rounded-[20px] bg-gradient-to-br from-[#E94B3C] via-[#D99A2B] to-[#F2B84B] shadow-[0_10px_30px_rgba(230,57,70,0.28)]">
+              <Sparkles className="h-7 w-7 text-white" />
+            </div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#F2B84B]/85">
+              Buat akun
+            </p>
+            <h2 className="mt-2.5 text-[28px] font-bold leading-tight tracking-[-0.02em] text-[#F8F4EF]">
+              Mulai perjalananmu
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[#A99EA6]">
+              Diary visual node-based yang tetap personal.
+            </p>
           </div>
-          <h2 className="text-2xl font-bold text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.5)]">Buat Akun</h2>
-          <p className="mt-2 text-sm text-white/70 [text-shadow:0_1px_6px_rgba(0,0,0,0.4)]">
-            Mulai perjalanan Diary Visual Node-Based-mu
+
+          <form className="relative mt-8 space-y-5" onSubmit={handleRegister}>
+            {error && (
+              <div className="rounded-2xl border border-[#E63946]/35 bg-[#E63946]/12 px-4 py-3 text-sm text-[#F8D7DA]">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="rounded-2xl border border-emerald-400/35 bg-emerald-500/12 px-4 py-3 text-sm text-emerald-100">
+                {success}
+              </div>
+            )}
+
+            <div className="space-y-5">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#A99EA6]"
+                >
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  className="block h-[54px] w-full rounded-2xl border border-white/12 bg-white/[0.08] px-4 text-sm text-[#F8F4EF] outline-none transition-all placeholder:text-[#F8F4EF]/42 focus:border-[#F2B84B]/75 focus:bg-white/[0.1] focus:ring-2 focus:ring-[#F2B84B]/20"
+                  placeholder="email@domain.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <PinInput
+                  id="register-pin"
+                  label="PIN"
+                  value={pin}
+                  onChange={setPin}
+                  disabled={loading}
+                />
+                <p className="mt-2 text-[11px] font-medium text-[#7F747C]">
+                  6 digit angka rahasia.
+                </p>
+              </div>
+
+              <div>
+                <PinInput
+                  id="register-confirm-pin"
+                  label="Konfirmasi PIN"
+                  value={confirmPin}
+                  onChange={setConfirmPin}
+                  error={pinMismatch}
+                  disabled={loading}
+                />
+                {pinMismatch && (
+                  <p className="mt-2 text-[11px] font-medium text-[#E94B3C]">
+                    PIN tidak cocok
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative mt-1 flex h-[56px] w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#B80F1E] via-[#E94B3C] to-[#F2B84B] text-sm font-bold text-white shadow-[0_10px_30px_rgba(230,57,70,0.25)] transition-all hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-65 disabled:hover:translate-y-0"
+            >
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Buat Akun"}
+            </button>
+          </form>
+
+          <div className="relative mt-7 flex items-center gap-3">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/12" />
+            <Sparkles className="h-3.5 w-3.5 text-[#F2B84B]/55" />
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/12" />
+          </div>
+
+          <p className="relative mt-5 text-center text-sm text-[#A99EA6]">
+            Sudah punya akun?{" "}
+            <Link
+              href="/login"
+              className="font-semibold text-[#F2B84B] transition-opacity hover:opacity-80"
+            >
+              Masuk
+            </Link>
           </p>
         </div>
-
-        <form className="mt-8 space-y-5" onSubmit={handleRegister}>
-          {error && (
-            <div className="rounded-xl bg-[#E63946]/15 border border-[#E63946]/40 p-3.5 text-sm text-white">
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="rounded-xl bg-emerald-500/15 border border-emerald-400/40 p-3.5 text-sm text-emerald-100">
-              {success}
-            </div>
-          )}
-
-          <div className="space-y-3">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-xs font-semibold text-white/65 uppercase tracking-wider mb-1.5"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="block w-full bg-white/85 border border-white/40 rounded-xl px-4 py-3 text-[#3F2A35] placeholder-[#5A3E4C]/40 focus:outline-none focus:ring-2 focus:ring-[#D9A441]/45 focus:border-[#D9A441]/50 transition-all text-sm"
-                placeholder="alamat@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <PinInput
-                id="register-pin"
-                label="PIN"
-                value={pin}
-                onChange={setPin}
-                disabled={loading}
-              />
-              <p className="mt-1.5 text-[11px] font-medium text-white/70 [text-shadow:0_1px_4px_rgba(0,0,0,0.4)]">
-                6 digit angka rahasia.
-              </p>
-            </div>
-            <div>
-              <PinInput
-                id="register-confirm-pin"
-                label="Konfirmasi PIN"
-                value={confirmPin}
-                onChange={setConfirmPin}
-                error={pinMismatch}
-                disabled={loading}
-              />
-              {pinMismatch && (
-                <p className="mt-1.5 text-[11px] font-medium text-[#FFCAD4]">
-                  PIN tidak cocok
-                </p>
-              )}
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="group relative flex w-full justify-center rounded-xl bg-gradient-to-r from-[#FF8FA3] to-[#FFB4A2] hover:from-[#FF7A8A] hover:to-[#FF8FA3] px-4 py-3 text-sm font-semibold text-white transition-all shadow-lg shadow-pink-300/30 hover:shadow-pink-300/50 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              "Buat Akun"
-            )}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-white/70 [text-shadow:0_1px_6px_rgba(0,0,0,0.4)]">
-          Sudah punya akun?{" "}
-          <Link
-            href="/login"
-            className="font-medium text-[#FFCAD4] hover:text-white transition-colors"
-          >
-            Masuk
-          </Link>
-        </p>
       </div>
-    </div>
+    </main>
   );
 }

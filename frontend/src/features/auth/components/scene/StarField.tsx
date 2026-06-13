@@ -5,9 +5,10 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { SKY_RADIUS } from "./data/constellations";
 
-const CREAM = new THREE.Color("#FFF4D8");
-const GOLD = new THREE.Color("#D9A441");
-const PEACH = new THREE.Color("#FFB4A2");
+// Night-sky star colors: soft white, soft blue-white, muted gold.
+const SOFT_WHITE = new THREE.Color("#F8F4EF");
+const BLUE_WHITE = new THREE.Color("#C9D4E8");
+const MUTED_GOLD = new THREE.Color("#D99A2B");
 
 interface StarFieldProps {
   count: number;
@@ -16,12 +17,12 @@ interface StarFieldProps {
 }
 
 /**
- * StarField - Points-based random background stars.
+ * StarField - Points-based night-sky star field.
  *
- * Distributed on a sphere just inside the skybox. Each star has a
- * random color (mostly cream/gold, occasional peach), size, and twinkle
- * phase. `enableTwinkle=false` disables per-frame shader updates
- * (used for mobile / reduced-motion).
+ * Most stars are small and dim; only ~6% are bright. Colors stay in the
+ * soft white / blue-white / muted gold range to read as a real night sky
+ * rather than colorful particle noise. Twinkle is very subtle and can be
+ * disabled (mobile / reduced-motion).
  */
 export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
   const matRef = useRef<THREE.ShaderMaterial>(null);
@@ -31,9 +32,9 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
     const phases = new Float32Array(count);
+    const baseAlpha = new Float32Array(count);
 
     const rng = mulberry32(seed);
-    const palette = [CREAM, GOLD, PEACH];
     const r = SKY_RADIUS * 1.35;
 
     for (let i = 0; i < count; i++) {
@@ -41,25 +42,25 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
       const v = rng();
       const theta = 2 * Math.PI * u;
       const phi = Math.acos(2 * v - 1);
-      const x = r * Math.sin(phi) * Math.cos(theta);
-      const y = r * Math.sin(phi) * Math.sin(theta);
-      const z = r * Math.cos(phi);
-      positions[i * 3 + 0] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
+      positions[i * 3 + 0] = r * Math.sin(phi) * Math.cos(theta);
+      positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      positions[i * 3 + 2] = r * Math.cos(phi);
 
       const colorRoll = rng();
       const c =
-        colorRoll < 0.7
-          ? palette[0]
-          : colorRoll < 0.92
-            ? palette[1]
-            : palette[2];
+        colorRoll < 0.62
+          ? SOFT_WHITE
+          : colorRoll < 0.9
+            ? BLUE_WHITE
+            : MUTED_GOLD;
       colors[i * 3 + 0] = c.r;
       colors[i * 3 + 1] = c.g;
       colors[i * 3 + 2] = c.b;
 
-      sizes[i] = 1.2 + rng() * 2.0;
+      // ~6% bright stars, the rest small and dim.
+      const bright = rng() < 0.06;
+      sizes[i] = bright ? 2.0 + rng() * 1.4 : 0.7 + rng() * 0.9;
+      baseAlpha[i] = bright ? 0.7 + rng() * 0.3 : 0.25 + rng() * 0.35;
       phases[i] = rng() * Math.PI * 2;
     }
 
@@ -68,12 +69,13 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
     geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     geo.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
     geo.setAttribute("aPhase", new THREE.BufferAttribute(phases, 1));
+    geo.setAttribute("aAlpha", new THREE.BufferAttribute(baseAlpha, 1));
 
     const mat = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
       vertexColors: true,
-      blending: THREE.AdditiveBlending,
+      blending: THREE.NormalBlending,
       uniforms: {
         uTime: { value: 0 },
         uTwinkle: { value: enableTwinkle ? 1.0 : 0.0 },
@@ -82,6 +84,7 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
       vertexShader: `
         attribute float aSize;
         attribute float aPhase;
+        attribute float aAlpha;
         uniform float uTime;
         uniform float uTwinkle;
         uniform float uPixelRatio;
@@ -90,13 +93,13 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
 
         void main() {
           vColor = color;
-          float twinkle = 1.0;
+          float tw = 1.0;
           if (uTwinkle > 0.5) {
-            twinkle = 0.55 + 0.45 * sin(uTime * 1.6 + aPhase);
+            tw = 0.82 + 0.18 * sin(uTime * 1.2 + aPhase);
           }
-          vAlpha = twinkle;
+          vAlpha = aAlpha * tw;
           vec4 mv = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = aSize * uPixelRatio * (420.0 / -mv.z);
+          gl_PointSize = aSize * uPixelRatio * (300.0 / -mv.z);
           gl_Position = projectionMatrix * mv;
         }
       `,
@@ -109,9 +112,7 @@ export function StarField({ count, enableTwinkle, seed = 42 }: StarFieldProps) {
           float d = length(c);
           if (d > 0.5) discard;
           float core = smoothstep(0.5, 0.0, d);
-          float halo = smoothstep(0.5, 0.15, d) * 0.5;
-          float a = (core + halo) * vAlpha;
-          gl_FragColor = vec4(vColor, a);
+          gl_FragColor = vec4(vColor, core * vAlpha);
         }
       `,
     });

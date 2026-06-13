@@ -5,9 +5,11 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { CONSTELLATIONS, type ConstellationData, SKY_RADIUS } from "./data/constellations";
 
-const GOLD = new THREE.Color("#D9A441");
-const ROTATION_INTERVAL = 13;
-const FADE_DURATION = 1.5;
+// Soft white-gold lines, low opacity. No harsh red.
+const LINE_COLOR = new THREE.Color("#EBE3D4");
+const ROTATION_INTERVAL = 14;
+const FADE_DURATION = 1.8;
+const LINE_MAX_OPACITY = 0.3;
 
 interface ConstellationsProps {
   active: boolean;
@@ -46,7 +48,7 @@ function ConstellationGroup({
       starPositions[i * 3 + 0] = s.x * data.scale;
       starPositions[i * 3 + 1] = s.y * data.scale;
       starPositions[i * 3 + 2] = (s.z ?? 0) * data.scale;
-      starSizes[i] = (s.size ?? 1) * 8;
+      starSizes[i] = (s.size ?? 1) * 6;
     });
 
     const linePositions = new Float32Array(data.lines.length * 6);
@@ -72,13 +74,13 @@ function ConstellationGroup({
     const starM = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
-      blending: THREE.AdditiveBlending,
+      blending: THREE.NormalBlending,
       uniforms: { uOpacity: { value: 1 } },
       vertexShader: `
         attribute float aSize;
         void main() {
           vec4 mv = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = aSize * (600.0 / -mv.z);
+          gl_PointSize = aSize * (520.0 / -mv.z);
           gl_Position = projectionMatrix * mv;
         }
       `,
@@ -89,9 +91,9 @@ function ConstellationGroup({
           float d = length(c);
           if (d > 0.5) discard;
           float core = smoothstep(0.5, 0.0, d);
-          float halo = smoothstep(0.5, 0.15, d) * 0.6;
+          float halo = smoothstep(0.5, 0.2, d) * 0.4;
           float a = (core + halo) * uOpacity;
-          gl_FragColor = vec4(1.0, 0.85, 0.45, a);
+          gl_FragColor = vec4(0.97, 0.92, 0.78, a);
         }
       `,
     });
@@ -115,13 +117,12 @@ function ConstellationGroup({
     const opacity = active
       ? Math.min(1, (elapsed.current += delta) / FADE_DURATION)
       : 1;
-    if (lineMatRef.current) lineMatRef.current.opacity = opacity * 0.85;
-    if (starMatRef.current) starMatRef.current.uniforms.uOpacity.value = opacity;
+    if (lineMatRef.current) lineMatRef.current.opacity = opacity * LINE_MAX_OPACITY;
+    if (starMatRef.current) starMatRef.current.uniforms.uOpacity.value = opacity * 0.9;
   });
 
-  // Camera at origin looks -Z. Convention: theta=0 = dead center front,
-  // positive theta = right, positive phi = up. Negate z so constellation
-  // is in front of the camera (not behind).
+  // Camera at origin looks -Z. theta=0 = front-center, +theta = right,
+  // +phi = up. Negate z so the constellation sits in front of the camera.
   const groupPos = useMemo<[number, number, number]>(() => {
     const r = SKY_RADIUS * 0.92;
     const x = r * Math.cos(data.pivot.phi) * Math.sin(data.pivot.theta);
@@ -130,7 +131,6 @@ function ConstellationGroup({
     return [x, y, z];
   }, [data]);
 
-  // Look back at the origin so the flat constellation patch faces the camera.
   const lookAtOrigin = useMemo<[number, number, number]>(() => {
     const dir = new THREE.Vector3(...groupPos).normalize().multiplyScalar(-1);
     return [dir.x, dir.y, dir.z];
@@ -146,7 +146,7 @@ function ConstellationGroup({
         <primitive object={lineGeo} attach="geometry" />
         <lineBasicMaterial
           ref={lineMatRef}
-          color={GOLD}
+          color={LINE_COLOR}
           transparent
           depthWrite={false}
         />

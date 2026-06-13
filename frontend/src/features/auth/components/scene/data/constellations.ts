@@ -27,8 +27,6 @@ export interface ConstellationData {
 
 const SKY_RADIUS = 50;
 
-const r = SKY_RADIUS;
-
 export const CONSTELLATIONS: ConstellationData[] = [
   {
     name: "Orion",

@@ -72,7 +72,7 @@ function Fallback() {
       className="pointer-events-none absolute inset-0 z-0"
       style={{
         background:
-          "radial-gradient(ellipse at top, #4A1118 0%, #2A0A14 60%, #1a050a 100%)",
+          "radial-gradient(ellipse at 30% 20%, #160A13 0%, #090A16 45%, #070812 100%)",
       }}
     />
   );

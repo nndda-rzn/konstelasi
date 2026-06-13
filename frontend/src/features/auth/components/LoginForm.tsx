@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ArrowRight, Gem, Loader2, Mail, Sparkles } from "lucide-react";
-import { InputField } from "./InputField";
 import { PinInput } from "./PinInput";
 
 interface LoginFormProps {
@@ -16,9 +15,8 @@ interface LoginFormProps {
 }
 
 /**
- * LoginForm - Right-side login form with branded header.
- * Uses email + 6-digit PIN (PIN-as-password Supabase).
- * Card uses glass-morphism so 3D background shows through.
+ * LoginForm - Premium dark-translucent login card.
+ * Email + 6-digit PIN (PIN-as-password Supabase).
  */
 export function LoginForm({
   email,
@@ -32,44 +30,59 @@ export function LoginForm({
   const pinInvalid = Boolean(error) && pin.length > 0;
 
   return (
-    <section className="mx-auto w-full max-w-md animate-fade-in-up">
-      <div className="relative overflow-hidden rounded-[2rem] border border-white/35 bg-white/30 p-6 shadow-[0_28px_90px_rgba(0,0,0,0.35)] backdrop-blur-2xl sm:p-8">
-        <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#D9A441]/65 to-transparent" />
-        <div className="absolute -right-16 -top-16 h-36 w-36 rounded-full bg-[#D9A441]/15 blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 h-44 w-44 rounded-full bg-[#E63946]/15 blur-3xl" />
-        <div className="relative text-center">
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[1.4rem] bg-gradient-to-br from-[#FFF4D8] via-[#E86A76] to-[#9D0208] shadow-[0_16px_36px_rgba(157,2,8,0.20)]">
+    <section className="mx-auto w-full max-w-[440px] animate-fade-in-up">
+      <div className="relative overflow-hidden rounded-[30px] border border-white/12 bg-[rgba(14,12,22,0.78)] p-9 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:p-10">
+        {/* inner top highlight */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+        {/* subtle radial glow */}
+        <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-[#F2B84B]/8 blur-[80px]" />
+
+        <div className="relative flex flex-col items-center text-center">
+          <div className="mb-5 flex h-[68px] w-[68px] items-center justify-center rounded-[20px] bg-gradient-to-br from-[#E94B3C] via-[#D99A2B] to-[#F2B84B] shadow-[0_10px_30px_rgba(230,57,70,0.28)]">
             <Gem className="h-7 w-7 text-white" />
           </div>
-          <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#D9A441]/85">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#F2B84B]/85">
             Private access
           </p>
-          <h2 className="mt-2 text-3xl font-black tracking-[-0.03em] text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.55)]">
+          <h2 className="mt-2.5 text-[28px] font-bold leading-tight tracking-[-0.02em] text-[#F8F4EF]">
             Selamat datang kembali
           </h2>
-          <p className="mt-3 text-sm leading-6 text-white/80 [text-shadow:0_1px_8px_rgba(0,0,0,0.45)]">
+          <p className="mt-2 text-sm leading-6 text-[#A99EA6]">
             Masuk ke ruang kerja personalmu dengan tenang.
           </p>
         </div>
 
         <form className="relative mt-8 space-y-5" onSubmit={onSubmit}>
           {error && (
-            <div className="rounded-2xl border border-[#E63946]/40 bg-[#E63946]/15 px-4 py-3 text-sm text-white shadow-sm">
+            <div className="rounded-2xl border border-[#E63946]/35 bg-[#E63946]/12 px-4 py-3 text-sm text-[#F8D7DA]">
               {error}
             </div>
           )}
 
-          <div className="space-y-4">
-            <InputField
-              id="email"
-              label="Email"
-              type="email"
-              icon={<Mail className="h-4 w-4" />}
-              placeholder="email@domain.com"
-              value={email}
-              onChange={setEmail}
-            />
-            <div className="space-y-2">
+          <div className="space-y-5">
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#A99EA6]"
+              >
+                Email
+              </label>
+              <div className="group flex h-[54px] items-center gap-3 rounded-2xl border border-white/12 bg-white/[0.08] px-4 transition-all focus-within:border-[#F2B84B]/75 focus-within:bg-white/[0.1] focus-within:ring-2 focus-within:ring-[#F2B84B]/20">
+                <Mail className="h-4 w-4 shrink-0 text-[#A99EA6] transition-colors group-focus-within:text-[#F2B84B]" />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  className="w-full bg-transparent text-sm text-[#F8F4EF] outline-none placeholder:text-[#F8F4EF]/42"
+                  placeholder="email@domain.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
               <PinInput
                 id="pin"
                 label="PIN"
@@ -79,7 +92,7 @@ export function LoginForm({
                 autoFocus={false}
                 disabled={loading}
               />
-              <p className="text-[11px] font-medium text-white/70 [text-shadow:0_1px_4px_rgba(0,0,0,0.4)]">
+              <p className="mt-2 text-[11px] font-medium text-[#7F747C]">
                 6 digit angka rahasia.
               </p>
             </div>
@@ -88,31 +101,30 @@ export function LoginForm({
           <button
             type="submit"
             disabled={loading}
-            className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#9D0208] via-[#E63946] to-[#D9A441] px-4 py-3.5 text-sm font-bold text-white shadow-[0_16px_36px_rgba(157,2,8,0.20)] transition-all hover:scale-[1.01] hover:shadow-[0_20px_46px_rgba(157,2,8,0.26)] disabled:cursor-not-allowed disabled:opacity-65 disabled:hover:scale-100"
+            className="group relative mt-1 flex h-[56px] w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#B80F1E] via-[#E94B3C] to-[#F2B84B] text-sm font-bold text-white shadow-[0_10px_30px_rgba(230,57,70,0.25)] transition-all hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-65 disabled:hover:translate-y-0"
           >
-            <span className="absolute inset-0 translate-x-[-120%] bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-[120%]" />
             {loading ? (
-              <Loader2 className="relative h-5 w-5 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <>
-                <span className="relative">Masuk</span>
-                <ArrowRight className="relative h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                <span>Masuk</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </>
             )}
           </button>
         </form>
 
         <div className="relative mt-7 flex items-center gap-3">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/40" />
-          <Sparkles className="h-4 w-4 text-[#D9A441]/70" />
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/40" />
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/12" />
+          <Sparkles className="h-3.5 w-3.5 text-[#F2B84B]/55" />
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/12" />
         </div>
 
-        <p className="relative mt-5 text-center text-sm text-white/80 [text-shadow:0_1px_6px_rgba(0,0,0,0.4)]">
+        <p className="relative mt-5 text-center text-sm text-[#A99EA6]">
           Belum punya akun?{" "}
           <Link
             href="/register"
-            className="font-bold text-[#FFCAD4] transition-colors hover:text-white"
+            className="font-semibold text-[#F2B84B] transition-opacity hover:opacity-80"
           >
             Buat akun baru
           </Link>

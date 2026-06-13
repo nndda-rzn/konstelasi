@@ -4,38 +4,44 @@ import { Gem, Star } from "lucide-react";
 import { ConstellationCard } from "./ConstellationCard";
 
 /**
- * MarketingPanel - Left-side intro panel with brand visuals.
+ * MarketingPanel - Left-side hero panel, dark translucent premium.
  */
 export function MarketingPanel() {
   return (
     <section className="hidden lg:block">
-      <div className="relative rounded-[2rem] border border-white/55 bg-white/38 p-8 shadow-[0_28px_90px_rgba(84,45,55,0.14)] backdrop-blur-2xl">
-        <div className="absolute -right-5 -top-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-[#D9A441] via-[#E86A76] to-[#9D0208] text-white shadow-[0_18px_44px_rgba(157,2,8,0.22)] animate-float">
-          <Gem className="h-7 w-7" />
-        </div>
-        <div className="mb-10 inline-flex items-center gap-2 rounded-full border border-[#E6B8A2]/45 bg-white/62 px-3 py-1.5 text-xs font-semibold text-[#9D0208] shadow-sm">
-          <Star className="h-3.5 w-3.5" />
-          Private writing studio
-        </div>
-        <h1 className="max-w-xl text-5xl font-black leading-[1.03] tracking-[-0.04em] text-[#3F2A35]">
-          Ruang pribadi untuk merangkai cerita dengan tenang.
-        </h1>
-        <p className="mt-5 max-w-lg text-sm leading-7 text-[#5A3E4C]/62">
-          Lanjutkan catatan, story, dan time capsule dalam tampilan yang
-          lembut, rapi, dan tetap personal.
-        </p>
-        <div className="mt-10 grid gap-4">
-          <div className="ml-8 max-w-sm rounded-[1.6rem] border border-[#E6B8A2]/35 bg-white/75 p-4 shadow-[0_16px_42px_rgba(84,45,55,0.10)] backdrop-blur-xl">
-            <div className="mb-3 flex items-center gap-2 text-xs font-bold text-[#9D0208]">
-              <Gem className="h-4 w-4" />
-              Studio focus
-            </div>
-            <p className="text-sm leading-6 text-[#5A3E4C]/70">
-              Tempat masuk yang terasa ringan, namun tetap matang untuk
-              menulis hal personal.
-            </p>
+      <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[rgba(14,12,22,0.6)] p-12 shadow-[0_24px_70px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+        {/* subtle radial highlight */}
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#F2B84B]/8 blur-[100px]" />
+        <div className="pointer-events-none absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-[#7C83FD]/8 blur-[100px]" />
+
+        <div className="relative">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.05] px-3.5 py-1.5 text-xs font-medium text-[#D8CDD2]">
+            <Star className="h-3.5 w-3.5 text-[#F2B84B]" />
+            Private writing studio
           </div>
-          <ConstellationCard />
+
+          <h1 className="mt-9 max-w-xl text-[52px] font-extrabold leading-[1.08] tracking-[-0.03em] text-[#F8F4EF]">
+            Ruang pribadi untuk merangkai cerita dengan tenang.
+          </h1>
+
+          <p className="mt-5 max-w-lg text-[17px] leading-[1.7] text-[#A99EA6]">
+            Lanjutkan catatan, story, dan time capsule dalam tampilan yang
+            lembut, rapi, dan tetap personal.
+          </p>
+
+          <div className="mt-11 grid gap-4">
+            <div className="rounded-[20px] border border-white/10 bg-white/[0.05] p-5 backdrop-blur-md">
+              <div className="mb-2.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#F2B84B]">
+                <Gem className="h-4 w-4" />
+                Studio focus
+              </div>
+              <p className="text-sm leading-6 text-[#D8CDD2]/80">
+                Tempat masuk yang terasa ringan, namun tetap matang untuk
+                menulis hal personal.
+              </p>
+            </div>
+            <ConstellationCard />
+          </div>
         </div>
       </div>
     </section>
