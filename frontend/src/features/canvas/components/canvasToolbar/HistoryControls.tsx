@@ -25,10 +25,10 @@ export function HistoryControls({
         disabled={!canUndo}
         title="Undo (Ctrl+Z)"
         aria-label="Undo"
-        className={`p-1.5 rounded-lg transition-all ${
+        className={`p-1.5 rounded-[8px] transition-colors ${
           canUndo
-            ? "text-[#5A3E4C]/60 hover:text-[#5A3E4C] hover:bg-[#FFB4A2]/15"
-            : "text-[#5A3E4C]/15 cursor-not-allowed"
+            ? "text-[#9A8F95] hover:text-[#2F2730] hover:bg-[#F3ECE4]"
+            : "text-[#9A8F95]/30 cursor-not-allowed"
         }`}
       >
         <Undo2 className="w-4 h-4" />
@@ -38,10 +38,10 @@ export function HistoryControls({
         disabled={!canRedo}
         title="Redo (Ctrl+Shift+Z)"
         aria-label="Redo"
-        className={`p-1.5 rounded-lg transition-all ${
+        className={`p-1.5 rounded-[8px] transition-colors ${
           canRedo
-            ? "text-[#5A3E4C]/60 hover:text-[#5A3E4C] hover:bg-[#FFB4A2]/15"
-            : "text-[#5A3E4C]/15 cursor-not-allowed"
+            ? "text-[#9A8F95] hover:text-[#2F2730] hover:bg-[#F3ECE4]"
+            : "text-[#9A8F95]/30 cursor-not-allowed"
         }`}
       >
         <Redo2 className="w-4 h-4" />

@@ -73,7 +73,7 @@ export default function CanvasToolbar({
           onToggle={onTogglePanel}
           selectedTagFiltersCount={selectedTagFiltersCount}
         />
-        <div className="hidden lg:block pl-1 border-l border-[#FFB4A2]/20 ml-1">
+        <div className="hidden lg:block pl-1 border-l border-[rgba(47,39,48,0.08)] ml-1">
           <StreakWidget />
         </div>
       </div>

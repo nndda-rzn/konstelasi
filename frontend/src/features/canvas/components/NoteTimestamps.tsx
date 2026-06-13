@@ -7,10 +7,6 @@ interface Props {
   updatedAt?: string | null;
 }
 
-/**
- * Compact created/updated timestamp display below the title input.
- * Shows relative time, with absolute date as title tooltip.
- */
 export default function NoteTimestamps({ createdAt, updatedAt }: Props) {
   if (!createdAt) return null;
 
@@ -18,19 +14,19 @@ export default function NoteTimestamps({ createdAt, updatedAt }: Props) {
   const updated = updatedAt && updatedAt !== createdAt ? formatRelative(updatedAt) : null;
 
   return (
-    <div className="flex items-center gap-3 mt-2 px-1 text-[11px] text-[#5A3E4C]/40">
+    <div className="flex items-center gap-3 mt-2 px-1 text-[11px] text-[#9A8F95]">
       <span
         className="flex items-center gap-1"
-        title={`Dibuat: ${formatAbsolute(createdAt)}`}
+        title={`Created: ${formatAbsolute(createdAt)}`}
       >
         <Clock className="w-3 h-3" />
-        Dibuat {created}
+        {created}
       </span>
       {updated && (
         <>
-          <span className="text-[#5A3E4C]/20">·</span>
-          <span title={`Diperbarui: ${formatAbsolute(updatedAt!)}`}>
-            Diperbarui {updated}
+          <span className="text-[#9A8F95]/50">·</span>
+          <span title={`Updated: ${formatAbsolute(updatedAt!)}`}>
+            Edited {updated}
           </span>
         </>
       )}
@@ -42,14 +38,14 @@ function formatRelative(iso: string): string {
   const ts = new Date(iso).getTime();
   if (isNaN(ts)) return '';
   const diff = Math.floor((Date.now() - ts) / 1000);
-  if (diff < 60) return 'baru saja';
+  if (diff < 60) return 'just now';
   const min = Math.floor(diff / 60);
-  if (min < 60) return `${min} menit lalu`;
+  if (min < 60) return `${min}m ago`;
   const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr} jam lalu`;
+  if (hr < 24) return `${hr}h ago`;
   const days = Math.floor(hr / 24);
-  if (days < 7) return `${days} hari lalu`;
-  return new Date(ts).toLocaleDateString('id-ID', {
+  if (days < 7) return `${days}d ago`;
+  return new Date(ts).toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'short',
     year: days > 365 ? 'numeric' : undefined,
@@ -59,7 +55,7 @@ function formatRelative(iso: string): string {
 function formatAbsolute(iso: string): string {
   const ts = new Date(iso).getTime();
   if (isNaN(ts)) return '';
-  return new Date(ts).toLocaleString('id-ID', {
+  return new Date(ts).toLocaleString('en-US', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',

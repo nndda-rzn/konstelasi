@@ -58,7 +58,6 @@ import AdvancedAnalyticsPanel from '../panels/AdvancedAnalyticsPanel';
 import ArchivePanel from '../panels/ArchivePanel';
 import ExportPanel from '../panels/ExportPanel';
 import CalendarPanel from '../panels/CalendarPanel';
-import StreakWidget from './StreakWidget';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
 const nodeTypes = {
@@ -317,13 +316,8 @@ function DiaryCanvasInner() {
     return <CanvasError message={error.message} onRetry={() => refetch()} />;
 
   return (
-    <div className="w-full h-screen relative bg-[#F7F1EA]">
-      {/* Subtle warm ambient glows (no pink) */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(201,154,69,0.06),_transparent_60%)] pointer-events-none" />
-      <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] bg-[#C99A45]/8 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[8000ms]" />
-      <div className="absolute -bottom-[20%] -left-[10%] w-[40%] h-[40%] bg-[#B84A5A]/8 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[10000ms]" />
-
-      {/* Header / Toolbar */}
+    <div className="h-screen flex flex-col bg-[#F7F1EA] overflow-hidden">
+      {/* Header / Toolbar (flex-shrink-0 = always visible) */}
       <CanvasToolbar
         searchInputRef={searchInputRef}
         searchQuery={searchQuery}
@@ -339,150 +333,119 @@ function DiaryCanvasInner() {
         canRedo={canRedo}
         onUndo={() => {
           const s = undo();
-          if (s) {
-            setNodes(s.nodes);
-            setEdges(s.edges);
-          }
+          if (s) { setNodes(s.nodes); setEdges(s.edges); }
         }}
         onRedo={() => {
           const s = redo();
-          if (s) {
-            setNodes(s.nodes);
-            setEdges(s.edges);
-          }
+          if (s) { setNodes(s.nodes); setEdges(s.edges); }
         }}
       />
 
-      {/* Main view area */}
-      <div
-        className="w-full h-full pt-16 relative z-0"
-        onContextMenu={handleCanvasContextMenu}
-      >
-        {viewMode === 'canvas' ? (
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            edgeTypes={edgeTypes}
-            onNodesChange={handleNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={handleConnect}
-            onNodesDelete={handleNodesDelete}
-            onEdgesDelete={handleEdgesDelete}
-            connectionMode={ConnectionMode.Loose}
-            defaultEdgeOptions={{
-              type: 'semanticEdge',
-              animated: true,
-            }}
-            onNodeDoubleClick={(_, node) => handleNodeDoubleClick(node.id)}
-            nodeTypes={nodeTypes}
-            fitView
-            fitViewOptions={{ padding: 2 }}
-          >
-            <Background color="rgba(47, 39, 48, 0.08)" gap={28} size={1.2} />
-            <Controls className="!bg-[#FFFCF8]/85 !border-[rgba(47,39,48,0.08)] !backdrop-blur-xl !shadow-md !rounded-[12px] overflow-hidden" />
-            <MiniMap
-              className="!bg-[#FFFCF8]/85 !border-[rgba(47,39,48,0.08)] !backdrop-blur-xl !shadow-md !rounded-[14px] overflow-hidden !m-4"
-              nodeColor={(n) =>
-                n.id === selectedNote?.id ? '#B84A5A' : 'rgba(47, 39, 48, 0.25)'
-              }
-              maskColor="rgba(247, 241, 234, 0.6)"
+      {/* Main area: canvas + optional inspector */}
+      <div className="flex-1 flex min-h-0">
+        {/* Canvas */}
+        <div
+          className="flex-1 min-w-0 relative bg-[#F7F1EA]"
+          onContextMenu={handleCanvasContextMenu}
+        >
+          {/* Subtle warm ambient glows */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(201,154,69,0.06),_transparent_60%)] pointer-events-none" />
+          <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] bg-[#C99A45]/8 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[8000ms]" />
+          <div className="absolute -bottom-[20%] -left-[10%] w-[40%] h-[40%] bg-[#B84A5A]/8 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[10000ms]" />
+
+          {viewMode === 'canvas' ? (
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              edgeTypes={edgeTypes}
+              onNodesChange={handleNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={handleConnect}
+              onNodesDelete={handleNodesDelete}
+              onEdgesDelete={handleEdgesDelete}
+              connectionMode={ConnectionMode.Loose}
+              defaultEdgeOptions={{ type: 'semanticEdge', animated: true }}
+              onNodeDoubleClick={(_, node) => handleNodeDoubleClick(node.id)}
+              nodeTypes={nodeTypes}
+              fitView
+              fitViewOptions={{ padding: 2 }}
+            >
+              <Background color="rgba(47, 39, 48, 0.08)" gap={28} size={1.2} />
+              <Controls className="!bg-[#FFFCF8]/85 !border-[rgba(47,39,48,0.08)] !backdrop-blur-xl !shadow-md !rounded-[12px] overflow-hidden" />
+              <MiniMap
+                className="!bg-[#FFFCF8]/85 !border-[rgba(47,39,48,0.08)] !backdrop-blur-xl !shadow-md !rounded-[14px] overflow-hidden !m-4"
+                nodeColor={(n) => n.id === selectedNote?.id ? '#B84A5A' : 'rgba(47, 39, 48, 0.25)'}
+                maskColor="rgba(247, 241, 234, 0.6)"
+              />
+            </ReactFlow>
+          ) : (
+            <ThreadView
+              nodes={nodes}
+              selectedNoteId={selectedNote?.id}
+              onNodeClick={handleNodeDoubleClick}
             />
-          </ReactFlow>
-        ) : (
-          <ThreadView
-            nodes={nodes}
-            selectedNoteId={selectedNote?.id}
-            onNodeClick={handleNodeDoubleClick}
+          )}
+
+          {viewMode === 'timeline' && data?.getNotes && (
+            <TimelineView
+              notes={data.getNotes}
+              onNoteClick={(noteId) => handleNodeDoubleClick(noteId)}
+              selectedNoteId={selectedNote?.id}
+            />
+          )}
+
+          {viewMode === 'canvas' && (
+            <CanvasFooter onCreate={handleCreateAtCenter} />
+          )}
+
+          {viewMode === 'canvas' && !loading && nodes.length === 0 && (
+            <CanvasEmptyState onCreate={handleCreateAtCenter} />
+          )}
+
+          {/* Tag panel */}
+          {activePanel === 'tag' && <TagPanel onClose={closePanel} />}
+
+          {/* Search panel */}
+          {activePanel === 'search' && data?.getNotes && (
+            <SearchPanel notes={data.getNotes} onNoteClick={(noteId) => { handleNodeDoubleClick(noteId); closePanel(); }} onClose={closePanel} />
+          )}
+
+          {/* Stats panel */}
+          {activePanel === 'stats' && data?.getNotes && (
+            <AdvancedAnalyticsPanel isOpen={true} notes={data.getNotes} onClose={closePanel} />
+          )}
+
+          {/* Archive panel */}
+          <ArchivePanel isOpen={activePanel === 'archive'} onClose={closePanel} onRestoreSuccess={() => refetch()} />
+
+          {/* Export panel */}
+          {activePanel === 'export' && data?.getNotes && (
+            <ExportPanel isOpen={true} onClose={closePanel} notes={data.getNotes} />
+          )}
+
+          {/* Calendar panel */}
+          {activePanel === 'calendar' && data?.getNotes && (
+            <CalendarPanel
+              isOpen={true}
+              onClose={closePanel}
+              notes={data.getNotes}
+              onNoteClick={(noteId) => { handleNodeDoubleClick(noteId); closePanel(); }}
+            />
+          )}
+        </div>
+
+        {/* Inspector panel (flex-shrink-0, never overlaps canvas) */}
+        {selectedNote && (
+          <NoteEditorSidebar
+            note={selectedNote}
+            allNotes={data?.getNotes || []}
+            onClose={() => { setSelectedNote(null); restoreFocus(); }}
+            onUpdateCache={handleUpdateCache}
+            onDeleteSuccess={handleDeleteSuccess}
+            onNavigate={(id) => handleNodeDoubleClick(id)}
           />
-        )}
-
-        {viewMode === 'timeline' && data?.getNotes && (
-          <TimelineView
-            notes={data.getNotes}
-            onNoteClick={(noteId) => handleNodeDoubleClick(noteId)}
-            selectedNoteId={selectedNote?.id}
-          />
-        )}
-
-        {viewMode === 'canvas' && (
-          <CanvasFooter onCreate={handleCreateAtCenter} />
-        )}
-
-        {viewMode === 'canvas' && !loading && nodes.length === 0 && (
-          <CanvasEmptyState onCreate={handleCreateAtCenter} />
         )}
       </div>
-
-      {/* Note editor sidebar */}
-      {selectedNote && (
-        <NoteEditorSidebar
-          note={selectedNote}
-          allNotes={data?.getNotes || []}
-          onClose={() => {
-            setSelectedNote(null);
-            restoreFocus();
-          }}
-          onUpdateCache={handleUpdateCache}
-          onDeleteSuccess={handleDeleteSuccess}
-          onNavigate={(id) => handleNodeDoubleClick(id)}
-        />
-      )}
-
-      {/* Tag panel */}
-      {activePanel === 'tag' && <TagPanel onClose={closePanel} />}
-
-      {/* Search panel */}
-      {activePanel === 'search' && data?.getNotes && (
-        <SearchPanel
-          notes={data.getNotes}
-          onNoteClick={(noteId) => {
-            handleNodeDoubleClick(noteId);
-            closePanel();
-          }}
-          onClose={closePanel}
-        />
-      )}
-
-      {/* Stats panel */}
-      {activePanel === 'stats' && data?.getNotes && (
-        <AdvancedAnalyticsPanel
-          isOpen={true}
-          notes={data.getNotes}
-          onClose={closePanel}
-        />
-      )}
-
-      {/* Archive panel */}
-      <ArchivePanel
-        isOpen={activePanel === 'archive'}
-        onClose={closePanel}
-        onRestoreSuccess={() => refetch()}
-      />
-
-      {/* Export panel */}
-      {activePanel === 'export' && data?.getNotes && (
-        <ExportPanel
-          isOpen={true}
-          onClose={closePanel}
-          notes={data.getNotes}
-        />
-      )}
-
-      {/* Calendar panel */}
-      {activePanel === 'calendar' && data?.getNotes && (
-        <CalendarPanel
-          isOpen={true}
-          onClose={closePanel}
-          notes={data.getNotes}
-          onNoteClick={(noteId) => {
-            handleNodeDoubleClick(noteId);
-            closePanel();
-          }}
-        />
-      )}
-
-      {/* Streak widget */}
-      <StreakWidget />
 
       {/* Multi-delete confirmation */}
       <ConfirmDialog
@@ -492,10 +455,7 @@ function DiaryCanvasInner() {
         confirmLabel="Delete all"
         variant="danger"
         onCancel={clearPendingDelete}
-        onConfirm={() => {
-          performNodesDelete(pendingDelete);
-          clearPendingDelete();
-        }}
+        onConfirm={() => { performNodesDelete(pendingDelete); clearPendingDelete(); }}
       />
     </div>
   );
