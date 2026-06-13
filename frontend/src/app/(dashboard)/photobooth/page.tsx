@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef } from "react";
 import Webcam from "react-webcam";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,10 +17,6 @@ import {
   Smile,
   X,
 } from "lucide-react";
-import { useMutation } from "@apollo/client/react";
-import { CREATE_NOTE, ADD_NOTE_IMAGE } from "@/graphql/mutations";
-import { createClient } from "@/lib/supabase/client";
-import { notify } from "@/lib/toast";
 import { ApolloWrapper } from "@/lib/apollo/ApolloWrapper";
 import { Providers } from "@/lib/Providers";
 import {
@@ -30,213 +25,47 @@ import {
   TIMERS,
   STRIP_COLORS,
   EMOJI_PALETTE,
-  type Stage,
-  type FilterKey,
-  type LayoutKey,
   type EditTab,
-  type StickerItem,
 } from "@/features/photobooth/constants";
-import {
-  renderSingle,
-  renderStrip,
-  renderGrid,
-} from "@/features/photobooth/renderers";
+import { usePhotoboothStore } from "@/features/photobooth/store/usePhotoboothStore";
+import { usePhotobooth } from "@/features/photobooth/hooks/usePhotobooth";
 
 function PhotoboothContent() {
-  const router = useRouter();
   const webcamRef = useRef<Webcam>(null);
-  const capturedRef = useRef<string[]>([]);
   const previewRef = useRef<HTMLDivElement>(null);
-  const [stage, setStage] = useState<Stage>("landing");
-  const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
-  const [finalPhoto, setFinalPhoto] = useState<string | null>(null);
-  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
-  const [selectedFilter, setSelectedFilter] = useState<FilterKey>("normal");
-  const [selectedLayout, setSelectedLayout] = useState<LayoutKey>("strip4");
-  const [selectedTimer, setSelectedTimer] = useState(3);
-  const [selectedStripColor, setSelectedStripColor] = useState("white");
-  const [caption, setCaption] = useState("");
-  const [stickers, setStickers] = useState<StickerItem[]>([]);
-  const [activeTab, setActiveTab] = useState<EditTab>("filter");
-  const [processing, setProcessing] = useState(false);
-  const [countdown, setCountdown] = useState<number | null>(null);
-  const [isCapturing, setIsCapturing] = useState(false);
-  const [createNote] = useMutation<any>(CREATE_NOTE);
-  const [addNoteImage] = useMutation<any>(ADD_NOTE_IMAGE);
-  const layoutDef = LAYOUTS.find((l) => l.key === selectedLayout)!;
 
-  // Render preview
-  useEffect(() => {
-    if (capturedPhotos.length === 0 || stage !== "edit") return;
-    let cancelled = false;
-    setProcessing(true);
-    let p: Promise<string>;
-    if (selectedLayout === "single")
-      p = renderSingle(capturedPhotos[0], selectedFilter, stickers, caption);
-    else if (selectedLayout === "grid4")
-      p = renderGrid(
-        capturedPhotos,
-        selectedFilter,
-        selectedStripColor,
-        2,
-        stickers,
-        caption,
-      );
-    else if (selectedLayout === "grid6")
-      p = renderGrid(
-        capturedPhotos,
-        selectedFilter,
-        selectedStripColor,
-        3,
-        stickers,
-        caption,
-      );
-    else
-      p = renderStrip(
-        capturedPhotos,
-        selectedFilter,
-        selectedStripColor,
-        stickers,
-        caption,
-      );
-    p.then((r) => {
-      if (!cancelled) {
-        setFinalPhoto(r);
-        setProcessing(false);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    capturedPhotos,
-    selectedFilter,
-    selectedStripColor,
-    caption,
-    stickers,
-    stage,
-    selectedLayout,
-  ]);
+  // Subscribe to store (granular subscriptions for performance)
+  const stage = usePhotoboothStore((s) => s.stage);
+  const capturedPhotos = usePhotoboothStore((s) => s.capturedPhotos);
+  const finalPhoto = usePhotoboothStore((s) => s.finalPhoto);
+  const selectedFilter = usePhotoboothStore((s) => s.selectedFilter);
+  const selectedLayout = usePhotoboothStore((s) => s.selectedLayout);
+  const selectedTimer = usePhotoboothStore((s) => s.selectedTimer);
+  const selectedStripColor = usePhotoboothStore((s) => s.selectedStripColor);
+  const caption = usePhotoboothStore((s) => s.caption);
+  const stickers = usePhotoboothStore((s) => s.stickers);
+  const activeTab = usePhotoboothStore((s) => s.activeTab);
+  const processing = usePhotoboothStore((s) => s.processing);
+  const countdown = usePhotoboothStore((s) => s.countdown);
+  const facingMode = usePhotoboothStore((s) => s.facingMode);
 
-  // Countdown tick
-  useEffect(() => {
-    if (countdown === null || countdown <= 0) return;
-    const t = setTimeout(
-      () => setCountdown((c) => (c !== null ? c - 1 : null)),
-      1000,
-    );
-    return () => clearTimeout(t);
-  }, [countdown]);
+  // Actions
+  const setStage = usePhotoboothStore((s) => s.setStage);
+  const setSelectedFilter = usePhotoboothStore((s) => s.setSelectedFilter);
+  const setSelectedLayout = usePhotoboothStore((s) => s.setSelectedLayout);
+  const setSelectedTimer = usePhotoboothStore((s) => s.setSelectedTimer);
+  const setSelectedStripColor = usePhotoboothStore(
+    (s) => s.setSelectedStripColor
+  );
+  const setCaption = usePhotoboothStore((s) => s.setCaption);
+  const setActiveTab = usePhotoboothStore((s) => s.setActiveTab);
+  const toggleFacingMode = usePhotoboothStore((s) => s.toggleFacingMode);
+  const addSticker = usePhotoboothStore((s) => s.addSticker);
+  const removeSticker = usePhotoboothStore((s) => s.removeSticker);
 
-  // Take shot when countdown hits 0
-  useEffect(() => {
-    if (countdown !== 0 || !isCapturing) return;
-    setCountdown(null);
-    const raw = webcamRef.current?.getScreenshot({ width: 1920, height: 1920 });
-    if (!raw) return;
-    setStage("flash");
-    setTimeout(() => {
-      capturedRef.current = [...capturedRef.current, raw];
-      setCapturedPhotos([...capturedRef.current]);
-      if (capturedRef.current.length >= layoutDef.shots) {
-        setIsCapturing(false);
-        setStage("edit");
-      } else {
-        setStage("countdown");
-        setCountdown(selectedTimer);
-      }
-    }, 200);
-  }, [countdown, isCapturing, layoutDef.shots, selectedTimer]);
-
-  const handleStart = useCallback(() => {
-    capturedRef.current = [];
-    setCapturedPhotos([]);
-    setFinalPhoto(null);
-    setStickers([]);
-    setIsCapturing(true);
-    setStage("countdown");
-    setCountdown(selectedTimer);
-  }, [selectedTimer]);
-
-  const handleRetake = () => {
-    setStage("setup");
-    setCapturedPhotos([]);
-    capturedRef.current = [];
-    setFinalPhoto(null);
-    setCaption("");
-    setStickers([]);
-    setIsCapturing(false);
-    setCountdown(null);
-  };
-
-  const addSticker = (emoji: string) => {
-    setStickers((prev) => [
-      ...prev,
-      { id: `${Date.now()}-${Math.random()}`, emoji, x: 50, y: 50 },
-    ]);
-  };
-
-  const removeSticker = (id: string) =>
-    setStickers((prev) => prev.filter((s) => s.id !== id));
-
-  const handleDownload = () => {
-    if (!finalPhoto) return;
-    const a = document.createElement("a");
-    a.href = finalPhoto;
-    a.download = `konstelasi_photobooth_${Date.now()}.jpg`;
-    a.click();
-    notify.success("Foto diunduh!");
-  };
-
-  const handleSave = async () => {
-    if (!finalPhoto) return;
-    setStage("saving");
-    try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      const userId = user?.id || "anonymous";
-      const res = await fetch(finalPhoto);
-      const blob = await res.blob();
-      const filePath = `${userId}/photobooth_${Date.now()}.jpg`;
-      const { error: err } = await supabase.storage
-        .from("notes_images")
-        .upload(filePath, blob, { contentType: "image/jpeg" });
-      if (err) throw err;
-      const { data: urlData } = supabase.storage
-        .from("notes_images")
-        .getPublicUrl(filePath);
-      const title = `📸 ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}`;
-      const { data: nd } = await createNote({
-        variables: {
-          input: {
-            title,
-            positionX: Math.random() * 400 + 200,
-            positionY: Math.random() * 300 + 150,
-          },
-        },
-      });
-      if (nd?.createNote) {
-        await addNoteImage({
-          variables: {
-            input: {
-              noteId: nd.createNote.id,
-              imageUrl: urlData.publicUrl,
-              caption: caption || "Photo Booth",
-              order: 0,
-            },
-          },
-        });
-        setStage("done");
-        notify.success("Foto tersimpan ke kanvas!");
-        setTimeout(() => router.push("/canvas"), 1800);
-      }
-    } catch (e: any) {
-      notify.error("Gagal: " + e.message);
-      setStage("edit");
-    }
-  };
+  // Use the orchestrator hook
+  const { layoutDef, handleStart, handleRetake, handleDownload, handleSave, handleStickerDragEnd } =
+    usePhotobooth(webcamRef, previewRef);
 
   const filterCss = FILTERS.find((f) => f.key === selectedFilter)?.css || "";
 
@@ -465,11 +294,7 @@ function PhotoboothContent() {
                     </div>
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={() =>
-                          setFacingMode((f) =>
-                            f === "user" ? "environment" : "user",
-                          )
-                        }
+                        onClick={toggleFacingMode}
                         className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#FFB8C0]/25 bg-white/60 text-[#6D5561] hover:bg-white/80"
                       >
                         <FlipHorizontal className="h-5 w-5" />
@@ -516,25 +341,7 @@ function PhotoboothContent() {
                         top: `${s.y}%`,
                         transform: "translate(-50%,-50%)",
                       }}
-                      onDragEnd={(_, info) => {
-                        if (!previewRef.current) return;
-                        const rect = previewRef.current.getBoundingClientRect();
-                        const nx =
-                          ((info.point.x - rect.left) / rect.width) * 100;
-                        const ny =
-                          ((info.point.y - rect.top) / rect.height) * 100;
-                        setStickers((prev) =>
-                          prev.map((st) =>
-                            st.id === s.id
-                              ? {
-                                  ...st,
-                                  x: Math.max(0, Math.min(100, nx)),
-                                  y: Math.max(0, Math.min(100, ny)),
-                                }
-                              : st,
-                          ),
-                        );
-                      }}
+                      onDragEnd={(_, info) => handleStickerDragEnd(s.id, info)}
                     >
                       {s.emoji}
                     </motion.div>
