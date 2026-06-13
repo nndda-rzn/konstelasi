@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { PinInput } from "./PinInput";
-import { BRAND, BRAND_MONOGRAM } from "../lib/brand";
+import { BrandMark } from "./BrandMark";
+import { BRAND } from "../lib/brand";
 
 interface LoginFormProps {
   email: string;
@@ -44,8 +45,8 @@ export function LoginForm({
         <div className="relative">
           {/* monogram + wordmark */}
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/12 bg-white/[0.04] font-serif text-lg font-semibold text-[#F2E6CF]">
-              {BRAND_MONOGRAM}
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/12 bg-white/[0.04] text-[#F2E6CF]">
+              <BrandMark size={26} />
             </span>
             <span className="text-[15px] font-semibold tracking-tight text-[#F8F4EF]">
               {BRAND}
