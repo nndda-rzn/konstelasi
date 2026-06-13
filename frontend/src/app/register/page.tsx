@@ -1,45 +1,60 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { Loader2, Sparkles } from "lucide-react";
+import { PinInput } from "@/features/auth/components/PinInput";
+
+const PIN_PATTERN = /^\d{6}$/;
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [pin, setPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const supabase = createClient();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
     setSuccess("");
 
+    if (!PIN_PATTERN.test(pin)) {
+      setError("PIN harus 6 digit angka");
+      return;
+    }
+
+    if (pin !== confirmPin) {
+      setError("PIN tidak cocok");
+      return;
+    }
+
+    setLoading(true);
+
     const { data, error } = await supabase.auth.signUp({
       email,
-      password,
+      password: pin,
     });
 
     if (error) {
       setError(error.message);
-    } else {
-      if (data.session) {
-        router.push("/canvas");
-        router.refresh();
-      } else {
-        setSuccess(
-          "Registration successful! Check your email for verification link.",
-        );
-      }
+      setLoading(false);
+      return;
     }
+
+    if (data.session) {
+      window.location.href = "/canvas";
+      return;
+    }
+
+    setSuccess("Pendaftaran berhasil! Cek email kamu untuk verifikasi.");
     setLoading(false);
   };
+
+  const pinMismatch = Boolean(confirmPin) && pin !== confirmPin;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#FFFAF7] relative overflow-hidden">
@@ -57,9 +72,9 @@ export default function RegisterPage() {
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#FF8FA3] to-[#FFB4A2] flex items-center justify-center mx-auto mb-4 shadow-lg shadow-pink-300/30">
             <Sparkles className="w-6 h-6 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-[#4A2F3C]">Create Account</h2>
+          <h2 className="text-2xl font-bold text-[#4A2F3C]">Buat Akun</h2>
           <p className="mt-2 text-sm text-[#5A3E4C]/50">
-            Start your Visual Node-Based Diary journey
+            Mulai perjalanan Diary Visual Node-Based-mu
           </p>
         </div>
 
@@ -89,28 +104,37 @@ export default function RegisterPage() {
                 type="email"
                 required
                 className="block w-full bg-white/60 border border-[#FFB4A2]/20 rounded-xl px-4 py-3 text-[#5A3E4C] placeholder-[#5A3E4C]/30 focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/30 focus:border-[#FF8FA3]/30 transition-all text-sm hover:bg-white/80"
-                placeholder="your@email.com"
+                placeholder="alamat@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <label
-                htmlFor="password"
-                className="block text-xs font-semibold text-[#5A3E4C]/50 uppercase tracking-wider mb-1.5"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="block w-full bg-white/60 border border-[#FFB4A2]/20 rounded-xl px-4 py-3 text-[#5A3E4C] placeholder-[#5A3E4C]/30 focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/30 focus:border-[#FF8FA3]/30 transition-all text-sm hover:bg-white/80"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+              <PinInput
+                id="register-pin"
+                label="PIN"
+                value={pin}
+                onChange={setPin}
+                disabled={loading}
               />
+              <p className="mt-1.5 text-[11px] font-medium text-[#5A3E4C]/50">
+                6 digit angka rahasia.
+              </p>
+            </div>
+            <div>
+              <PinInput
+                id="register-confirm-pin"
+                label="Konfirmasi PIN"
+                value={confirmPin}
+                onChange={setConfirmPin}
+                error={pinMismatch}
+                disabled={loading}
+              />
+              {pinMismatch && (
+                <p className="mt-1.5 text-[11px] font-medium text-[#FF6B9D]">
+                  PIN tidak cocok
+                </p>
+              )}
             </div>
           </div>
 
@@ -122,18 +146,18 @@ export default function RegisterPage() {
             {loading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              "Create Account"
+              "Buat Akun"
             )}
           </button>
         </form>
 
         <p className="text-center text-sm text-[#5A3E4C]/50">
-          Already have an account?{" "}
+          Sudah punya akun?{" "}
           <Link
             href="/login"
             className="font-medium text-[#FF8FA3] hover:text-[#FF7A8A] transition-colors"
           >
-            Sign in
+            Masuk
           </Link>
         </p>
       </div>
