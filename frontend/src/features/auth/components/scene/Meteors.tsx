@@ -11,18 +11,17 @@ const MAX_INTERVAL = 60;
 const METEOR_DURATION = 0.9;
 const METEOR_LENGTH = 8;
 
-interface MeteorProps {
-  active: boolean;
-}
-
 interface MeteorShot {
   origin: THREE.Vector3;
   velocity: THREE.Vector3;
   startTime: number;
 }
 
+interface MeteorsProps {
+  active: boolean;
+}
+
 export function Meteors({ active }: MeteorsProps) {
-  const lineRef = useRef<THREE.LineSegments>(null);
   const matRef = useRef<THREE.LineBasicMaterial>(null);
   const [shots, setShots] = useState<MeteorShot[]>([]);
   const nextShotTime = useRef(0);
@@ -54,10 +53,10 @@ export function Meteors({ active }: MeteorsProps) {
     const pos = geometry.attributes.position as THREE.BufferAttribute;
     pos.array.fill(0);
     let liveCount = 0;
+    const now = performance.now() / 1000;
     shots.forEach((shot) => {
-      const age = t - shot.startTime;
+      const age = now - shot.startTime;
       if (age < 0 || age > METEOR_DURATION) return;
-      const p = age / METEOR_DURATION;
       const head = shot.origin
         .clone()
         .add(shot.velocity.clone().multiplyScalar(age));
@@ -74,7 +73,7 @@ export function Meteors({ active }: MeteorsProps) {
     });
     pos.needsUpdate = true;
     if (matRef.current) {
-      matRef.current.opacity = active ? (liveCount > 0 ? 0.85 : 0) : 0;
+      matRef.current.opacity = liveCount > 0 ? 0.85 : 0;
     }
   });
 
@@ -105,8 +104,9 @@ function spawnMeteor(setShots: React.Dispatch<React.SetStateAction<MeteorShot[]>
   );
   const direction = target.sub(origin).normalize().multiplyScalar(METEOR_LENGTH);
   setShots((prev) => {
-    const next = prev.filter((s) => Date.now() / 1000 - s.startTime < METEOR_DURATION);
-    next.push({ origin, velocity: direction, startTime: performance.now() / 1000 });
+    const now = performance.now() / 1000;
+    const next = prev.filter((s) => now - s.startTime < METEOR_DURATION);
+    next.push({ origin, velocity: direction, startTime: now });
     return next.slice(-POOL_SIZE);
   });
 }
