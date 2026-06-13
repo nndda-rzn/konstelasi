@@ -71,12 +71,17 @@ export default function RegisterPage() {
       />
 
       <div className="relative z-20 w-full max-w-[440px] animate-fade-in-up">
-        <div className="relative overflow-hidden rounded-[30px] border border-white/12 bg-[rgba(14,12,22,0.78)] p-9 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:p-10">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-          <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-[#F2B84B]/8 blur-[80px]" />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-8 -z-10 rounded-[48px] bg-[radial-gradient(circle_at_50%_30%,rgba(242,184,75,0.16),transparent_60%),radial-gradient(circle_at_50%_90%,rgba(184,15,30,0.14),transparent_65%)] blur-2xl"
+        />
+        <div className="relative overflow-hidden rounded-[30px] border border-white/[0.1] bg-[rgba(14,12,22,0.78)] p-9 shadow-[0_32px_100px_rgba(0,0,0,0.55)] ring-1 ring-white/[0.06] backdrop-blur-2xl sm:p-10">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <div className="pointer-events-none absolute -top-20 left-1/2 h-44 w-56 -translate-x-1/2 rounded-full bg-[#F2B84B]/10 blur-[70px]" />
 
           <div className="relative flex flex-col items-center text-center">
-            <div className="mb-5 flex h-[68px] w-[68px] items-center justify-center rounded-[20px] bg-gradient-to-br from-[#E94B3C] via-[#D99A2B] to-[#F2B84B] shadow-[0_10px_30px_rgba(230,57,70,0.28)]">
+            <div className="relative mb-5 flex h-[68px] w-[68px] items-center justify-center rounded-[20px] bg-gradient-to-br from-[#E94B3C] via-[#D99A2B] to-[#F2B84B] shadow-[0_10px_30px_rgba(230,57,70,0.28)]">
+              <div className="pointer-events-none absolute -inset-3 -z-10 rounded-[28px] bg-[#F2B84B]/25 blur-xl" />
               <Sparkles className="h-7 w-7 text-white" />
             </div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#F2B84B]/85">
@@ -155,9 +160,10 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative mt-1 flex h-[56px] w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#B80F1E] via-[#E94B3C] to-[#F2B84B] text-sm font-bold text-white shadow-[0_10px_30px_rgba(230,57,70,0.25)] transition-all hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-65 disabled:hover:translate-y-0"
+              className="group relative mt-1 flex h-[56px] w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#B80F1E] via-[#E94B3C] to-[#F2B84B] text-sm font-bold text-white shadow-[0_12px_34px_rgba(230,57,70,0.3)] transition-all hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-65 disabled:hover:translate-y-0"
             >
-              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Buat Akun"}
+              <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
+              {loading ? <Loader2 className="relative h-5 w-5 animate-spin" /> : <span className="relative">Buat Akun</span>}
             </button>
           </form>
 
