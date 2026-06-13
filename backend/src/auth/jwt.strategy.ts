@@ -7,9 +7,17 @@ dotenv.config();
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
+    const supabaseJwtSecret = process.env.SUPABASE_JWT_SECRET;
+    if (!supabaseJwtSecret) {
+      throw new Error(
+        'SUPABASE_JWT_SECRET env variable is required. ' +
+          'Get it from Supabase Dashboard > Settings > API > JWT Settings > JWT Secret.',
+      );
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.SUPABASE_JWT_SECRET || 'YOUR_SUPABASE_JWT_SECRET',
+      secretOrKey: supabaseJwtSecret,
     });
   }
 
@@ -17,7 +25,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!payload.sub) {
       throw new UnauthorizedException('Invalid JWT Payload: missing subject (sub)');
     }
-    // Return standard user payload
     return { id: payload.sub, email: payload.email, role: payload.role };
   }
 }
