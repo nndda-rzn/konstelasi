@@ -11,27 +11,44 @@ import { makeStarTexture } from "./three-utils";
 
 const LINE_GOLD = new THREE.Color("#F2B84B");
 
+// Stagger timing (seconds) for each constellation index
+const STAGGER_DELAYS = [0.0, 0.4, 0.8, 1.2];
+const FADE_DURATION = 0.8;
+
 interface ConstellationsProps {
   active: boolean;
 }
 
 /**
- * Constellations - Renders all constellation definitions simultaneously
- * as fixed celestial patterns (data-driven). Stars use a glow sprite;
- * lines use additive LineSegments. Subtle group-level twinkle/drift.
+ * Constellations - Renders all constellation definitions with staggered
+ * fade-in on mount. Stars use a glow sprite; lines use additive blending.
+ * Active: cycles through stagger. Reduced-motion: instant full opacity.
  */
 export function Constellations({ active }: ConstellationsProps) {
   const texture = useMemo(() => makeStarTexture(64), []);
+  const mountTime = useRef(-1);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    mountTime.current = performance.now() / 1000;
+    setMounted(true);
+    return () => { mountTime.current = -1; };
+  }, []);
+
   useEffect(() => () => texture.dispose(), [texture]);
+
+  if (!mounted) return null;
 
   return (
     <>
-      {CONSTELLATION_DEFS.map((def) => (
+      {CONSTELLATION_DEFS.map((def, i) => (
         <ConstellationGroup
           key={def.name}
           def={def}
           texture={texture}
           active={active}
+          staggerDelay={STAGGER_DELAYS[i] ?? 0}
+          mountTime={mountTime}
         />
       ))}
     </>
@@ -42,14 +59,24 @@ function ConstellationGroup({
   def,
   texture,
   active,
+  staggerDelay,
+  mountTime,
 }: {
   def: ConstellationDef;
   texture: THREE.Texture;
   active: boolean;
+  staggerDelay: number;
+  mountTime: React.MutableRefObject<number>;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const starMatRef = useRef<THREE.ShaderMaterial>(null);
   const elapsed = useRef(0);
+
+  // Resolve line color from def or default to warm gold
+  const lineColor = useMemo(
+    () => (def.lineColor ? new THREE.Color(def.lineColor) : LINE_GOLD),
+    [def.lineColor],
+  );
 
   const { starGeo, starMat, lineGeo, lineMat } = useMemo(() => {
     const index = new Map(def.stars.map((s, i) => [s.id, i]));
@@ -70,8 +97,6 @@ function ConstellationGroup({
     sGeo.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
     sGeo.setAttribute("aOpacity", new THREE.BufferAttribute(opacities, 1));
 
-    // Custom shader points so each star keeps its own size + opacity,
-    // with a soft glow sprite and very subtle twinkle.
     const sMat = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
@@ -107,7 +132,6 @@ function ConstellationGroup({
       `,
     });
 
-    // Lines
     const linePos: number[] = [];
     def.connections.forEach(([from, to]) => {
       const fi = index.get(from);
@@ -130,7 +154,7 @@ function ConstellationGroup({
       new THREE.BufferAttribute(new Float32Array(linePos), 3),
     );
     const lMat = new THREE.LineBasicMaterial({
-      color: LINE_GOLD,
+      color: lineColor,
       transparent: true,
       opacity: 0,
       depthWrite: false,
@@ -138,7 +162,7 @@ function ConstellationGroup({
     });
 
     return { starGeo: sGeo, starMat: sMat, lineGeo: lGeo, lineMat: lMat };
-  }, [def, texture]);
+  }, [def, texture, lineColor]);
 
   useEffect(() => {
     return () => {
@@ -151,8 +175,20 @@ function ConstellationGroup({
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
-    // fade in once on mount
-    elapsed.current = Math.min(1, elapsed.current + delta * 0.6);
+
+    // Staggered fade-in: progress based on time since mount + delay
+    if (active && mountTime.current > 0) {
+      const now = performance.now() / 1000;
+      const since = now - mountTime.current - staggerDelay;
+      elapsed.current = Math.max(
+        0,
+        Math.min(1, since / FADE_DURATION),
+      );
+    } else {
+      // reducedMotion: instant full opacity
+      elapsed.current = 1;
+    }
+
     const fade = elapsed.current;
 
     if (starMatRef.current) {
