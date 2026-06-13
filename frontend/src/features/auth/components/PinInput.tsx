@@ -89,11 +89,11 @@ export function PinInput({
     <div>
       <label
         htmlFor={`${id}-0`}
-        className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#A99EA6]"
+        className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-[#8C8088]"
       >
         {label}
       </label>
-      <div className="flex gap-2.5">
+      <div className="flex gap-[9px]">
         {Array.from({ length: PIN_LENGTH }).map((_, i) => {
           const digit = value[i] || "";
           const isFocused = focusedIndex === i;
@@ -118,7 +118,7 @@ export function PinInput({
               onFocus={() => setFocusedIndex(i)}
               onBlur={() => setFocusedIndex(null)}
               aria-label={`Digit ${i + 1} dari ${PIN_LENGTH}`}
-              className={`h-[58px] w-full rounded-[15px] border bg-white/[0.08] text-center text-xl font-bold text-[#F8F4EF] caret-[#F2B84B] outline-none transition-all placeholder:text-[#F8F4EF]/30 ${borderClass}`}
+              className={`h-[52px] w-full rounded-[14px] border bg-white/[0.055] text-center text-lg font-medium text-[#F8F4EF] caret-[#F2B84B] outline-none transition-all placeholder:text-[#F8F4EF]/25 ${borderClass}`}
             />
           );
         })}
