@@ -58,7 +58,7 @@ export function AuthBackground() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 -z-10"
+      className="pointer-events-none absolute inset-0 z-0"
     >
       <AuthScene3D isMobile={isMobile} reducedMotion={reducedMotion} />
     </div>
@@ -69,7 +69,7 @@ function Fallback() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 -z-10"
+      className="pointer-events-none absolute inset-0 z-0"
       style={{
         background:
           "radial-gradient(ellipse at top, #4A1118 0%, #2A0A14 60%, #1a050a 100%)",
