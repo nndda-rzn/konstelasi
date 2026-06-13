@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function CanvasPage() {
   return (
-    <main className="w-full h-screen overflow-hidden relative bg-[#F7F1EA]">
+    <main className="w-full h-screen relative bg-[#F7F1EA]">
       {/* warm paper background: subtle dot grid + soft center glow + noise */}
       <div
         aria-hidden="true"
