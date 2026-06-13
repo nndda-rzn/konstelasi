@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { PinInput } from "@/features/auth/components/PinInput";
 import { AuthBackground } from "@/features/auth/components/scene/AuthBackground";
 
+// TODO: replace "Northroom" with the final brand name.
+const BRAND = "Northroom";
 const PIN_PATTERN = /^\d{6}$/;
 
 export default function RegisterPage() {
@@ -24,12 +26,12 @@ export default function RegisterPage() {
     setSuccess("");
 
     if (!PIN_PATTERN.test(pin)) {
-      setError("PIN harus 6 digit angka");
+      setError("Your PIN must be 6 digits.");
       return;
     }
 
     if (pin !== confirmPin) {
-      setError("PIN tidak cocok");
+      setError("PINs do not match.");
       return;
     }
 
@@ -51,7 +53,7 @@ export default function RegisterPage() {
       return;
     }
 
-    setSuccess("Pendaftaran berhasil! Cek email kamu untuk verifikasi.");
+    setSuccess("Account created. Check your email to verify it.");
     setLoading(false);
   };
 
@@ -73,26 +75,32 @@ export default function RegisterPage() {
       <div className="relative z-20 w-full max-w-[440px] animate-fade-in-up">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -inset-8 -z-10 rounded-[48px] bg-[radial-gradient(circle_at_50%_30%,rgba(242,184,75,0.16),transparent_60%),radial-gradient(circle_at_50%_90%,rgba(184,15,30,0.14),transparent_65%)] blur-2xl"
+          className="pointer-events-none absolute -inset-8 -z-10 rounded-[48px] bg-[radial-gradient(circle_at_50%_25%,rgba(242,184,75,0.1),transparent_62%)] blur-2xl"
         />
-        <div className="relative overflow-hidden rounded-[30px] border border-white/[0.1] bg-[rgba(14,12,22,0.78)] p-9 shadow-[0_32px_100px_rgba(0,0,0,0.55)] ring-1 ring-white/[0.06] backdrop-blur-2xl sm:p-10">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-          <div className="pointer-events-none absolute -top-20 left-1/2 h-44 w-56 -translate-x-1/2 rounded-full bg-[#F2B84B]/10 blur-[70px]" />
+        <div className="relative overflow-hidden rounded-[28px] border border-white/[0.09] bg-[rgba(14,12,22,0.8)] p-9 shadow-[0_28px_90px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:p-10">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
-          <div className="relative flex flex-col items-center text-center">
-            <div className="relative mb-5 flex h-[68px] w-[68px] items-center justify-center rounded-[20px] bg-gradient-to-br from-[#E94B3C] via-[#D99A2B] to-[#F2B84B] shadow-[0_10px_30px_rgba(230,57,70,0.28)]">
-              <div className="pointer-events-none absolute -inset-3 -z-10 rounded-[28px] bg-[#F2B84B]/25 blur-xl" />
-              <Sparkles className="h-7 w-7 text-white" />
+          <div className="relative">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/12 bg-white/[0.04] font-serif text-lg font-semibold text-[#F2E6CF]">
+                N
+              </span>
+              <span className="text-[15px] font-semibold tracking-tight text-[#F8F4EF]">
+                {BRAND}
+              </span>
             </div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#F2B84B]/85">
-              Buat akun
-            </p>
-            <h2 className="mt-2.5 text-[28px] font-bold leading-tight tracking-[-0.02em] text-[#F8F4EF]">
-              Mulai perjalananmu
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-[#A99EA6]">
-              Diary visual node-based yang tetap personal.
-            </p>
+
+            <div className="mt-9">
+              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#8C8088]">
+                Create account
+              </p>
+              <h2 className="mt-3 text-[26px] font-semibold leading-tight tracking-[-0.01em] text-[#F8F4EF]">
+                Start your space
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-[#AFA6AD]">
+                A calm, personal workspace for your writing.
+              </p>
+            </div>
           </div>
 
           <form className="relative mt-8 space-y-5" onSubmit={handleRegister}>
@@ -111,7 +119,7 @@ export default function RegisterPage() {
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#A99EA6]"
+                  className="mb-2 block text-[11px] font-medium uppercase tracking-[0.14em] text-[#8C8088]"
                 >
                   Email
                 </label>
@@ -120,8 +128,8 @@ export default function RegisterPage() {
                   name="email"
                   type="email"
                   required
-                  className="block h-[54px] w-full rounded-2xl border border-white/12 bg-white/[0.08] px-4 text-sm text-[#F8F4EF] outline-none transition-all placeholder:text-[#F8F4EF]/42 focus:border-[#F2B84B]/75 focus:bg-white/[0.1] focus:ring-2 focus:ring-[#F2B84B]/20"
-                  placeholder="email@domain.com"
+                  className="block h-[54px] w-full rounded-xl border border-white/12 bg-white/[0.06] px-4 text-sm text-[#F8F4EF] outline-none transition-all placeholder:text-[#F8F4EF]/38 focus:border-[#F2B84B]/60 focus:bg-white/[0.09] focus:ring-2 focus:ring-[#F2B84B]/15"
+                  placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -136,14 +144,14 @@ export default function RegisterPage() {
                   disabled={loading}
                 />
                 <p className="mt-2 text-[11px] font-medium text-[#7F747C]">
-                  6 digit angka rahasia.
+                  Use your 6-digit private code.
                 </p>
               </div>
 
               <div>
                 <PinInput
                   id="register-confirm-pin"
-                  label="Konfirmasi PIN"
+                  label="Confirm PIN"
                   value={confirmPin}
                   onChange={setConfirmPin}
                   error={pinMismatch}
@@ -151,7 +159,7 @@ export default function RegisterPage() {
                 />
                 {pinMismatch && (
                   <p className="mt-2 text-[11px] font-medium text-[#E94B3C]">
-                    PIN tidak cocok
+                    PINs do not match.
                   </p>
                 )}
               </div>
@@ -160,26 +168,24 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative mt-1 flex h-[56px] w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#B80F1E] via-[#E94B3C] to-[#F2B84B] text-sm font-bold text-white shadow-[0_12px_34px_rgba(230,57,70,0.3)] transition-all hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-65 disabled:hover:translate-y-0"
+              className="group relative mt-1 flex h-[54px] w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-[#B11E2A] bg-gradient-to-b from-[#C0303A] to-[#9E1722] text-sm font-semibold text-[#FFF6F0] shadow-[0_8px_22px_rgba(140,20,30,0.32)] transition-all hover:-translate-y-px hover:brightness-[1.04] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-65 disabled:hover:translate-y-0"
             >
-              <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
-              {loading ? <Loader2 className="relative h-5 w-5 animate-spin" /> : <span className="relative">Buat Akun</span>}
+              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/25" />
+              {loading ? (
+                <Loader2 className="relative h-5 w-5 animate-spin" />
+              ) : (
+                <span className="relative">Create account</span>
+              )}
             </button>
           </form>
 
-          <div className="relative mt-7 flex items-center gap-3">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/12" />
-            <Sparkles className="h-3.5 w-3.5 text-[#F2B84B]/55" />
-            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/12" />
-          </div>
-
-          <p className="relative mt-5 text-center text-sm text-[#A99EA6]">
-            Sudah punya akun?{" "}
+          <p className="relative mt-7 border-t border-white/[0.07] pt-6 text-center text-sm text-[#AFA6AD]">
+            Already have an account?{" "}
             <Link
               href="/login"
-              className="font-semibold text-[#F2B84B] transition-opacity hover:opacity-80"
+              className="font-medium text-[#F2B84B] transition-opacity hover:opacity-80"
             >
-              Masuk
+              Sign in
             </Link>
           </p>
         </div>

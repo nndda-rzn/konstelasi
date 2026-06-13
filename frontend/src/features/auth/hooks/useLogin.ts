@@ -24,7 +24,7 @@ export const useLogin = () => {
     setError(null);
 
     if (!PIN_PATTERN.test(pin)) {
-      setError("PIN harus 6 digit angka");
+      setError("Your PIN must be 6 digits.");
       return;
     }
 
