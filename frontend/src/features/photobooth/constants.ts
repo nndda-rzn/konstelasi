@@ -15,6 +15,13 @@ export interface StickerItem {
   y: number;
 }
 
+export interface LayoutDef {
+  key: LayoutKey;
+  label: string;
+  desc: string;
+  shots: number;
+}
+
 export const FILTERS = [
   { key: 'normal' as FilterKey, label: 'Normal', css: '', canvas: 'none' },
   { key: 'grayscale' as FilterKey, label: 'Mono', css: 'grayscale(100%)', canvas: 'grayscale(100%)' },
