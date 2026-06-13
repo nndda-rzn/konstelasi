@@ -40,8 +40,9 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "Konstelasi — Visual Node-Based Diary",
-  description: "A beautiful visual diary that lets you connect your thoughts like constellations in the sky.",
+  title: "Constella — A private space for shaping stories",
+  description:
+    "A private writing studio where your notes, stories, and time capsules connect like constellations.",
 };
 
 import { ApolloWrapper } from "@/lib/apollo/ApolloWrapper";

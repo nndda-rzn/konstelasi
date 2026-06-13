@@ -30,15 +30,15 @@ export function GroupedIconButton({
       aria-label={ariaLabel}
       aria-pressed={active}
       disabled={disabled}
-      className={`relative p-1.5 rounded-lg transition-all ${
+      className={`relative p-1.5 rounded-[8px] transition-colors ${
         active
-          ? "bg-white text-[#FF8FA3] shadow-sm"
-          : "text-[#5A3E4C]/50 hover:text-[#5A3E4C] hover:bg-white/60"
+          ? "bg-[#FFFCF8] text-[#B84A5A]"
+          : "text-[#9A8F95] hover:text-[#2F2730] hover:bg-[#FFFCF8]/70"
       } disabled:opacity-30 disabled:cursor-not-allowed`}
     >
       {children}
       {badge !== undefined && badge > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#FF8FA3] text-white text-[9px] flex items-center justify-center font-bold ring-2 ring-[#FFFAF7]">
+        <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#B84A5A] text-white text-[9px] flex items-center justify-center font-semibold ring-2 ring-[#FFFCF8]">
           {badge}
         </span>
       )}

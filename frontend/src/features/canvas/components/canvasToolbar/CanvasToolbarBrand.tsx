@@ -1,18 +1,17 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
+import { BrandMark } from "@/features/auth/components/BrandMark";
 
 /**
- * CanvasToolbarBrand - Logo + name (left section).
+ * CanvasToolbarBrand - Constella monogram + wordmark.
+ * Plain, editorial, no gradient candy.
  */
 export function CanvasToolbarBrand() {
   return (
-    <div className="flex items-center gap-2 pr-3 border-r border-[#FFB4A2]/20">
-      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF8FA3] to-[#FFB4A2] flex items-center justify-center shadow-md shadow-pink-300/40">
-        <Sparkles className="w-3.5 h-3.5 text-white" />
-      </div>
-      <h1 className="text-base font-bold bg-gradient-to-r from-[#FF8FA3] via-[#FFB4A2] to-[#FFD6A5] bg-clip-text text-transparent tracking-tight hidden sm:block">
-        Konstelasi
+    <div className="flex items-center gap-2 pr-3 border-r border-[rgba(47,39,48,0.08)]">
+      <BrandMark size={22} />
+      <h1 className="text-[14px] font-semibold tracking-[-0.01em] text-[#2F2730] hidden sm:block">
+        Constella
       </h1>
     </div>
   );
