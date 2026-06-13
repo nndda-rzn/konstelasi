@@ -6,9 +6,8 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { PinInput } from "@/features/auth/components/PinInput";
 import { AuthBackground } from "@/features/auth/components/scene/AuthBackground";
+import { BRAND, BRAND_MONOGRAM } from "@/features/auth/lib/brand";
 
-// TODO: replace "Northroom" with the final brand name.
-const BRAND = "Northroom";
 const PIN_PATTERN = /^\d{6}$/;
 
 export default function RegisterPage() {
@@ -83,7 +82,7 @@ export default function RegisterPage() {
           <div className="relative">
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/12 bg-white/[0.04] font-serif text-lg font-semibold text-[#F2E6CF]">
-                N
+                {BRAND_MONOGRAM}
               </span>
               <span className="text-[15px] font-semibold tracking-tight text-[#F8F4EF]">
                 {BRAND}
