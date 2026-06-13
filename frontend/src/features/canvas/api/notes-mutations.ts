@@ -16,6 +16,7 @@ export const CREATE_NOTE = gql`
       height
       color
       mood
+      titleFont
       isArchived
       isLocked
       unlockDate
