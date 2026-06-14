@@ -4,7 +4,7 @@ import { useRef } from "react";
 import Webcam from "react-webcam";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Camera, SlidersHorizontal } from "lucide-react";
+import { Camera, SlidersHorizontal, ArrowLeft } from "lucide-react";
 import { ApolloWrapper } from "@/lib/apollo/ApolloWrapper";
 import { Providers } from "@/lib/Providers";
 import { usePhotoboothStore } from "@/features/photobooth/store/usePhotoboothStore";
@@ -90,7 +90,6 @@ function PhotoboothContent() {
                   Mode Edit
                 </span>
               )}
-
               {isCapture && (
                 <button
                   onClick={() => setSettingsSheetOpen(true)}
@@ -124,11 +123,20 @@ function PhotoboothContent() {
             )}
 
             {isEdit && (
-              <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px] items-start">
-                <PhotoPreview
-                  previewRef={previewRef}
-                  onStickerDragEnd={handleStickerDragEnd}
-                />
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_360px] items-start">
+                <div className="space-y-3">
+                  <button
+                    onClick={handleRetake}
+                    className="inline-flex items-center gap-1.5 rounded text-[12px] font-medium text-[#6D5561] transition-colors hover:text-[#3F2A35]"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Kembali ke Kamera
+                  </button>
+                  <PhotoPreview
+                    previewRef={previewRef}
+                    onStickerDragEnd={handleStickerDragEnd}
+                  />
+                </div>
                 <EditorSidebar
                   onSave={handleSave}
                   onDownload={handleDownload}
