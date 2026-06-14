@@ -1,12 +1,15 @@
 "use client";
 
-import { Palette, Frame as FrameIcon, Smile, Type } from "lucide-react";
+import { Palette, LayoutTemplate, Smile, Type } from "lucide-react";
 
-export type EditorTab = "filter" | "frame" | "sticker" | "caption";
+export type EditorTab = "template" | "filter" | "sticker" | "caption";
 
 /**
  * EditorTabs - Underline tabs for the result editor panel.
- * Tabs: Filter · Frame · Sticker · Caption
+ * Tabs: Template · Filter · Stiker · Caption
+ *
+ * The Frame tab is removed — all frame styling is now part of
+ * the Template's sub-options.
  */
 export function EditorTabs({
   tab,
@@ -16,8 +19,8 @@ export function EditorTabs({
   setTab: (t: EditorTab) => void;
 }) {
   const items: { key: EditorTab; label: string; icon: any }[] = [
+    { key: "template", label: "Template", icon: LayoutTemplate },
     { key: "filter", label: "Filter", icon: Palette },
-    { key: "frame", label: "Frame", icon: FrameIcon },
     { key: "sticker", label: "Stiker", icon: Smile },
     { key: "caption", label: "Caption", icon: Type },
   ];

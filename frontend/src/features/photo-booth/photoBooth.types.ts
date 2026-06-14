@@ -117,6 +117,7 @@ export interface GalleryMetadata {
   filterId: FilterId;
   effectId: EffectId;
   frameId: FrameId;
+  templateId: string | null;
   width: number;
   height: number;
   caption: string;

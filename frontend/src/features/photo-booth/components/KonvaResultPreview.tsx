@@ -1,45 +1,85 @@
 "use client";
 
-import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from "react";
-import { Stage, Layer, Image as KonvaImage, Rect, Text, Group, Line, Circle } from "react-konva";
-import type Konva from "konva";
+import { forwardRef, useMemo } from "react";
 import { usePhotoBoothStore } from "../photoBoothStore";
-import { FRAME_MAP } from "../config/frames";
-import type { Sticker } from "../photoBooth.types";
+import { getTemplateById, type TemplateConfig } from "../config/templates";
+import {
+  KonvaTemplateRenderer,
+  type KonvaResultPreviewHandle,
+} from "./KonvaTemplateRenderer";
 
-export interface KonvaResultPreviewHandle {
-  /**
-   * Export the current stage as a data URL (PNG) at the given pixel width.
-   * Used by Download and Save actions — both call this, so the source
-   * of truth is the same (the Konva stage).
-   */
-  exportDataUrl: (pixelWidth?: number) => string | null;
-  /**
-   * Export the current stage as a Blob (PNG) at the given pixel width.
-   */
-  exportBlob: (pixelWidth?: number) => Promise<Blob | null>;
-}
+// Re-export the handle so consumers can import it from this file
+export type { KonvaResultPreviewHandle };
 
 interface KonvaResultPreviewProps {
-  /** Display width in CSS pixels (height computed from composed aspect). */
+  /** Display width in CSS pixels (height computed from aspect). */
   displayWidth?: number;
+  /** Maximum height for the rendered stage. */
+  maxHeight?: number;
 }
 
 /**
  * KonvaResultPreview - The single source of truth for the final output.
  *
- * Renders the composed photo output + frame + stickers + caption as a
- * Konva stage. The image itself is NEVER re-cropped or transformed —
- * it's placed at its natural size and the frame adds border/padding
- * around it.
+ * Routes to either:
+ *  - KonvaTemplateRenderer (when a template is selected) — full template
+ *    design with photo slots, decor, frame, text, stickers
+ *  - Legacy frame mode (when no template is selected) — preserved from
+ *    earlier commits for backward compatibility
  *
- * All exports (Download, Save to Canvas, Save to Gallery) come from
- * this stage, so preview = download = save.
+ * Preview = Download = Save — both call this same stage's export.
  */
 export const KonvaResultPreview = forwardRef<
   KonvaResultPreviewHandle,
   KonvaResultPreviewProps
->(({ displayWidth = 720 }, ref) => {
+>(({ displayWidth = 720, maxHeight = 640 }, ref) => {
+  const selectedTemplateId = usePhotoBoothStore((s) => s.selectedTemplateId);
+  const composed = usePhotoBoothStore((s) => s.composed);
+
+  const template = useMemo<TemplateConfig | null>(
+    () => (selectedTemplateId ? getTemplateById(selectedTemplateId) ?? null : null),
+    [selectedTemplateId]
+  );
+
+  // Use template renderer when a template is selected AND composed
+  // is available. Otherwise fall back to legacy frame mode.
+  if (template && composed) {
+    return (
+      <KonvaTemplateRenderer
+        ref={ref}
+        template={template}
+        displayWidth={displayWidth}
+        maxHeight={maxHeight}
+      />
+    );
+  }
+
+  // Legacy frame mode — single composed image + frame + sticker
+  return (
+    <LegacyFramePreview
+      ref={ref}
+      displayWidth={displayWidth}
+      maxHeight={maxHeight}
+    />
+  );
+});
+
+KonvaResultPreview.displayName = "KonvaResultPreview";
+
+/* ------------------------------------------------------------------ */
+/*  Legacy frame mode (preserved for backward compatibility)            */
+/* ------------------------------------------------------------------ */
+
+import { useEffect, useRef, useState, useImperativeHandle } from "react";
+import { Stage, Layer, Image as KonvaImage, Rect, Text, Group, Line, Circle } from "react-konva";
+import type Konva from "konva";
+import { FRAME_MAP } from "../config/frames";
+import type { Sticker } from "../photoBooth.types";
+
+const LegacyFramePreview = forwardRef<
+  KonvaResultPreviewHandle,
+  KonvaResultPreviewProps
+>(({ displayWidth = 720, maxHeight = 640 }, ref) => {
   const stageRef = useRef<Konva.Stage>(null);
 
   const composed = usePhotoBoothStore((s) => s.composed);
@@ -53,7 +93,6 @@ export const KonvaResultPreview = forwardRef<
   // Native image element for the composed output
   const [image, setImage] = useState<HTMLImageElement | null>(null);
 
-  // Load the composed image into a native HTMLImageElement for Konva
   useEffect(() => {
     if (!composed?.dataUrl) {
       setImage(null);
@@ -66,8 +105,6 @@ export const KonvaResultPreview = forwardRef<
     img.src = composed.dataUrl;
   }, [composed?.dataUrl]);
 
-  // The stage canvas size matches the composed image's natural size
-  // (so exports are at full quality). For display, we scale via CSS.
   const aspect =
     composed && composed.width && composed.height
       ? composed.width / composed.height
@@ -75,18 +112,15 @@ export const KonvaResultPreview = forwardRef<
   const stageWidth = composed?.width || Math.round(displayWidth);
   const stageHeight = composed?.height || Math.round(displayWidth / aspect);
 
-  // Frame padding (in stage pixels)
   const paddingPx = frame ? (frame.padding / 1000) * stageWidth : 0;
   const captionPx = frame ? (frame.captionArea / 1000) * stageWidth : 0;
   const borderWidthPx = frame ? (frame.borderWidth / 1000) * stageWidth : 0;
 
-  // Inner image area inside the frame padding + caption area
   const innerX = paddingPx;
   const innerY = paddingPx;
   const innerW = Math.max(0, stageWidth - paddingPx * 2);
   const innerH = Math.max(0, stageHeight - paddingPx * 2 - captionPx);
 
-  // Expose export functions
   useImperativeHandle(ref, () => ({
     exportDataUrl: (pixelWidth?: number) => {
       const stage = stageRef.current;
@@ -103,10 +137,6 @@ export const KonvaResultPreview = forwardRef<
       });
     },
     exportBlob: async (pixelWidth?: number) => {
-      const dataUrl = (stageRef.current as KonvaResultPreviewHandle | null)
-        ? null
-        : null;
-      void dataUrl;
       const stage = stageRef.current;
       if (!stage || !composed) return null;
       const targetW = pixelWidth || stageWidth;
@@ -142,24 +172,17 @@ export const KonvaResultPreview = forwardRef<
         width: displayWidth,
         maxWidth: "100%",
         aspectRatio: `${stageWidth} / ${stageHeight}`,
+        maxHeight: `${maxHeight}px`,
       }}
     >
       <Stage
         ref={stageRef}
         width={stageWidth}
         height={stageHeight}
-        // Scale display to fit the CSS width while keeping stage pixel-perfect
         scaleX={displayWidth / stageWidth}
         scaleY={displayWidth / stageWidth}
-        // Disable stage-level listening: there are no interactive
-        // children yet, and the canvas's full-resolution DOM element
-        // (stageWidth wide) was overflowing into the right panel,
-        // stealing pointer events from the Filter/Frame/Stiker/Caption
-        // tabs. Clip via overflow:hidden on the wrapper + listening:false
-        // on the Stage makes the canvas truly passive.
         listening={false}
       >
-        {/* Layer 1: Frame surround (background + border + decor) */}
         <Layer listening={false}>
           <Rect
             x={0}
@@ -209,7 +232,6 @@ export const KonvaResultPreview = forwardRef<
           )}
         </Layer>
 
-        {/* Layer 2: Base photo output (NO cropping, just placed) */}
         {image && !processing && (
           <Layer listening={false}>
             <KonvaImage
@@ -222,7 +244,6 @@ export const KonvaResultPreview = forwardRef<
           </Layer>
         )}
 
-        {/* Layer 3: Caption (if any) — drawn INSIDE the frame caption area */}
         {frame.captionArea > 0 && caption && caption.trim().length > 0 && (
           <Layer listening={false}>
             <Text
@@ -239,10 +260,9 @@ export const KonvaResultPreview = forwardRef<
           </Layer>
         )}
 
-        {/* Layer 4: Stickers (interactive + exportable) */}
         <Layer>
           {stickers.map((s: Sticker) => (
-            <StickerNode
+            <StickerNodeLegacy
               key={s.id}
               sticker={s}
               stageWidth={stageWidth}
@@ -255,13 +275,13 @@ export const KonvaResultPreview = forwardRef<
   );
 });
 
-KonvaResultPreview.displayName = "KonvaResultPreview";
+LegacyFramePreview.displayName = "LegacyFramePreview";
 
 /* ------------------------------------------------------------------ */
-/*  Sub-components                                                       */
+/*  Decor helpers (legacy)                                             */
 /* ------------------------------------------------------------------ */
 
-function StickerNode({
+function StickerNodeLegacy({
   sticker,
   stageWidth,
   stageHeight,
@@ -270,7 +290,6 @@ function StickerNode({
   stageWidth: number;
   stageHeight: number;
 }) {
-  // Sticker position is stored as 0..100% of the stage.
   const x = (sticker.x / 100) * stageWidth;
   const y = (sticker.y / 100) * stageHeight;
   const fontSize = Math.max(28, stageWidth * 0.04);
@@ -287,48 +306,26 @@ function StickerNode({
 }
 
 function StarDecor({ x, y, size }: { x: number; y: number; size: number }) {
-  // 4-pointed star path
-  const path = `
-    M ${x} ${y - size}
-    L ${x + size * 0.3} ${y - size * 0.3}
-    L ${x + size} ${y}
-    L ${x + size * 0.3} ${y + size * 0.3}
-    L ${x} ${y + size}
-    L ${x - size * 0.3} ${y + size * 0.3}
-    L ${x - size} ${y}
-    L ${x - size * 0.3} ${y - size * 0.3}
-    Z
-  `;
-  return <Path d={path} fill="#D4A574" />;
-}
-
-function Path({ d, fill }: { d: string; fill: string }) {
-  // Use a Konva Path via a stringified SVG path
-  // We import through Group to keep it simple
+  const path =
+    `M ${x} ${y - size} L ${x + size * 0.3} ${y - size * 0.3} L ${x + size} ${y} ` +
+    `L ${x + size * 0.3} ${y + size * 0.3} L ${x} ${y + size} L ${x - size * 0.3} ${y + size * 0.3} ` +
+    `L ${x - size} ${y} L ${x - size * 0.3} ${y - size * 0.3} Z`;
   return (
     <Group>
-      <SvgPathString d={d} fill={fill} />
+      <Rect
+        x={0}
+        y={0}
+        width={0}
+        height={0}
+        fill="#D4A574"
+        sceneFunc={(context, shape) => {
+          const p = new Path2D(path);
+          context.fillStyle = "#D4A574";
+          context.fill(p);
+          context.fillStrokeShape(shape);
+        }}
+      />
     </Group>
-  );
-}
-
-function SvgPathString({ d, fill }: { d: string; fill: string }) {
-  // Convert simple SVG path to Konva Shape using sceneFunc
-  return (
-    <Rect
-      x={0}
-      y={0}
-      width={0}
-      height={0}
-      fill={fill}
-      shadowEnabled={false}
-      sceneFunc={(context, shape) => {
-        const path = new Path2D(d);
-        context.fillStyle = fill;
-        context.fill(path);
-        context.fillStrokeShape(shape);
-      }}
-    />
   );
 }
 
@@ -381,34 +378,62 @@ function HeartsDecor({
   const margin = Math.max(12, stageWidth * 0.018);
   return (
     <Group>
-      <HeartShape x={margin} y={margin} size={size} />
-      <HeartShape x={stageWidth - margin - size} y={stageHeight - margin - size} size={size} />
+      <Rect
+        x={margin}
+        y={margin}
+        width={0}
+        height={0}
+        fill="#E8919C"
+        opacity={0.7}
+        sceneFunc={(context, shape) => {
+          const cx = margin + size / 2;
+          const cy = margin + size / 2;
+          const r = size / 2;
+          context.beginPath();
+          context.moveTo(cx, margin + size);
+          context.bezierCurveTo(margin, margin + size * 0.6, margin, margin + size * 0.2, cx, margin + size * 0.4);
+          context.bezierCurveTo(margin + size, margin + size * 0.2, margin + size, margin + size * 0.6, cx, margin + size);
+          context.closePath();
+          context.fillStyle = "#E8919C";
+          context.fill();
+          context.fillStrokeShape(shape);
+        }}
+      />
+      <Rect
+        x={stageWidth - margin - size}
+        y={stageHeight - margin - size}
+        width={0}
+        height={0}
+        fill="#E8919C"
+        opacity={0.7}
+        sceneFunc={(context, shape) => {
+          const cx = stageWidth - margin - size + size / 2;
+          const cy = stageHeight - margin - size + size / 2;
+          const r = size / 2;
+          context.beginPath();
+          context.moveTo(cx, stageHeight - margin);
+          context.bezierCurveTo(
+            stageWidth - margin - size,
+            stageHeight - margin - size * 0.4,
+            stageWidth - margin - size,
+            stageHeight - margin - size * 0.8,
+            cx,
+            stageHeight - margin - size * 0.6
+          );
+          context.bezierCurveTo(
+            stageWidth - margin,
+            stageHeight - margin - size * 0.8,
+            stageWidth - margin,
+            stageHeight - margin - size * 0.4,
+            cx,
+            stageHeight - margin
+          );
+          context.closePath();
+          context.fillStyle = "#E8919C";
+          context.fill();
+          context.fillStrokeShape(shape);
+        }}
+      />
     </Group>
-  );
-}
-
-function HeartShape({ x, y, size }: { x: number; y: number; size: number }) {
-  return (
-    <Rect
-      x={0}
-      y={0}
-      width={0}
-      height={0}
-      fill="#E8919C"
-      opacity={0.7}
-      sceneFunc={(context, shape) => {
-        const cx = x + size / 2;
-        const cy = y + size / 2;
-        const r = size / 2;
-        context.beginPath();
-        context.moveTo(cx, y + size);
-        context.bezierCurveTo(x, y + size * 0.6, x, y + size * 0.2, cx, y + size * 0.4);
-        context.bezierCurveTo(x + size, y + size * 0.2, x + size, y + size * 0.6, cx, y + size);
-        context.closePath();
-        context.fillStyle = "#E8919C";
-        context.fill();
-        context.fillStrokeShape(shape);
-      }}
-    />
   );
 }

@@ -157,6 +157,7 @@ export function usePhotoActions({ exporter }: UsePhotoActionsOptions = {
         filterId: composed?.filterId ?? "normal",
         effectId: composed?.effectId ?? "off",
         frameId: selectedFrame,
+        templateId: usePhotoBoothStore.getState().selectedTemplateId,
         width: composed?.width ?? 1600,
         height: composed?.height ?? 2000,
         caption: composed?.caption ?? "",

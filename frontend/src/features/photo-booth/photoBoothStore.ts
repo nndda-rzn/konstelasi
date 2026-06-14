@@ -6,6 +6,8 @@ import {
   PHOTO_THEMES,
   type EffectId,
 } from "./photoBooth.config";
+import type { TemplateId } from "./config/templates";
+import { DEFAULT_TEMPLATE_ID } from "./config/templates";
 import type { ComposeResult, GalleryMetadata, Sticker } from "./photoBooth.types";
 
 /**
@@ -103,6 +105,7 @@ interface PhotoBoothState {
   selectedEffect: EffectId;
   selectedTimer: number;
   selectedFrame: FrameId;
+  selectedTemplateId: TemplateId | null;
   caption: string;
   setSelectedRatio: (id: RatioId) => void;
   setSelectedLayout: (id: LayoutId) => void;
@@ -114,6 +117,7 @@ interface PhotoBoothState {
   cycleSelectedEffect: () => void;
   setSelectedTimer: (n: number) => void;
   setSelectedFrame: (f: FrameId) => void;
+  setSelectedTemplate: (id: TemplateId | null) => void;
   setCaption: (c: string) => void;
 
   /* ----- Camera state ----- */
@@ -181,6 +185,7 @@ const defaultState: Pick<
   | "selectedEffect"
   | "selectedTimer"
   | "selectedFrame"
+  | "selectedTemplateId"
   | "caption"
   | "facingMode"
   | "isCameraReady"
@@ -211,6 +216,7 @@ const defaultState: Pick<
   selectedEffect: "off",
   selectedTimer: 3,
   selectedFrame: "softDiary",
+  selectedTemplateId: DEFAULT_TEMPLATE_ID,
   caption: "",
   facingMode: "user",
   isCameraReady: false,
@@ -255,6 +261,7 @@ export const usePhotoBoothStore = create<PhotoBoothState>((set) => ({
     }),
   setSelectedTimer: (n) => set({ selectedTimer: n }),
   setSelectedFrame: (f) => set({ selectedFrame: f }),
+  setSelectedTemplate: (id) => set({ selectedTemplateId: id }),
   setCaption: (c) => set({ caption: c }),
 
   toggleFacingMode: () =>
