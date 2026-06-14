@@ -133,9 +133,9 @@ export function PhotoBoothPage() {
                     onDownload={handleDownload}
                     onSave={handleSave}
                   />
-                  <aside className="hidden lg:block">
+                  <div className="hidden lg:block">
                     <PhotoBoothSettings />
-                  </aside>
+                  </div>
                 </div>
               )}
 
