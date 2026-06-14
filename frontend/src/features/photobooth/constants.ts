@@ -11,6 +11,7 @@ export type RatioKey = 'square' | 'portrait' | 'story' | 'landscape' | 'ultrawid
 export type QualityKey = 'standard' | 'hd' | 'ultra';
 export type BackgroundKey = 'none' | 'softBlur' | 'cream' | 'gradient';
 export type ZoomKey = 'ultrawide' | 'wide' | 'normal' | 'closeup';
+export type EffectKey = 'off' | 'soft' | 'warm';
 
 export interface StickerItem {
   id: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { FilterKey, LayoutKey, EditTab, StickerItem, ZoomKey, RatioKey, QualityKey, BackgroundKey } from "../constants";
+import type { FilterKey, LayoutKey, EditTab, StickerItem, ZoomKey, RatioKey, QualityKey, BackgroundKey, EffectKey } from "../constants";
 
 export type Stage =
   | "landing"
@@ -57,11 +57,21 @@ interface PhotoboothState {
   isGridEnabled: boolean;
   setGridEnabled: (enabled: boolean) => void;
 
-  isBeautyEnabled: boolean;
-  setBeautyEnabled: (enabled: boolean) => void;
+  selectedEffect: EffectKey;
+  setSelectedEffect: (effect: EffectKey) => void;
+  cycleSelectedEffect: () => void;
 
   isFlashEnabled: boolean;
   setFlashEnabled: (enabled: boolean) => void;
+
+  isCameraReady: boolean;
+  setCameraReady: (ready: boolean) => void;
+
+  isMoreSettingsOpen: boolean;
+  setMoreSettingsOpen: (open: boolean) => void;
+
+  isSettingsSheetOpen: boolean;
+  setSettingsSheetOpen: (open: boolean) => void;
 
   caption: string;
   setCaption: (caption: string) => void;
@@ -143,11 +153,26 @@ export const usePhotoboothStore = create<PhotoboothState>((set) => ({
   isGridEnabled: true,
   setGridEnabled: (isGridEnabled) => set({ isGridEnabled }),
 
-  isBeautyEnabled: false,
-  setBeautyEnabled: (isBeautyEnabled) => set({ isBeautyEnabled }),
+  selectedEffect: "off",
+  setSelectedEffect: (selectedEffect) => set({ selectedEffect }),
+  cycleSelectedEffect: () =>
+    set((s) => {
+      const order: EffectKey[] = ["off", "soft", "warm"];
+      const next = order[(order.indexOf(s.selectedEffect) + 1) % order.length];
+      return { selectedEffect: next };
+    }),
 
   isFlashEnabled: true,
   setFlashEnabled: (isFlashEnabled) => set({ isFlashEnabled }),
+
+  isCameraReady: false,
+  setCameraReady: (isCameraReady) => set({ isCameraReady }),
+
+  isMoreSettingsOpen: false,
+  setMoreSettingsOpen: (isMoreSettingsOpen) => set({ isMoreSettingsOpen }),
+
+  isSettingsSheetOpen: false,
+  setSettingsSheetOpen: (isSettingsSheetOpen) => set({ isSettingsSheetOpen }),
 
   caption: "",
   setCaption: (caption) => set({ caption }),
@@ -204,8 +229,10 @@ export const usePhotoboothStore = create<PhotoboothState>((set) => ({
       selectedQuality: "standard",
       selectedBackground: "none",
       isGridEnabled: true,
-      isBeautyEnabled: false,
+      selectedEffect: "off",
       isFlashEnabled: true,
+      isMoreSettingsOpen: false,
+      isSettingsSheetOpen: false,
       stickers: [],
       caption: "",
       isAuthPromptOpen: false,

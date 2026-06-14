@@ -35,7 +35,7 @@ export const usePhotobooth = (
   const selectedRatio = usePhotoboothStore((s) => s.selectedRatio);
   const selectedQuality = usePhotoboothStore((s) => s.selectedQuality);
   const selectedBackground = usePhotoboothStore((s) => s.selectedBackground);
-  const isBeautyEnabled = usePhotoboothStore((s) => s.isBeautyEnabled);
+  const selectedEffect = usePhotoboothStore((s) => s.selectedEffect);
   const zoomLevelKey = usePhotoboothStore((s) => s.zoomLevel);
   const selectedStripColor = usePhotoboothStore((s) => s.selectedStripColor);
   const caption = usePhotoboothStore((s) => s.caption);
@@ -74,7 +74,7 @@ export const usePhotobooth = (
       stickers,
       caption,
       zoomScale,
-      isBeautyEnabled
+      isBeautyEnabled: selectedEffect !== "off",
     };
 
     let p: Promise<string>;
@@ -111,7 +111,7 @@ export const usePhotobooth = (
     selectedRatio,
     selectedQuality,
     selectedBackground,
-    isBeautyEnabled,
+    selectedEffect,
     zoomLevelKey,
     caption,
     stickers,

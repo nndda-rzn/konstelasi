@@ -32,10 +32,13 @@ export function CameraPreview({ webcamRef, isCapturing }: CameraPreviewProps) {
   const zoomLevelKey = usePhotoboothStore((s) => s.zoomLevel);
   const ratioKey = usePhotoboothStore((s) => s.selectedRatio);
   const isGridEnabled = usePhotoboothStore((s) => s.isGridEnabled);
-  const isBeautyEnabled = usePhotoboothStore((s) => s.isBeautyEnabled);
+  const selectedEffect = usePhotoboothStore((s) => s.selectedEffect);
 
   const zoom = ZOOM_LEVELS.find((z) => z.key === zoomLevelKey) || ZOOM_LEVELS[0];
   const ratio = RATIOS.find((r) => r.key === ratioKey) || RATIOS[0];
+
+  const isBeautyOn = selectedEffect !== "off";
+  const isWarmOn = selectedEffect === "warm";
 
   return (
     <div className="relative mx-auto w-full max-w-2xl">
@@ -68,9 +71,16 @@ export function CameraPreview({ webcamRef, isCapturing }: CameraPreviewProps) {
           />
         </div>
 
-        {/* Beauty Filter Overlay (CSS) */}
-        {isBeautyEnabled && (
-          <div className="pointer-events-none absolute inset-0 backdrop-blur-[0.4px] saturate-[1.1] brightness-[1.04] contrast-[0.98]" />
+        {/* Beauty/Warm Filter Overlay (CSS) */}
+        {isBeautyOn && (
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backdropFilter: isWarmOn
+                ? 'saturate(140%) hue-rotate(10deg) brightness(1.05)'
+                : 'blur(0.4px) saturate(1.1) brightness(1.04) contrast(0.98)',
+            }}
+          />
         )}
 
         {/* Grid Overlay */}
