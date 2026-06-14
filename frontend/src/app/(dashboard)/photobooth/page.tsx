@@ -4,15 +4,15 @@ import { useRef } from "react";
 import Webcam from "react-webcam";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Camera } from "lucide-react";
+import { Camera, SlidersHorizontal } from "lucide-react";
 import { ApolloWrapper } from "@/lib/apollo/ApolloWrapper";
 import { Providers } from "@/lib/Providers";
 import { usePhotoboothStore } from "@/features/photobooth/store/usePhotoboothStore";
 import { usePhotobooth } from "@/features/photobooth/hooks/usePhotobooth";
 import { LandingStage } from "@/features/photobooth/components/LandingStage";
-import { CameraStage } from "@/features/photobooth/components/CameraStage";
-import { CaptureSettingsPanel } from "@/features/photobooth/components/CaptureSettingsPanel";
-import { StickyCaptureBar } from "@/features/photobooth/components/StickyCaptureBar";
+import { StudioStage } from "@/features/photobooth/components/StudioStage";
+import { CompactSettingsPanel } from "@/features/photobooth/components/CompactSettingsPanel";
+import { SettingsSheet } from "@/features/photobooth/components/SettingsSheet";
 import { PhotoPreview } from "@/features/photobooth/components/PhotoPreview";
 import { EditorSidebar } from "@/features/photobooth/components/EditorSidebar";
 import { DoneStage } from "@/features/photobooth/components/DoneStage";
@@ -24,9 +24,12 @@ function PhotoboothContent() {
   const previewRef = useRef<HTMLDivElement>(null);
 
   const stage = usePhotoboothStore((s) => s.stage);
-  const capturedPhotos = usePhotoboothStore((s) => s.capturedPhotos);
   const isAuthPromptOpen = usePhotoboothStore((s) => s.isAuthPromptOpen);
   const setAuthPromptOpen = usePhotoboothStore((s) => s.setAuthPromptOpen);
+  const isSettingsSheetOpen = usePhotoboothStore((s) => s.isSettingsSheetOpen);
+  const setSettingsSheetOpen = usePhotoboothStore((s) => s.setSettingsSheetOpen);
+  const selectedLayout = usePhotoboothStore((s) => s.selectedLayout);
+  const capturedPhotos = usePhotoboothStore((s) => s.capturedPhotos);
 
   const {
     layoutDef,
@@ -36,6 +39,9 @@ function PhotoboothContent() {
     handleSave,
     handleStickerDragEnd,
   } = usePhotobooth(webcamRef, previewRef);
+
+  const isCapture = stage === "setup" || stage === "countdown" || stage === "flash";
+  const isEdit = stage === "edit" || stage === "saving";
 
   return (
     <>
@@ -59,45 +65,61 @@ function PhotoboothContent() {
             )}
           </AnimatePresence>
 
-          {/* Header */}
+          {/* Slim Header */}
           <header className="sticky top-0 z-20 border-b border-[#FFB8C0]/15 bg-white/72 backdrop-blur-2xl">
-            <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-4">
+            <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-5">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#E63946] to-[#9D0208]">
-                  <Camera className="h-4 w-4 text-white" />
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#E63946] to-[#9D0208]">
+                  <Camera className="h-3.5 w-3.5 text-white" />
                 </div>
-                <h1 className="text-base font-bold text-[#3F2A35]">
-                  Photo Booth
-                </h1>
+                <h1 className="text-sm font-bold text-[#3F2A35]">Photo Booth</h1>
               </div>
               {(stage === "countdown" || stage === "flash") && (
-                <span className="ml-auto rounded-full border border-[#FFB8C0]/30 bg-white/60 px-3 py-1 text-[11px] font-semibold text-[#E63946]">
+                <span className="ml-auto rounded-full border border-[#FFB8C0]/30 bg-white/60 px-2.5 py-0.5 text-[10px] font-semibold text-[#E63946]">
                   Foto {capturedPhotos.length + 1} / {layoutDef.shots}
                 </span>
               )}
-              {stage === "edit" && (
-                <span className="ml-auto rounded-full border border-[#FFB8C0]/30 bg-white/60 px-3 py-1 text-[11px] font-semibold text-[#E63946]">
+              {isEdit && (
+                <span className="ml-auto rounded-full border border-[#FFB8C0]/30 bg-white/60 px-2.5 py-0.5 text-[10px] font-semibold text-[#E63946]">
                   Mode Edit
                 </span>
+              )}
+
+              {/* Mobile: open settings sheet */}
+              {isCapture && (
+                <button
+                  onClick={() => setSettingsSheetOpen(true)}
+                  className="ml-auto flex h-9 w-9 items-center justify-center rounded-xl border border-[#FFB8C0]/25 bg-white/60 text-[#6D5561] hover:text-[#E63946] lg:hidden"
+                  aria-label="Buka pengaturan"
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                </button>
               )}
             </div>
           </header>
 
           {/* Main content */}
-          <main className="mx-auto max-w-6xl xl:max-w-7xl 2xl:max-w-[1600px] px-6 py-8 pb-32 transition-all duration-500">
-            {/* SETUP / COUNTDOWN / FLASH stage */}
-            {(stage === "setup" ||
-              stage === "countdown" ||
-              stage === "flash") && (
-              <div className="grid gap-8 lg:grid-cols-[1fr_360px] 2xl:grid-cols-[1fr_420px] items-start">
-                <CameraStage webcamRef={webcamRef} layoutDef={layoutDef} />
-                <CaptureSettingsPanel onStart={handleStart} />
+          <main className="mx-auto max-w-7xl px-4 py-5 lg:px-6 lg:py-6 transition-all duration-500">
+            {/* Capture stage: asymmetric grid (preview hero + settings rail) */}
+            {isCapture && (
+              <div className="grid gap-5 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_360px] 2xl:grid-cols-[1fr_380px] items-start">
+                <StudioStage
+                  webcamRef={webcamRef}
+                  layoutDef={layoutDef}
+                  onStart={handleStart}
+                  onRetake={handleRetake}
+                  onDownload={handleDownload}
+                  onSave={handleSave}
+                />
+                <aside className="hidden lg:block">
+                  <CompactSettingsPanel />
+                </aside>
               </div>
             )}
 
-            {/* EDIT / SAVING stage */}
-            {(stage === "edit" || stage === "saving") && (
-              <div className="grid gap-8 lg:grid-cols-[1fr_320px] 2xl:grid-cols-[1fr_380px] items-start">
+            {/* Edit stage: keep existing 2-col editor + sidebar */}
+            {isEdit && (
+              <div className="grid gap-5 lg:grid-cols-[1fr_320px] items-start">
                 <PhotoPreview
                   previewRef={previewRef}
                   onStickerDragEnd={handleStickerDragEnd}
@@ -110,19 +132,12 @@ function PhotoboothContent() {
               </div>
             )}
 
-            {/* DONE stage */}
+            {/* Done stage */}
             {stage === "done" && <DoneStage />}
           </main>
 
-          {/* Sticky Bottom Control Bar */}
-          {(stage === "setup" || stage === "countdown" || stage === "flash" || stage === "edit") && (
-            <StickyCaptureBar
-              onStart={handleStart}
-              onRetake={handleRetake}
-              onDownload={handleDownload}
-              onSave={handleSave}
-            />
-          )}
+          {/* Mobile bottom sheet for settings */}
+          <SettingsSheet />
 
           {/* Soft auth prompt replaces hard redirect */}
           <AuthPromptModal
