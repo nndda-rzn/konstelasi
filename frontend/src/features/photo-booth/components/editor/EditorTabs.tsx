@@ -1,11 +1,12 @@
 "use client";
 
-import { Palette, Smile, Type } from "lucide-react";
+import { Palette, Frame as FrameIcon, Smile, Type } from "lucide-react";
 
-export type EditorTab = "filter" | "sticker" | "caption";
+export type EditorTab = "filter" | "frame" | "sticker" | "caption";
 
 /**
  * EditorTabs - Underline tabs for the result editor panel.
+ * Tabs: Filter · Frame · Sticker · Caption
  */
 export function EditorTabs({
   tab,
@@ -16,6 +17,7 @@ export function EditorTabs({
 }) {
   const items: { key: EditorTab; label: string; icon: any }[] = [
     { key: "filter", label: "Filter", icon: Palette },
+    { key: "frame", label: "Frame", icon: FrameIcon },
     { key: "sticker", label: "Stiker", icon: Smile },
     { key: "caption", label: "Caption", icon: Type },
   ];

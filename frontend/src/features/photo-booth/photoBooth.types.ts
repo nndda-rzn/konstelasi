@@ -3,6 +3,7 @@
  * Re-exports config + shared types used across components and utils.
  */
 
+import type { FrameId } from "./config/frames";
 import type {
   RatioId,
   LayoutId,
@@ -95,6 +96,12 @@ export interface ComposeResult {
   layoutId: LayoutId;
   filterId: FilterId;
   effectId: EffectId;
+  /**
+   * Optional. The composer doesn't apply frames (those are applied by
+   * the Konva stage in Result/Edit). The frame is recorded here when
+   * the result is finalized for save/download.
+   */
+  frameId?: FrameId;
   caption: string;
   createdAt: number;
 }
@@ -109,6 +116,7 @@ export interface GalleryMetadata {
   ratioId: RatioId;
   filterId: FilterId;
   effectId: EffectId;
+  frameId: FrameId;
   width: number;
   height: number;
   caption: string;

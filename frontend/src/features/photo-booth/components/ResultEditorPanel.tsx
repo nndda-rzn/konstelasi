@@ -4,11 +4,13 @@ import { useState } from "react";
 import { usePhotoBoothStore } from "../photoBoothStore";
 import { EditorTabs, type EditorTab } from "./editor/EditorTabs";
 import { FilterSelector } from "./FilterSelector";
+import { FrameSelector } from "./editor/FrameSelector";
 import { StickerPanel } from "./editor/StickerPanel";
 import { CaptionPanel } from "./editor/CaptionPanel";
 
 /**
  * ResultEditorPanel - Right-side editor for the result page.
+ * Tabs: Filter · Frame · Sticker · Caption
  * Divided sections, underline tabs, no nested card-in-card.
  */
 export function ResultEditorPanel() {
@@ -25,8 +27,9 @@ export function ResultEditorPanel() {
         <EditorTabs tab={tab} setTab={setTab} />
       </div>
 
-      <div className="min-h-[200px] p-4">
+      <div className="min-h-[260px] max-h-[60vh] overflow-y-auto p-4">
         {tab === "filter" && <FilterSelector />}
+        {tab === "frame" && <FrameSelector />}
         {tab === "sticker" && (
           <StickerPanel
             onAdd={addSticker}
