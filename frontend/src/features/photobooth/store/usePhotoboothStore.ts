@@ -77,6 +77,9 @@ interface PhotoboothState {
   activeTab: EditTab;
   setActiveTab: (tab: EditTab) => void;
 
+  isAuthPromptOpen: boolean;
+  setAuthPromptOpen: (open: boolean) => void;
+
   // Capture process state
   processing: boolean;
   setProcessing: (processing: boolean) => void;
@@ -177,6 +180,9 @@ export const usePhotoboothStore = create<PhotoboothState>((set) => ({
   activeTab: "filter",
   setActiveTab: (activeTab) => set({ activeTab }),
 
+  isAuthPromptOpen: false,
+  setAuthPromptOpen: (isAuthPromptOpen) => set({ isAuthPromptOpen }),
+
   // Capture process state
   processing: false,
   setProcessing: (processing) => set({ processing }),
@@ -202,6 +208,7 @@ export const usePhotoboothStore = create<PhotoboothState>((set) => ({
       isFlashEnabled: true,
       stickers: [],
       caption: "",
+      isAuthPromptOpen: false,
       isCapturing: false,
       countdown: null,
       processing: false,

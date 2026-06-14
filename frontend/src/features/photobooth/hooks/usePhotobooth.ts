@@ -220,21 +220,17 @@ export const usePhotobooth = (
     const caption = usePhotoboothStore.getState().caption;
     if (!finalPhoto) return;
 
-    // Precheck: ensure user has a session before hitting the auth-guarded mutation.
+    // Precheck: show soft auth prompt if no session, never hard-redirect.
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        notify.error("Sesi berakhir. Silakan masuk kembali.");
-        const r = usePhotoboothStore.getState();
-        r.setStage("edit");
-        if (typeof window !== "undefined") {
-          window.location.href = "/login?reason=session";
-        }
+        usePhotoboothStore.getState().setStage("edit");
+        usePhotoboothStore.getState().setAuthPromptOpen(true);
         return;
       }
     } catch {
-      notify.error("Tidak dapat memverifikasi sesi.");
+      usePhotoboothStore.getState().setAuthPromptOpen(true);
       return;
     }
 
@@ -287,10 +283,8 @@ export const usePhotobooth = (
     } catch (e: any) {
       const msg = String(e?.message || "");
       if (/unauthorized|401|403/i.test(msg)) {
-        notify.error("Sesi berakhir. Silakan masuk kembali.");
-        if (typeof window !== "undefined") {
-          window.location.href = "/login?reason=unauthorized";
-        }
+        usePhotoboothStore.getState().setStage("edit");
+        usePhotoboothStore.getState().setAuthPromptOpen(true);
         return;
       }
       notify.error("Gagal: " + e.message);

@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import Webcam from "react-webcam";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Camera } from "lucide-react";
 import { ApolloWrapper } from "@/lib/apollo/ApolloWrapper";
@@ -15,13 +16,17 @@ import { StickyCaptureBar } from "@/features/photobooth/components/StickyCapture
 import { PhotoPreview } from "@/features/photobooth/components/PhotoPreview";
 import { EditorSidebar } from "@/features/photobooth/components/EditorSidebar";
 import { DoneStage } from "@/features/photobooth/components/DoneStage";
+import { AuthPromptModal } from "@/features/photobooth/components/AuthPromptModal";
 
 function PhotoboothContent() {
+  const router = useRouter();
   const webcamRef = useRef<Webcam>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
   const stage = usePhotoboothStore((s) => s.stage);
   const capturedPhotos = usePhotoboothStore((s) => s.capturedPhotos);
+  const isAuthPromptOpen = usePhotoboothStore((s) => s.isAuthPromptOpen);
+  const setAuthPromptOpen = usePhotoboothStore((s) => s.setAuthPromptOpen);
 
   const {
     layoutDef,
@@ -118,6 +123,13 @@ function PhotoboothContent() {
               onSave={handleSave}
             />
           )}
+
+          {/* Soft auth prompt replaces hard redirect */}
+          <AuthPromptModal
+            open={isAuthPromptOpen}
+            onClose={() => setAuthPromptOpen(false)}
+            onLogin={() => router.push("/login?reason=photobooth_save")}
+          />
         </div>
       )}
     </>

@@ -25,48 +25,20 @@ const authLink = setContext(async (_, { headers }) => {
 });
 
 /**
- * Gracefully handle auth failures so they don't pollute the console
- * and so we can route the user to the login screen instead of
- * leaving them on a broken mutation.
+ * Gracefully handle auth failures so they don't pollute the console.
+ * We intentionally do NOT auto-redirect to /login here — feature-specific
+ * callers (e.g. handleSave) decide the right UX (modal, toast, etc.)
+ * via their own try/catch around the mutation.
  *
  * Apollo Client v4 passes a combined `error` object instead of the
  * separate graphQLErrors / networkError from v3.
  */
-const errorLink = onError(({ error, operation }) => {
+const errorLink = onError(({ error }) => {
+  // Silent: rely on caller to handle. We only normalize the detection here
+  // for future hook-in (analytics, telemetry) without changing the call path.
   const message = String((error as Error)?.message || "");
-  const cause = (error as { cause?: unknown })?.cause;
-  const causeMessage =
-    cause instanceof Error
-      ? String(cause.message || "")
-      : String(cause || "");
-
-  const isAuthError =
-    /unauthorized|UNAUTHENTICATED|jwt|token/i.test(message) ||
-    /unauthorized|UNAUTHENTICATED|jwt|401|403/i.test(causeMessage) ||
-    (() => {
-      try {
-        const raw = JSON.stringify(error);
-        return /unauthorized|UNAUTHENTICATED/i.test(raw);
-      } catch {
-        return false;
-      }
-    })();
-
-  if (isAuthError && typeof window !== 'undefined') {
-    const path = window.location.pathname;
-    const isAuthRoute = path.startsWith('/login') || path.startsWith('/register');
-    if (!isAuthRoute) {
-      // Soft redirect only for state-mutating ops, not background prefetches.
-      const isMutation = operation.query.definitions.some(
-        (d) => d.kind === 'OperationDefinition' && d.operation === 'mutation'
-      );
-      if (isMutation) {
-        const supabase = createClient();
-        supabase.auth.signOut().finally(() => {
-          window.location.href = '/login?reason=unauthorized';
-        });
-      }
-    }
+  if (/unauthorized|UNAUTHENTICATED/i.test(message)) {
+    // Intentionally no-op; let the mutation's catch block surface UX.
   }
 });
 
