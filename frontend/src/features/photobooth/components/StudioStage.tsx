@@ -32,7 +32,7 @@ export function StudioStage({
   const stage = usePhotoboothStore((s) => s.stage);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <CameraPreview webcamRef={webcamRef} isCapturing={isCapturing} />
       <CapturedThumbs layoutDef={layoutDef} />
       {(stage === "setup" ||

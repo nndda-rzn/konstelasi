@@ -9,8 +9,8 @@ interface CapturedThumbsProps {
 }
 
 /**
- * CapturedThumbs - Compact row of small thumbnails (48x32) shown
- * below the preview once photos are captured.
+ * CapturedThumbs - Compact row of small thumbnails shown once photos
+ * are captured. Sits between preview and control bar.
  */
 export function CapturedThumbs({ layoutDef }: CapturedThumbsProps) {
   const capturedPhotos = usePhotoboothStore((s) => s.capturedPhotos);
@@ -21,13 +21,13 @@ export function CapturedThumbs({ layoutDef }: CapturedThumbsProps) {
   if (capturedPhotos.length === 0) return null;
 
   return (
-    <div className="flex justify-center gap-2">
+    <div className="flex justify-center gap-1.5">
       {capturedPhotos.map((p, i) => (
         <motion.div
           key={i}
-          initial={{ scale: 0.6, opacity: 0 }}
+          initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="h-12 w-[48px] overflow-hidden rounded-md border border-[#E63946]/30 shadow-sm bg-black/5"
+          className="h-10 w-10 overflow-hidden rounded-md border border-black/10 bg-black/5"
         >
           <img
             src={p}
@@ -42,7 +42,7 @@ export function CapturedThumbs({ layoutDef }: CapturedThumbsProps) {
       }).map((_, i) => (
         <div
           key={`e${i}`}
-          className="h-12 w-[48px] rounded-md border border-dashed border-[#FFB8C0]/40 bg-white/30"
+          className="h-10 w-10 rounded-md border border-dashed border-black/15 bg-[#FAFAFA]"
         />
       ))}
     </div>
