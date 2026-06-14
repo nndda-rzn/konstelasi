@@ -9,24 +9,25 @@ interface CapturedThumbsProps {
 }
 
 /**
- * CapturedThumbs - Displays small thumbnails of photos taken so far.
+ * CapturedThumbs - Compact row of small thumbnails (48x32) shown
+ * below the preview once photos are captured.
  */
 export function CapturedThumbs({ layoutDef }: CapturedThumbsProps) {
   const capturedPhotos = usePhotoboothStore((s) => s.capturedPhotos);
   const selectedFilter = usePhotoboothStore((s) => s.selectedFilter);
-  
+
   const filterCss = FILTERS.find((f) => f.key === selectedFilter)?.css || "";
 
   if (capturedPhotos.length === 0) return null;
 
   return (
-    <div className="flex justify-center gap-3">
+    <div className="flex justify-center gap-2">
       {capturedPhotos.map((p, i) => (
         <motion.div
           key={i}
-          initial={{ scale: 0.7, opacity: 0 }}
+          initial={{ scale: 0.6, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="h-14 w-[74px] overflow-hidden rounded-lg border-2 border-[#E63946]/30 shadow-md bg-black/5"
+          className="h-12 w-[48px] overflow-hidden rounded-md border border-[#E63946]/30 shadow-sm bg-black/5"
         >
           <img
             src={p}
@@ -41,7 +42,7 @@ export function CapturedThumbs({ layoutDef }: CapturedThumbsProps) {
       }).map((_, i) => (
         <div
           key={`e${i}`}
-          className="h-14 w-[74px] rounded-lg border-2 border-dashed border-[#FFB8C0]/40 bg-white/30"
+          className="h-12 w-[48px] rounded-md border border-dashed border-[#FFB8C0]/40 bg-white/30"
         />
       ))}
     </div>
