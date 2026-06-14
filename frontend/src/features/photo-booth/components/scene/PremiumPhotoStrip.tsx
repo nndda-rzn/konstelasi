@@ -5,19 +5,16 @@ import { useEffect } from "react";
 
 /**
  * PremiumPhotoStrip - HTML/CSS photo strip styled like a printed photo card.
- * Looks like real paper, not 3D mesh. Uses framer-motion for subtle
- * floating + parallax tilt.
+ * Branded for Constella: warm cream paper, pastel frames, tiny star accents,
+ * soft highlight, parallax tilt, and gentle floating.
  */
 export function PremiumPhotoStrip() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // Smooth spring physics for natural feel
   const springConfig = { stiffness: 60, damping: 18, mass: 0.4 };
   const rotateX = useSpring(useTransform(mouseY, [-1, 1], [4, -4]), springConfig);
   const rotateY = useSpring(useTransform(mouseX, [-1, 1], [-5, 5]), springConfig);
-
-  // Subtle shadow that follows tilt
   const shadowX = useSpring(useTransform(mouseX, [-1, 1], [6, -6]), springConfig);
   const shadowY = useSpring(useTransform(mouseY, [-1, 1], [6, -6]), springConfig);
 
@@ -40,6 +37,24 @@ export function PremiumPhotoStrip() {
       className="relative flex items-center justify-center"
       style={{ perspective: "1200px" }}
     >
+      {/* Soft radial glow behind the strip - Constella haze */}
+      <div
+        className="pointer-events-none absolute inset-0 -m-16"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(255, 200, 210, 0.35) 0%, rgba(245, 220, 230, 0.18) 35%, transparent 70%)",
+          filter: "blur(20px)",
+        }}
+        aria-hidden
+      />
+
+      {/* Tiny star sparkles around the strip - positioned absolutely */}
+      <Sparkle className="absolute -top-2 -left-3" delay={0} size={6} />
+      <Sparkle className="absolute -top-1 right-2" delay={0.8} size={4} />
+      <Sparkle className="absolute top-1/3 -left-5" delay={1.5} size={5} />
+      <Sparkle className="absolute bottom-2 -right-3" delay={0.4} size={7} />
+      <Sparkle className="absolute -bottom-1 left-4" delay={1.2} size={4} />
+
       {/* Soft drop shadow that follows parallax */}
       <motion.div
         className="absolute -bottom-4 left-1/2 h-10 w-52 -translate-x-1/2 rounded-full opacity-40 blur-2xl"
@@ -97,20 +112,33 @@ export function PremiumPhotoStrip() {
             <Frame color="#FCDCE6" />
           </div>
 
-          {/* Brand footer */}
+          {/* Brand footer with tiny star accent */}
           <div className="mt-3 flex items-center justify-center gap-1.5">
-            <span
-              className="inline-block h-1 w-1 rounded-full"
-              style={{ background: "#E63946" }}
-            />
+            <svg
+              width="8"
+              height="8"
+              viewBox="0 0 8 8"
+              fill="none"
+              className="shrink-0"
+              aria-hidden
+            >
+              <path
+                d="M4 0L4.5 3L8 4L4.5 5L4 8L3.5 5L0 4L3.5 3L4 0Z"
+                fill="#D4A574"
+                opacity="0.7"
+              />
+            </svg>
             <span
               className="text-[8.5px] font-semibold tracking-[0.22em] uppercase"
               style={{ color: "#5A3E4C" }}
             >
               Constella
             </span>
+            <span className="text-[8.5px]" style={{ color: "#B8A0AA" }}>
+              ✦
+            </span>
             <span className="text-[8.5px]" style={{ color: "#8C7783" }}>
-              · 14 Jun 2026
+              14 Jun 2026
             </span>
           </div>
         </div>
@@ -137,6 +165,49 @@ function Frame({ color }: { color: string }) {
         aria-hidden
       />
     </div>
+  );
+}
+
+/**
+ * Sparkle - Tiny twinkling star accent for the brand.
+ */
+function Sparkle({
+  className,
+  delay = 0,
+  size = 6,
+}: {
+  className?: string;
+  delay?: number;
+  size?: number;
+}) {
+  return (
+    <motion.div
+      className={`pointer-events-none ${className}`}
+      animate={{
+        opacity: [0.2, 0.8, 0.2],
+        scale: [0.85, 1, 0.85],
+      }}
+      transition={{
+        duration: 3 + delay * 0.3,
+        repeat: Infinity,
+        delay,
+        ease: "easeInOut",
+      }}
+    >
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 8 8"
+        fill="none"
+        aria-hidden
+      >
+        <path
+          d="M4 0L4.6 3.4L8 4L4.6 4.6L4 8L3.4 4.6L0 4L3.4 3.4L4 0Z"
+          fill="#D4A574"
+          opacity="0.6"
+        />
+      </svg>
+    </motion.div>
   );
 }
 
