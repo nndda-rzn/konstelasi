@@ -3,9 +3,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useReducedMotion } from "@/features/auth/hooks/useReducedMotion";
-import { FloatingPhotoStrip } from "./FloatingPhotoStrip";
 import { SoftStarField } from "./SoftStarField";
 import { ConstellationLines } from "./ConstellationLines";
+import { PremiumPhotoStrip } from "./PremiumPhotoStrip";
 import { PhotoStripSample } from "../PhotoStripSample";
 
 function detectWebGL(): boolean {
@@ -29,18 +29,18 @@ interface HeroSceneProps {
 }
 
 /**
- * HeroScene - 3D hero for Photo Booth welcome screen.
+ * HeroScene - Hybrid 2.5D hero for Photo Booth welcome screen.
  *
  * Architecture:
- * - Three.js renders a 3D printed photo card with thin depth
- * - Ambient particles + constellation lines in the background
- * - HTML content (text, buttons) sits above via z-index
+ * - HTML/CSS photo strip is the main visual (looks like real paper)
+ * - Three.js renders ambient particles + constellation lines behind
+ * - Canvas is transparent, pointer-events-none
  *
  * Performance:
- * - SSR safe with WebGL detection → 2D fallback
+ * - SSR safe with WebGL detection → 2D fallback (PhotoStripSample)
  * - Mobile detection for particle count tuning
  * - Reduced motion disables animations
- * - No 3D models, no heavy geometry, no textures
+ * - No 3D models, no textures
  */
 export function HeroScene({ className = "" }: HeroSceneProps) {
   const [ready, setReady] = useState(false);
@@ -48,46 +48,11 @@ export function HeroScene({ className = "" }: HeroSceneProps) {
   const [isMobile, setIsMobile] = useState(false);
   const reducedMotion = useReducedMotion();
 
-  // Mouse parallax state
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [parallaxEnabled, setParallaxEnabled] = useState(false);
-
   useEffect(() => {
     setHasWebGL(detectWebGL());
     setIsMobile(detectMobile());
     setReady(true);
-
-    const isTouch = window.matchMedia("(pointer: coarse)").matches;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setParallaxEnabled(!isTouch && !reduced);
   }, []);
-
-  // Mouse tracking for parallax
-  useEffect(() => {
-    if (!parallaxEnabled) return;
-    let raf: number;
-    const target = { x: 0, y: 0 };
-    const current = { x: 0, y: 0 };
-
-    const onMove = (e: PointerEvent) => {
-      target.x = (e.clientX / window.innerWidth) * 2 - 1;
-      target.y = (e.clientY / window.innerHeight) * 2 - 1;
-    };
-
-    const tick = () => {
-      current.x += (target.x - current.x) * 0.04;
-      current.y += (target.y - current.y) * 0.04;
-      setMousePos({ x: current.x, y: current.y });
-      raf = requestAnimationFrame(tick);
-    };
-
-    window.addEventListener("pointermove", onMove, { passive: true });
-    raf = requestAnimationFrame(tick);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      cancelAnimationFrame(raf);
-    };
-  }, [parallaxEnabled]);
 
   // Curated constellation anchor points
   const constellationAnchors = useMemo<[number, number, number][]>(() => {
@@ -112,7 +77,7 @@ export function HeroScene({ className = "" }: HeroSceneProps) {
     ];
   }, [isMobile]);
 
-  // Fallback: existing 2D photo strip
+  // Fallback: existing 2D photo strip (no Three.js)
   if (!ready || hasWebGL === null || !hasWebGL) {
     return (
       <div className={`flex items-center justify-center ${className}`}>
@@ -124,56 +89,37 @@ export function HeroScene({ className = "" }: HeroSceneProps) {
   const particleCount = isMobile ? 30 : 55;
 
   return (
-    <div
-      className={`relative ${className}`}
-      aria-hidden="true"
-    >
-      <Canvas
-        dpr={[1, isMobile ? 1.25 : 1.5]}
-        gl={{
-          antialias: !isMobile,
-          alpha: true,
-          powerPreference: "high-performance",
-        }}
-        camera={{ position: [0, 0, 4.5], fov: 40, near: 0.1, far: 50 }}
-        style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
+    <div className={`relative ${className}`}>
+      {/* Three.js ambient layer (behind the HTML strip) */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden="true"
       >
-        {/* Bright warm lighting to keep the strip looking like printed paper */}
-        <ambientLight intensity={1.2} color="#FFF8F0" />
-        <directionalLight
-          position={[2, 2, 4]}
-          intensity={0.6}
-          color="#FFFAF0"
-        />
-        <directionalLight
-          position={[-1.5, 0, 3]}
-          intensity={0.3}
-          color="#FFE8D0"
-        />
-        <directionalLight
-          position={[0, -1, 2]}
-          intensity={0.2}
-          color="#F0E0D0"
-        />
+        <Canvas
+          dpr={[1, isMobile ? 1.25 : 1.5]}
+          gl={{
+            antialias: !isMobile,
+            alpha: true,
+            powerPreference: "high-performance",
+          }}
+          camera={{ position: [0, 0, 8], fov: 40, near: 0.1, far: 50 }}
+          style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
+        >
+          <SoftStarField
+            count={particleCount}
+            enableTwinkle={!reducedMotion}
+          />
+          <ConstellationLines
+            starPositions={constellationAnchors}
+            opacity={0.18}
+          />
+        </Canvas>
+      </div>
 
-        {/* Main 3D element - thin printed photo card */}
-        <FloatingPhotoStrip
-          reducedMotion={reducedMotion}
-          parallax={{ x: mousePos.x, y: mousePos.y, enabled: parallaxEnabled }}
-        />
-
-        {/* Ambient particles */}
-        <SoftStarField
-          count={particleCount}
-          enableTwinkle={!reducedMotion}
-        />
-
-        {/* Constellation connecting lines */}
-        <ConstellationLines
-          starPositions={constellationAnchors}
-          opacity={0.18}
-        />
-      </Canvas>
+      {/* HTML photo strip (main visual, above the canvas) */}
+      <div className="relative z-10 flex h-full items-center justify-center">
+        <PremiumPhotoStrip />
+      </div>
     </div>
   );
 }
