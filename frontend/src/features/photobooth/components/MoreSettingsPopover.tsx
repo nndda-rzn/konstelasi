@@ -6,8 +6,7 @@ import { QUALITIES, BACKGROUNDS, ZOOM_LEVELS, type QualityKey, type BackgroundKe
 import { usePhotoboothStore } from "../store/usePhotoboothStore";
 
 /**
- * MoreSettingsPopover - Floating popover with advanced settings:
- * Quality, Background, Zoom. Triggered from CompactSettingsPanel.
+ * MoreSettingsPopover - Advanced settings: Quality, Background, Zoom.
  */
 export function MoreSettingsPopover() {
   const isOpen = usePhotoboothStore((s) => s.isMoreSettingsOpen);
@@ -44,10 +43,10 @@ export function MoreSettingsPopover() {
     <div ref={containerRef} className="relative w-full">
       <button
         onClick={() => setOpen(!isOpen)}
-        className={`flex w-full items-center justify-center gap-1.5 rounded-xl border py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all ${
+        className={`flex w-full items-center justify-center gap-1.5 rounded-md border py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
           isOpen
             ? "border-[#E63946]/40 bg-[#E63946]/6 text-[#E63946]"
-            : "border-[#FFB8C0]/20 bg-white/40 text-[#6D5561] hover:bg-white/60 hover:text-[#3F2A35]"
+            : "border-black/10 bg-white text-[#6D5561] hover:border-black/20 hover:text-[#3F2A35]"
         }`}
       >
         <SlidersHorizontal className="h-3 w-3" />
@@ -55,11 +54,11 @@ export function MoreSettingsPopover() {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-30 rounded-2xl border border-[#FFB8C0]/25 bg-white/95 p-4 shadow-[0_8px_24px_rgba(84,45,55,0.15)] backdrop-blur-2xl">
-          <div className="space-y-4">
+        <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-30 rounded-lg border border-black/10 bg-white p-3 shadow-lg">
+          <div className="space-y-3">
             {/* Quality */}
             <div className="space-y-1.5">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-[#8C7783]">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#6D5561]">
                 Kualitas
               </p>
               <div className="flex gap-1">
@@ -69,10 +68,10 @@ export function MoreSettingsPopover() {
                     <button
                       key={q.key}
                       onClick={() => setSelectedQuality(q.key as QualityKey)}
-                      className={`flex-1 rounded-lg border px-1.5 py-1 text-[10px] font-bold transition-all ${
+                      className={`flex-1 rounded border px-1.5 py-1 text-[10px] font-semibold transition-colors ${
                         active
                           ? "border-[#E63946]/40 bg-[#E63946]/8 text-[#E63946]"
-                          : "border-[#FFB8C0]/20 bg-white/50 text-[#6D5561] hover:border-[#FFB8C0]/45"
+                          : "border-black/10 bg-white text-[#6D5561] hover:border-black/20"
                       }`}
                     >
                       {q.label}
@@ -84,24 +83,24 @@ export function MoreSettingsPopover() {
 
             {/* Background */}
             <div className="space-y-1.5">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-[#8C7783]">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#6D5561]">
                 Latar
               </p>
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-4 gap-1">
                 {BACKGROUNDS.map((b) => {
                   const active = b.key === selectedBackground;
                   return (
                     <button
                       key={b.key}
                       onClick={() => setSelectedBackground(b.key as BackgroundKey)}
-                      className={`flex flex-col items-center gap-1 rounded-lg border px-1 py-1.5 text-[9px] font-semibold transition-all ${
+                      className={`flex flex-col items-center gap-1 rounded border px-1 py-1.5 text-[9px] font-medium transition-colors ${
                         active
                           ? "border-[#E63946]/40 bg-[#E63946]/8 text-[#E63946]"
-                          : "border-[#FFB8C0]/20 bg-white/50 text-[#6D5561]"
+                          : "border-black/10 bg-white text-[#6D5561]"
                       }`}
                     >
                       <div
-                        className="h-4 w-full rounded"
+                        className="h-4 w-full rounded-sm"
                         style={{
                           background:
                             b.key === "none"
@@ -111,7 +110,7 @@ export function MoreSettingsPopover() {
                                 : b.key === "gradient"
                                   ? "linear-gradient(135deg,#FFE5E8,#FFB8C0,#FFE5E8)"
                                   : "linear-gradient(135deg,#FFE5E8,#FFB8C0)",
-                          border: b.key === "none" ? "1px dashed #FFB8C0" : "none",
+                          border: b.key === "none" ? "1px dashed #8C7783" : "none",
                         }}
                       />
                       {b.label}
@@ -123,7 +122,7 @@ export function MoreSettingsPopover() {
 
             {/* Zoom */}
             <div className="space-y-1.5">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-[#8C7783]">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#6D5561]">
                 Sudut Pandang
               </p>
               <div className="grid grid-cols-4 gap-1">
@@ -133,10 +132,10 @@ export function MoreSettingsPopover() {
                     <button
                       key={z.key}
                       onClick={() => setZoomLevel(z.key as ZoomKey)}
-                      className={`rounded-lg border px-1 py-1 text-[9px] font-bold transition-all ${
+                      className={`rounded border px-1 py-1 text-[9px] font-semibold transition-colors ${
                         active
                           ? "border-[#E63946]/40 bg-[#E63946]/8 text-[#E63946]"
-                          : "border-[#FFB8C0]/20 bg-white/50 text-[#6D5561]"
+                          : "border-black/10 bg-white text-[#6D5561]"
                       }`}
                     >
                       {z.desc}

@@ -5,30 +5,29 @@ import { usePhotoboothStore } from "../store/usePhotoboothStore";
 
 /**
  * TimerSelector - Slim 3-button segmented control.
- * h-8, no per-item card.
  */
 export function TimerSelector() {
   const selectedTimer = usePhotoboothStore((s) => s.selectedTimer);
   const setSelectedTimer = usePhotoboothStore((s) => s.setSelectedTimer);
 
   return (
-    <div className="flex w-full rounded-xl border border-[#FFB8C0]/20 bg-white/55 p-0.5 backdrop-blur-md">
+    <div className="flex w-full rounded-md border border-black/10 bg-[#FAFAFA] p-0.5">
       {TIMERS.map((t) => {
         const active = selectedTimer === t.value;
         return (
           <button
             key={t.value}
             onClick={() => setSelectedTimer(t.value)}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 text-[11px] font-bold transition-all ${
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded py-1.5 text-[11px] font-semibold transition-colors ${
               active
-                ? "bg-[#E63946] text-white shadow-sm"
-                : "text-[#6D5561] hover:text-[#3F2A35]"
+                ? "bg-white text-[#3F2A35] shadow-sm"
+                : "text-[#8C7783] hover:text-[#3F2A35]"
             }`}
             title={t.desc}
           >
             <span>{t.label}</span>
             {active && (
-              <span className="text-[9px] font-medium opacity-80">
+              <span className="text-[9px] font-medium text-[#8C7783]">
                 {t.desc}
               </span>
             )}

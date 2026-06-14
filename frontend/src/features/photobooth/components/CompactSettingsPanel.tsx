@@ -7,13 +7,13 @@ import { EffectsToggleGroup } from "./EffectsToggleGroup";
 import { MoreSettingsPopover } from "./MoreSettingsPopover";
 
 /**
- * CompactSettingsPanel - Studio-style settings column.
- * Fits one viewport without internal scroll at 1366x768.
- * Order: Format (ratio) → Layout → Timer → Effects → More.
+ * CompactSettingsPanel - Right column settings rail.
+ * Width set by parent grid (340px). Reduced radius and shadows for a
+ * calmer, product-like look.
  */
 export function CompactSettingsPanel() {
   return (
-    <div className="flex flex-col gap-3.5 rounded-3xl border border-[#FFB8C0]/20 bg-white/65 p-4 shadow-[0_8px_24px_rgba(84,45,55,0.08)] backdrop-blur-2xl">
+    <div className="flex flex-col gap-4 rounded-2xl border border-black/10 bg-white p-4 shadow-sm">
       <Section label="Format">
         <RatioSelector />
       </Section>
@@ -44,7 +44,7 @@ function Section({
 }) {
   return (
     <div className="space-y-1.5">
-      <p className="text-[9px] font-bold uppercase tracking-widest text-[#8C7783]">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-[#6D5561]">
         {label}
       </p>
       {children}

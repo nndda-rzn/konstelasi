@@ -6,9 +6,7 @@ import { LAYOUTS, type LayoutKey } from "../constants";
 import { usePhotoboothStore } from "../store/usePhotoboothStore";
 
 /**
- * LayoutDropdown - Compact pill button that opens a popover with 8 layout
- * options. Hides the visual weight of 8 cards while keeping all options
- * one click away. Closes on outside click and Escape.
+ * LayoutDropdown - Compact pill that opens a popover with 8 layout options.
  */
 export function LayoutDropdown() {
   const selectedLayout = usePhotoboothStore((s) => s.selectedLayout);
@@ -39,15 +37,15 @@ export function LayoutDropdown() {
     <div ref={containerRef} className="relative w-full">
       <button
         onClick={() => setOpen((v) => !v)}
-        className={`flex w-full items-center justify-between gap-2 rounded-xl border bg-white/55 px-3 py-2 text-left backdrop-blur-md transition-all ${
+        className={`flex w-full items-center justify-between gap-2 rounded-md border bg-white px-3 py-2 text-left transition-colors ${
           open
             ? "border-[#E63946]/40"
-            : "border-[#FFB8C0]/20 hover:border-[#FFB8C0]/45"
+            : "border-black/10 hover:border-black/20"
         }`}
         aria-expanded={open}
       >
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[12px] font-bold text-[#3F2A35]">
+          <p className="truncate text-[12px] font-semibold text-[#3F2A35]">
             {current.label}
           </p>
         </div>
@@ -59,7 +57,7 @@ export function LayoutDropdown() {
       </button>
 
       {open && (
-        <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-30 max-h-[280px] overflow-y-auto rounded-2xl border border-[#FFB8C0]/25 bg-white/95 p-1.5 shadow-[0_8px_24px_rgba(84,45,55,0.12)] backdrop-blur-2xl">
+        <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-30 max-h-[280px] overflow-y-auto rounded-lg border border-black/10 bg-white p-1 shadow-lg">
           {LAYOUTS.map((l) => {
             const active = l.key === selectedLayout;
             return (
@@ -69,15 +67,13 @@ export function LayoutDropdown() {
                   setSelectedLayout(l.key as LayoutKey);
                   setOpen(false);
                 }}
-                className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors ${
-                  active
-                    ? "bg-[#E63946]/8"
-                    : "hover:bg-[#FFE5E8]/60"
+                className={`flex w-full items-center gap-2.5 rounded px-2 py-1.5 text-left transition-colors ${
+                  active ? "bg-[#E63946]/8" : "hover:bg-[#FAFAFA]"
                 }`}
               >
                 <div className="min-w-0 flex-1">
                   <p
-                    className={`text-[12px] font-bold ${
+                    className={`text-[12px] font-semibold ${
                       active ? "text-[#E63946]" : "text-[#3F2A35]"
                     }`}
                   >

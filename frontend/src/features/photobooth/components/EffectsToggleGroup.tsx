@@ -12,7 +12,6 @@ import type { EffectKey } from "../constants";
 
 /**
  * EffectsToggleGroup - 5 icon-only chips: Mirror, Grid, Flash, Soft, Warm.
- * Each independent. Soft and Warm are mutually exclusive within effect.
  */
 export function EffectsToggleGroup() {
   const isGridEnabled = usePhotoboothStore((s) => s.isGridEnabled);
@@ -40,10 +39,10 @@ export function EffectsToggleGroup() {
       onClick={onClick}
       title={label}
       aria-label={label}
-      className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
+      className={`flex h-9 w-9 items-center justify-center rounded-md border transition-colors ${
         active
-          ? "bg-[#E63946] text-white shadow-sm"
-          : "bg-white/55 text-[#6D5561] hover:bg-white/80 hover:text-[#3F2A35]"
+          ? "border-[#E63946] bg-[#E63946] text-white"
+          : "border-black/10 bg-white text-[#6D5561] hover:border-black/20 hover:text-[#3F2A35]"
       }`}
     >
       <Icon className="h-4 w-4" />
@@ -51,7 +50,7 @@ export function EffectsToggleGroup() {
   );
 
   return (
-    <div className="flex w-full items-center justify-between gap-1.5 rounded-xl border border-[#FFB8C0]/20 bg-white/40 p-1.5 backdrop-blur-md">
+    <div className="flex w-full items-center justify-between gap-1 rounded-md border border-black/10 bg-[#FAFAFA] p-1.5">
       <Chip
         active={isGridEnabled}
         onClick={() => setGridEnabled(!isGridEnabled)}

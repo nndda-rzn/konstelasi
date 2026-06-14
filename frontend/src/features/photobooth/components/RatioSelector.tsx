@@ -5,24 +5,23 @@ import { usePhotoboothStore } from "../store/usePhotoboothStore";
 
 /**
  * RatioSelector - Slim segmented control for 5 aspect ratios.
- * Single horizontal row, h-7, no per-item card.
  */
 export function RatioSelector() {
   const selectedRatio = usePhotoboothStore((s) => s.selectedRatio);
   const setSelectedRatio = usePhotoboothStore((s) => s.setSelectedRatio);
 
   return (
-    <div className="flex w-full rounded-xl border border-[#FFB8C0]/20 bg-white/55 p-0.5 backdrop-blur-md">
+    <div className="flex w-full rounded-md border border-black/10 bg-[#FAFAFA] p-0.5">
       {RATIOS.map((r) => {
         const active = selectedRatio === r.key;
         return (
           <button
             key={r.key}
             onClick={() => setSelectedRatio(r.key as RatioKey)}
-            className={`flex flex-1 items-center justify-center rounded-lg px-1.5 py-1.5 text-[10px] font-bold transition-all ${
+            className={`flex flex-1 items-center justify-center rounded px-1.5 py-1.5 text-[10px] font-semibold transition-colors ${
               active
-                ? "bg-[#E63946] text-white shadow-sm"
-                : "text-[#6D5561] hover:text-[#3F2A35]"
+                ? "bg-white text-[#3F2A35] shadow-sm"
+                : "text-[#8C7783] hover:text-[#3F2A35]"
             }`}
             title={r.desc}
           >
