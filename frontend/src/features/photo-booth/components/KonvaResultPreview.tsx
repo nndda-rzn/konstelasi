@@ -137,7 +137,7 @@ export const KonvaResultPreview = forwardRef<
 
   return (
     <div
-      className="relative mx-auto"
+      className="relative mx-auto overflow-hidden rounded-lg"
       style={{
         width: displayWidth,
         maxWidth: "100%",
@@ -151,6 +151,13 @@ export const KonvaResultPreview = forwardRef<
         // Scale display to fit the CSS width while keeping stage pixel-perfect
         scaleX={displayWidth / stageWidth}
         scaleY={displayWidth / stageWidth}
+        // Disable stage-level listening: there are no interactive
+        // children yet, and the canvas's full-resolution DOM element
+        // (stageWidth wide) was overflowing into the right panel,
+        // stealing pointer events from the Filter/Frame/Stiker/Caption
+        // tabs. Clip via overflow:hidden on the wrapper + listening:false
+        // on the Stage makes the canvas truly passive.
+        listening={false}
       >
         {/* Layer 1: Frame surround (background + border + decor) */}
         <Layer listening={false}>
