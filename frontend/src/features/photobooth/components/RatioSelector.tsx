@@ -1,51 +1,35 @@
 "use client";
 
-import { Maximize2, Square, Smartphone, Monitor, Tv } from "lucide-react";
-import { RATIOS } from "../constants";
+import { RATIOS, type RatioKey } from "../constants";
 import { usePhotoboothStore } from "../store/usePhotoboothStore";
 
-const ICONS = {
-  square: Square,
-  portrait: RectangleVertical,
-  story: Smartphone,
-  landscape: Monitor,
-  ultrawide: Tv
-};
-
-// RectangleVertical fallback if not in lucide
-function RectangleVertical(props: any) {
-  return <Square {...props} className={props.className + " scale-x-75"} />;
-}
-
+/**
+ * RatioSelector - Slim segmented control for 5 aspect ratios.
+ * Single horizontal row, h-7, no per-item card.
+ */
 export function RatioSelector() {
   const selectedRatio = usePhotoboothStore((s) => s.selectedRatio);
   const setSelectedRatio = usePhotoboothStore((s) => s.setSelectedRatio);
 
   return (
-    <div className="space-y-3">
-      <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#6D5561]">
-        <Maximize2 className="h-3.5 w-3.5" />
-        Rasio Frame
-      </p>
-      <div className="flex flex-wrap gap-2">
-        {RATIOS.map((r) => {
-          const Icon = ICONS[r.key as keyof typeof ICONS] || Square;
-          return (
-            <button
-              key={r.key}
-              onClick={() => setSelectedRatio(r.key)}
-              className={`flex flex-1 min-w-[80px] flex-col items-center gap-1.5 rounded-2xl border py-2.5 transition-all ${
-                selectedRatio === r.key
-                  ? "border-[#E63946]/40 bg-[#E63946]/6 text-[#E63946]"
-                  : "border-[#FFB8C0]/25 bg-white/50 text-[#6D5561]"
-              }`}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              <span className="text-[10px] font-bold">{r.label}</span>
-            </button>
-          );
-        })}
-      </div>
+    <div className="flex w-full rounded-xl border border-[#FFB8C0]/20 bg-white/55 p-0.5 backdrop-blur-md">
+      {RATIOS.map((r) => {
+        const active = selectedRatio === r.key;
+        return (
+          <button
+            key={r.key}
+            onClick={() => setSelectedRatio(r.key as RatioKey)}
+            className={`flex flex-1 items-center justify-center rounded-lg px-1.5 py-1.5 text-[10px] font-bold transition-all ${
+              active
+                ? "bg-[#E63946] text-white shadow-sm"
+                : "text-[#6D5561] hover:text-[#3F2A35]"
+            }`}
+            title={r.desc}
+          >
+            {r.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
