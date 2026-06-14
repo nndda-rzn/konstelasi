@@ -11,6 +11,16 @@ interface CameraPreviewProps {
   isCapturing: boolean;
 }
 
+function GridGuide({ ratioKey }: { ratioKey: string }) {
+  return (
+    <div className="pointer-events-none absolute inset-0 grid grid-cols-3 grid-rows-3">
+      {Array.from({ length: 9 }).map((_, i) => (
+        <div key={i} className="border-[0.5px] border-white/5" />
+      ))}
+    </div>
+  );
+}
+
 /**
  * CameraPreview - The viewfinder with ratio-awareness, FOV scaling, 
  * grid overlay, safe area guide, and empty state.
@@ -64,9 +74,7 @@ export function CameraPreview({ webcamRef, isCapturing }: CameraPreviewProps) {
         )}
 
         {/* Grid Overlay */}
-        {isGridEnabled && (
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:33.33%_33.33%]" />
-        )}
+        {isGridEnabled && <GridGuide ratioKey={ratioKey} />}
 
         {/* Safe Area Guide */}
         <div className="pointer-events-none absolute inset-[8%] rounded-2xl border border-white/10" />
