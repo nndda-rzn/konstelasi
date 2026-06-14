@@ -11,7 +11,9 @@ interface PhotoPreviewProps {
 }
 
 /**
- * PhotoPreview - Renders the processed final photo with draggable sticker overlay.
+ * PhotoPreview - The hero of the output page.
+ * Paper-like cream container, sized to be the largest element on screen.
+ * Sticker drag overlay aligns to the same % system used in the canvas render.
  */
 export function PhotoPreview({ previewRef, onStickerDragEnd }: PhotoPreviewProps) {
   const finalPhoto = usePhotoboothStore((s) => s.finalPhoto);
@@ -19,43 +21,48 @@ export function PhotoPreview({ previewRef, onStickerDragEnd }: PhotoPreviewProps
   const stickers = usePhotoboothStore((s) => s.stickers);
 
   return (
-    <div
-      ref={previewRef}
-      className="relative mx-auto w-full max-w-sm overflow-auto rounded-2xl shadow-[0_16px_48px_rgba(84,45,55,0.12)]"
-      style={{ maxHeight: "72vh" }}
-    >
-      {finalPhoto && !processing ? (
-        <img
-          src={finalPhoto}
-          alt="result"
-          loading="lazy"
-          decoding="async"
-          className="w-full"
-        />
-      ) : (
-        <div className="flex aspect-[3/4] items-center justify-center bg-[#FFF5F7]">
-          <Loader2 className="h-8 w-8 animate-spin text-[#E63946]/50" />
-        </div>
-      )}
-
-      {/* Sticker overlay */}
-      {stickers.map((s: StickerItem) => (
-        <motion.div
-          key={s.id}
-          drag
-          dragMomentum={false}
-          dragConstraints={previewRef}
-          className="absolute cursor-grab active:cursor-grabbing text-3xl select-none"
-          style={{
-            left: `${s.x}%`,
-            top: `${s.y}%`,
-            transform: "translate(-50%,-50%)",
-          }}
-          onDragEnd={(_, info) => onStickerDragEnd(s.id, info)}
+    <div className="relative mx-auto flex w-full max-w-[760px] items-center justify-center">
+      <div
+        className="relative flex w-full items-center justify-center overflow-hidden rounded-lg border border-black/10 bg-[#FAF8F5] p-3 shadow-[0_4px_24px_rgba(60,30,40,0.06)]"
+        style={{ maxHeight: "calc(100vh - 200px)", minHeight: "380px" }}
+      >
+        <div
+          ref={previewRef}
+          className="relative flex h-full min-h-[360px] w-full items-center justify-center"
         >
-          {s.emoji}
-        </motion.div>
-      ))}
+          {finalPhoto && !processing ? (
+            <img
+              src={finalPhoto}
+              alt="Hasil foto"
+              className="max-h-full max-w-full object-contain"
+              draggable={false}
+            />
+          ) : (
+            <div className="flex aspect-[3/4] w-full max-w-[420px] items-center justify-center">
+              <Loader2 className="h-7 w-7 animate-spin text-[#E63946]/50" />
+            </div>
+          )}
+
+          {/* Sticker overlay — position is % of preview container */}
+          {stickers.map((s: StickerItem) => (
+            <motion.div
+              key={s.id}
+              drag
+              dragMomentum={false}
+              dragConstraints={previewRef}
+              className="absolute cursor-grab active:cursor-grabbing text-3xl select-none touch-none"
+              style={{
+                left: `${s.x}%`,
+                top: `${s.y}%`,
+                transform: "translate(-50%,-50%)",
+              }}
+              onDragEnd={(_, info) => onStickerDragEnd(s.id, info)}
+            >
+              {s. emoji}
+            </motion.div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
