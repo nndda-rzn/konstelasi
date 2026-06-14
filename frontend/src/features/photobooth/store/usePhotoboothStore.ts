@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { FilterKey, LayoutKey, EditTab, StickerItem } from "../constants";
+import type { FilterKey, LayoutKey, EditTab, StickerItem, ZoomKey, RatioKey, QualityKey, BackgroundKey } from "../constants";
 
 export type Stage =
   | "landing"
@@ -29,19 +29,39 @@ interface PhotoboothState {
   // Camera settings
   facingMode: "user" | "environment";
   toggleFacingMode: () => void;
+  zoomLevel: ZoomKey;
+  setZoomLevel: (zoom: ZoomKey) => void;
 
-  // Editing settings
+  // Editing & Capture settings
   selectedFilter: FilterKey;
   setSelectedFilter: (filter: FilterKey) => void;
 
   selectedLayout: LayoutKey;
   setSelectedLayout: (layout: LayoutKey) => void;
 
+  selectedRatio: RatioKey;
+  setSelectedRatio: (ratio: RatioKey) => void;
+
   selectedTimer: number;
   setSelectedTimer: (timer: number) => void;
 
+  selectedQuality: QualityKey;
+  setSelectedQuality: (quality: QualityKey) => void;
+
+  selectedBackground: BackgroundKey;
+  setSelectedBackground: (bg: BackgroundKey) => void;
+
   selectedStripColor: string;
   setSelectedStripColor: (color: string) => void;
+
+  isGridEnabled: boolean;
+  setGridEnabled: (enabled: boolean) => void;
+
+  isBeautyEnabled: boolean;
+  setBeautyEnabled: (enabled: boolean) => void;
+
+  isFlashEnabled: boolean;
+  setFlashEnabled: (enabled: boolean) => void;
 
   caption: string;
   setCaption: (caption: string) => void;
@@ -92,6 +112,8 @@ export const usePhotoboothStore = create<PhotoboothState>((set) => ({
     set((state) => ({
       facingMode: state.facingMode === "user" ? "environment" : "user",
     })),
+  zoomLevel: "ultrawide",
+  setZoomLevel: (zoomLevel) => set({ zoomLevel }),
 
   // Editing settings
   selectedFilter: "normal",
@@ -100,11 +122,29 @@ export const usePhotoboothStore = create<PhotoboothState>((set) => ({
   selectedLayout: "strip4",
   setSelectedLayout: (selectedLayout) => set({ selectedLayout }),
 
+  selectedRatio: "square",
+  setSelectedRatio: (selectedRatio) => set({ selectedRatio }),
+
   selectedTimer: 3,
   setSelectedTimer: (selectedTimer) => set({ selectedTimer }),
 
+  selectedQuality: "standard",
+  setSelectedQuality: (selectedQuality) => set({ selectedQuality }),
+
+  selectedBackground: "none",
+  setSelectedBackground: (selectedBackground) => set({ selectedBackground }),
+
   selectedStripColor: "white",
   setSelectedStripColor: (selectedStripColor) => set({ selectedStripColor }),
+
+  isGridEnabled: true,
+  setGridEnabled: (isGridEnabled) => set({ isGridEnabled }),
+
+  isBeautyEnabled: false,
+  setBeautyEnabled: (isBeautyEnabled) => set({ isBeautyEnabled }),
+
+  isFlashEnabled: true,
+  setFlashEnabled: (isFlashEnabled) => set({ isFlashEnabled }),
 
   caption: "",
   setCaption: (caption) => set({ caption }),
@@ -153,6 +193,13 @@ export const usePhotoboothStore = create<PhotoboothState>((set) => ({
       stage: "setup",
       capturedPhotos: [],
       finalPhoto: null,
+      zoomLevel: "ultrawide",
+      selectedRatio: "square",
+      selectedQuality: "standard",
+      selectedBackground: "none",
+      isGridEnabled: true,
+      isBeautyEnabled: false,
+      isFlashEnabled: true,
       stickers: [],
       caption: "",
       isCapturing: false,
