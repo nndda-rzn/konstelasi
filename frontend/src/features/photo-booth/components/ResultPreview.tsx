@@ -11,39 +11,57 @@ interface ResultPreviewProps {
 
 /**
  * ResultPreview - The hero of the result/result page.
- * Displays the composed canvas image (the same image that will be
- * downloaded and saved). Renders sticker overlay aligned to the
- * same % system used by the composer.
+ *
+ * Displays the SINGLE composed canvas image (the exact same image that
+ * will be downloaded and saved). The image is shown in full using
+ * `object-contain` so no additional CSS crop happens here.
+ *
+ * The container's aspect-ratio is driven by the composed image's natural
+ * dimensions, NOT a hardcoded ratio, so the image always appears at its
+ * true proportions.
  */
 export function ResultPreview({ previewRef, onStickerDragEnd }: ResultPreviewProps) {
   const composed = usePhotoBoothStore((s) => s.composed);
   const processing = usePhotoBoothStore((s) => s.processing);
   const stickers = usePhotoBoothStore((s) => s.stickers);
 
+  // Use the composed image's natural aspect ratio for the container.
+  // This ensures the image is shown without any extra crop.
+  const aspectRatio =
+    composed && composed.width && composed.height
+      ? composed.width / composed.height
+      : 1; // 1:1 fallback while loading
+
   return (
-    <div className="relative mx-auto flex w-full max-w-[760px] items-center justify-center">
+    <div
+      className="relative mx-auto flex w-full max-w-[760px] items-center justify-center"
+      data-result-preview
+    >
       <div
         className="relative flex w-full items-center justify-center overflow-hidden rounded-lg border border-black/10 bg-[#FAF8F5] p-3 shadow-[0_4px_24px_rgba(60,30,40,0.06)]"
-        style={{ maxHeight: "calc(100vh - 200px)", minHeight: "380px" }}
       >
         <div
           ref={previewRef}
-          className="relative flex h-full min-h-[360px] w-full items-center justify-center"
+          className="relative flex w-full items-center justify-center"
+          style={{ aspectRatio: `${aspectRatio}` }}
         >
           {composed?.dataUrl && !processing ? (
             <img
               src={composed.dataUrl}
               alt="Hasil foto"
-              className="max-h-full max-w-full object-contain"
+              className="h-full w-full object-contain"
               draggable={false}
             />
           ) : (
-            <div className="flex aspect-[3/4] w-full max-w-[420px] items-center justify-center">
+            <div
+              className="flex w-full items-center justify-center"
+              style={{ aspectRatio: `${aspectRatio}` }}
+            >
               <span className="text-[11px] text-[#8C7783]">Menyiapkan hasil…</span>
             </div>
           )}
 
-          {/* Sticker overlay */}
+          {/* Sticker overlay aligned to the same % system as the composer */}
           {stickers.map((s: Sticker) => (
             <motion.div
               key={s.id}

@@ -6,6 +6,8 @@ import {
   PHOTO_THEMES,
   type EffectId,
 } from "./photoBooth.config";
+import type { TemplateId } from "./config/templates";
+import { DEFAULT_TEMPLATE_ID } from "./config/templates";
 import type { ComposeResult, GalleryMetadata, Sticker } from "./photoBooth.types";
 
 /**
@@ -34,6 +36,7 @@ import type {
   Stage,
   Mode,
 } from "./photoBooth.config";
+import type { FrameId } from "./config/frames";
 
 /**
  * Re-export selectors from store/selectors.ts for consumers.
@@ -61,6 +64,14 @@ export {
   LAYOUT_LIST,
   TIMERS,
 } from "./photoBooth.config";
+
+// Re-export frame config
+export {
+  FRAME_STYLES,
+  FRAME_MAP,
+  DEFAULT_FRAME_ID,
+} from "./config/frames";
+export type { FrameId, FrameStyle, FrameDecor } from "./config/frames";
 
 /** Legacy alias for backward compat. */
 import type { CapturePhase, FlowMode, SessionStep } from "./store/types";
@@ -93,6 +104,8 @@ interface PhotoBoothState {
   selectedFilter: FilterId;
   selectedEffect: EffectId;
   selectedTimer: number;
+  selectedFrame: FrameId;
+  selectedTemplateId: TemplateId | null;
   caption: string;
   setSelectedRatio: (id: RatioId) => void;
   setSelectedLayout: (id: LayoutId) => void;
@@ -103,6 +116,8 @@ interface PhotoBoothState {
   setSelectedEffect: (e: EffectId) => void;
   cycleSelectedEffect: () => void;
   setSelectedTimer: (n: number) => void;
+  setSelectedFrame: (f: FrameId) => void;
+  setSelectedTemplate: (id: TemplateId | null) => void;
   setCaption: (c: string) => void;
 
   /* ----- Camera state ----- */
@@ -169,6 +184,8 @@ const defaultState: Pick<
   | "selectedFilter"
   | "selectedEffect"
   | "selectedTimer"
+  | "selectedFrame"
+  | "selectedTemplateId"
   | "caption"
   | "facingMode"
   | "isCameraReady"
@@ -198,6 +215,8 @@ const defaultState: Pick<
   selectedFilter: "normal",
   selectedEffect: "off",
   selectedTimer: 3,
+  selectedFrame: "softDiary",
+  selectedTemplateId: DEFAULT_TEMPLATE_ID,
   caption: "",
   facingMode: "user",
   isCameraReady: false,
@@ -241,6 +260,8 @@ export const usePhotoBoothStore = create<PhotoBoothState>((set) => ({
       return { selectedEffect: next };
     }),
   setSelectedTimer: (n) => set({ selectedTimer: n }),
+  setSelectedFrame: (f) => set({ selectedFrame: f }),
+  setSelectedTemplate: (id) => set({ selectedTemplateId: id }),
   setCaption: (c) => set({ caption: c }),
 
   toggleFacingMode: () =>

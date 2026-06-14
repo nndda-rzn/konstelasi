@@ -13,6 +13,8 @@ import type {
   Stage,
   Mode,
 } from "../photoBooth.config";
+import type { FrameId } from "../config/frames";
+import type { TemplateId } from "../config/templates";
 import type { ComposeResult, GalleryMetadata, Sticker } from "../photoBooth.types";
 
 /**
@@ -54,6 +56,8 @@ export interface ConfigSlice {
   selectedFilter: FilterId;
   selectedEffect: EffectId;
   selectedTimer: number;
+  selectedFrame: FrameId;
+  selectedTemplateId: TemplateId | null;
   caption: string;
   setSelectedRatio: (id: RatioId) => void;
   setSelectedLayout: (id: LayoutId) => void;
@@ -64,6 +68,8 @@ export interface ConfigSlice {
   setSelectedEffect: (e: EffectId) => void;
   cycleSelectedEffect: () => void;
   setSelectedTimer: (n: number) => void;
+  setSelectedFrame: (f: FrameId) => void;
+  setSelectedTemplate: (id: TemplateId | null) => void;
   setCaption: (c: string) => void;
 }
 
