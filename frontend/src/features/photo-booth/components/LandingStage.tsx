@@ -2,14 +2,17 @@
 
 import { motion } from "framer-motion";
 import { Camera } from "lucide-react";
-import { usePhotoboothStore } from "../store/usePhotoboothStore";
+import { usePhotoBoothStore } from "../photoBoothStore";
+import type { Stage } from "../photoBooth.config";
 
 /**
- * LandingStage - Welcome screen with branded intro and START button.
- * Pure UI: subscribes to store for setStage action only.
+ * LandingStage - Welcome / start screen for the photobooth.
+ * Pure UI: subscribes to store for setStage action.
  */
 export function LandingStage() {
-  const setStage = usePhotoboothStore((s) => s.setStage);
+  const setStage = usePhotoBoothStore(
+    (s: { setStage: (s: Stage) => void }) => s.setStage
+  );
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#FFF5F7]">

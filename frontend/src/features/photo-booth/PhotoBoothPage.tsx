@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Camera, SlidersHorizontal, ArrowLeft } from "lucide-react";
 import { ApolloWrapper } from "@/lib/apollo/ApolloWrapper";
 import { Providers } from "@/lib/Providers";
-import { LandingStage } from "@/features/photobooth/components/LandingStage";
+import { LandingStage } from "./components/LandingStage";
 import { usePhotoBoothStore } from "./photoBoothStore";
 import { usePhotoBooth } from "./usePhotoBooth";
 import { CameraStage } from "./components/CameraStage";
