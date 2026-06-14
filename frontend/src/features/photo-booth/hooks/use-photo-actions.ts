@@ -149,6 +149,8 @@ export function usePhotoActions() {
   }, [createNote, addNoteImage, addGalleryItem, setAuthPromptOpen, setStage]);
 
   const handleRetake = useCallback(() => {
+    // Switch back to capture screen mode with a clean state
+    const store = usePhotoBoothStore.getState();
     setStage("setup");
     setPhase("idle");
     setErrorMessage(null);
@@ -159,6 +161,9 @@ export function usePhotoActions() {
     setIsCapturing(false);
     setCountdown(null);
     setProcessing(false);
+    // Return to capture screen (not result)
+    store.setFlowMode("session");
+    store.setSessionStep("camera");
   }, [
     setStage,
     setPhase,

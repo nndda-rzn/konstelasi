@@ -64,7 +64,10 @@ export function PhotoBoothPage() {
   };
 
   const showFlashOverlay = stage === "flash";
-  const isResultMode = flowMode === "result" || phase === "result";
+  // Result mode is EXCLUSIVELY when flowMode is "result".
+  // This ensures the camera screen is unmounted when result is shown,
+  // so the result doesn't appear "stuck" under the camera preview.
+  const isResultMode = flowMode === "result";
 
   return (
     <ApolloWrapper>
