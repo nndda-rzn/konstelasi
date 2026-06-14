@@ -1,8 +1,10 @@
 "use client";
 
+import { motion } from "framer-motion";
+
 /**
- * StepIndicator - 3-dot step pill used across the photobooth session.
- * Active step is filled, others are outlined.
+ * StepIndicator - Minimal-premium 3-step progress.
+ * Uses thin connectors and tiny celestial accents for Constella brand.
  */
 export function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
   const steps = [
@@ -10,29 +12,61 @@ export function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
     { n: 2, label: "Format" },
     { n: 3, label: "Capture" },
   ];
+
   return (
-    <div className="flex items-center justify-center gap-1.5">
-      {steps.map((s) => {
+    <div className="flex items-center justify-center gap-2">
+      {steps.map((s, i) => {
         const active = s.n === step;
         const done = s.n < step;
         return (
-          <div key={s.n} className="flex items-center gap-1.5">
-            <div
-              className={`flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-semibold tracking-wider uppercase transition-colors ${
-                active
-                  ? "bg-[#E63946] text-white"
-                  : done
-                    ? "bg-[#E63946]/15 text-[#E63946]"
-                    : "bg-black/[0.04] text-[#8C7783]"
-              }`}
-            >
-              <span>{s.n}</span>
-              <span className="hidden sm:inline">{s.label}</span>
+          <div key={s.n} className="flex items-center gap-2">
+            {/* Step node */}
+            <div className="flex items-center gap-2">
+              {active && (
+                <motion.span
+                  className="h-1 w-1 rounded-full"
+                  style={{ background: "#D4A574" }}
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                />
+              )}
+              <span
+                className={`text-[10px] font-semibold tracking-[0.25em] uppercase transition-colors ${
+                  active
+                    ? "text-[#3F2A35]"
+                    : done
+                      ? "text-[#9D7B3F]"
+                      : "text-[#B8A0AA]"
+                }`}
+              >
+                <span
+                  className={`mr-1.5 inline-block ${
+                    active ? "text-[#D4A574]" : done ? "text-[#D4A574]/70" : "text-[#D4A574]/30"
+                  }`}
+                >
+                  0{s.n}
+                </span>
+                {s.label}
+              </span>
             </div>
+
+            {/* Connector line */}
             {s.n < 3 && (
-              <div
-                className={`h-px w-3 sm:w-5 ${done ? "bg-[#E63946]/40" : "bg-black/10"}`}
-              />
+              <div className="relative h-px w-6 sm:w-10">
+                <div
+                  className="absolute inset-0"
+                  style={{ background: "rgba(212, 165, 116, 0.15)" }}
+                />
+                {done && (
+                  <motion.div
+                    className="absolute inset-y-0 left-0"
+                    style={{ background: "linear-gradient(90deg, #D4A574 0%, #D4A57480 100%)" }}
+                    initial={{ width: 0 }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                  />
+                )}
+              </div>
             )}
           </div>
         );
