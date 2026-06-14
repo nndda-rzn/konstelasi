@@ -3,7 +3,7 @@
 import { usePhotoboothStore } from "../../store/usePhotoboothStore";
 
 /**
- * CaptionInput - Editable caption text field.
+ * CaptionInput - Simple, single-line input.
  */
 export function CaptionInput() {
   const caption = usePhotoboothStore((s) => s.caption);
@@ -11,14 +11,19 @@ export function CaptionInput() {
 
   return (
     <div>
-      <p className="mb-1.5 text-[11px] font-bold uppercase tracking-widest text-[#6D5561]">
+      <label
+        htmlFor="photobooth-caption"
+        className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-[#6D5561]"
+      >
         Caption
-      </p>
+      </label>
       <input
+        id="photobooth-caption"
         value={caption}
         onChange={(e) => setCaption(e.target.value)}
         placeholder="Tulis caption..."
-        className="w-full rounded-2xl border border-[#FFB8C0]/25 bg-white/65 px-4 py-2.5 text-sm text-[#3F2A35] outline-none placeholder:text-[#8C7783]/60 focus:border-[#E63946]/35 focus:ring-4 focus:ring-[#FFB8C0]/15 font-scrapbook-handwriting"
+        maxLength={60}
+        className="h-9 w-full rounded border border-black/10 bg-white px-3 text-[13px] text-[#3F2A35] outline-none placeholder:text-[#8C7783]/70 focus:border-[#E63946]/40"
       />
     </div>
   );

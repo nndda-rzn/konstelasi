@@ -17,8 +17,8 @@ interface EditorSidebarProps {
 }
 
 /**
- * EditorSidebar - Tabs (filter/color/sticker) + caption input + action buttons.
- * Pure composition: subscribes to store; calls parent handlers for save/download/retake.
+ * EditorSidebar - Single unified panel with divided sections.
+ * Tabs → content → caption → actions. Width set by parent grid (360px).
  */
 export function EditorSidebar({
   onSave,
@@ -28,17 +28,28 @@ export function EditorSidebar({
   const activeTab = usePhotoboothStore((s) => s.activeTab);
 
   return (
-    <div className="flex flex-col gap-4">
-      <EditorTabs />
-      {activeTab === "filter" && <FilterPanel />}
-      {activeTab === "color" && <ColorPanel />}
-      {activeTab === "sticker" && <StickerPanel />}
-      <CaptionInput />
-      <EditorActions
-        onSave={onSave}
-        onDownload={onDownload}
-        onRetake={onRetake}
-      />
-    </div>
+    <aside className="overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm divide-y divide-black/[0.06]">
+      <div className="p-4">
+        <EditorTabs />
+      </div>
+
+      <div className="min-h-[180px] p-4">
+        {activeTab === "filter" && <FilterPanel />}
+        {activeTab === "color" && <ColorPanel />}
+        {activeTab === "sticker" && <StickerPanel />}
+      </div>
+
+      <div className="p-4">
+        <CaptionInput />
+      </div>
+
+      <div className="p-4">
+        <EditorActions
+          onSave={onSave}
+          onDownload={onDownload}
+          onRetake={onRetake}
+        />
+      </div>
+    </aside>
   );
 }

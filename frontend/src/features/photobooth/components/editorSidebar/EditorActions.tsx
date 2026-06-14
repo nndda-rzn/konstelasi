@@ -10,7 +10,8 @@ interface EditorActionsProps {
 }
 
 /**
- * EditorActions - Save/Download/Retake button cluster.
+ * EditorActions - Primary save + secondary download/retake.
+ * Proportional sizing, no oversized primary.
  */
 export function EditorActions({
   onSave,
@@ -20,34 +21,36 @@ export function EditorActions({
   const stage = usePhotoboothStore((s) => s.stage);
   const processing = usePhotoboothStore((s) => s.processing);
 
+  const isSaving = stage === "saving";
+
   return (
-    <div className="mt-auto flex flex-col gap-2">
+    <div className="space-y-2">
       <button
         onClick={onSave}
-        disabled={stage === "saving" || processing}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#E63946] to-[#FF6B7A] py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(230,57,70,0.22)] disabled:opacity-60"
+        disabled={isSaving || processing}
+        className="flex h-10 w-full items-center justify-center gap-1.5 rounded bg-[#E63946] text-[13px] font-semibold text-white transition-colors hover:bg-[#D62828] disabled:opacity-60"
       >
-        {stage === "saving" ? (
+        {isSaving ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
           <Save className="h-4 w-4" />
         )}
-        {stage === "saving" ? "Menyimpan..." : "Simpan ke Kanvas"}
+        {isSaving ? "Menyimpan..." : "Simpan ke Kanvas"}
       </button>
-      <div className="flex gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <button
           onClick={onDownload}
           disabled={processing}
-          className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-[#FFB8C0]/25 bg-white/60 py-3 text-xs font-semibold text-[#6D5561] hover:bg-white/80 disabled:opacity-50"
+          className="flex h-9 items-center justify-center gap-1.5 rounded border border-black/10 bg-white text-[12px] font-medium text-[#3F2A35] transition-colors hover:bg-[#FAFAFA] disabled:opacity-50"
         >
-          <Download className="h-4 w-4" />
+          <Download className="h-3.5 w-3.5" />
           Unduh
         </button>
         <button
           onClick={onRetake}
-          className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-[#FFB8C0]/25 bg-white/60 py-3 text-xs font-semibold text-[#6D5561] hover:bg-white/80"
+          className="flex h-9 items-center justify-center gap-1.5 rounded border border-black/10 bg-white text-[12px] font-medium text-[#3F2A35] transition-colors hover:bg-[#FAFAFA]"
         >
-          <RotateCcw className="h-4 w-4" />
+          <RotateCcw className="h-3.5 w-3.5" />
           Ulangi
         </button>
       </div>
