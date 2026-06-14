@@ -219,6 +219,25 @@ export const usePhotobooth = (
     const finalPhoto = usePhotoboothStore.getState().finalPhoto;
     const caption = usePhotoboothStore.getState().caption;
     if (!finalPhoto) return;
+
+    // Precheck: ensure user has a session before hitting the auth-guarded mutation.
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        notify.error("Sesi berakhir. Silakan masuk kembali.");
+        const r = usePhotoboothStore.getState();
+        r.setStage("edit");
+        if (typeof window !== "undefined") {
+          window.location.href = "/login?reason=session";
+        }
+        return;
+      }
+    } catch {
+      notify.error("Tidak dapat memverifikasi sesi.");
+      return;
+    }
+
     setStage("saving");
     try {
       const supabase = createClient();
@@ -266,6 +285,14 @@ export const usePhotobooth = (
         setTimeout(() => router.push("/canvas"), 1800);
       }
     } catch (e: any) {
+      const msg = String(e?.message || "");
+      if (/unauthorized|401|403/i.test(msg)) {
+        notify.error("Sesi berakhir. Silakan masuk kembali.");
+        if (typeof window !== "undefined") {
+          window.location.href = "/login?reason=unauthorized";
+        }
+        return;
+      }
       notify.error("Gagal: " + e.message);
       setStage("edit");
     }
