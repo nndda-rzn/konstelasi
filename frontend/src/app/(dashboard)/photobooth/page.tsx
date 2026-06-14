@@ -18,6 +18,11 @@ import { EditorSidebar } from "@/features/photobooth/components/EditorSidebar";
 import { DoneStage } from "@/features/photobooth/components/DoneStage";
 import { AuthPromptModal } from "@/features/photobooth/components/AuthPromptModal";
 
+// Sidebar right edge: 12 + 260 = 272px. Global pl-[236px] leaves 36px
+// hidden behind the sidebar; we add 48px on photobooth's own containers
+// so header/content align cleanly past the sidebar (272 + 12 gap = 284px).
+const SIDEBAR_GUTTER = "md:pl-[48px]";
+
 function PhotoboothContent() {
   const router = useRouter();
   const webcamRef = useRef<Webcam>(null);
@@ -28,7 +33,6 @@ function PhotoboothContent() {
   const setAuthPromptOpen = usePhotoboothStore((s) => s.setAuthPromptOpen);
   const isSettingsSheetOpen = usePhotoboothStore((s) => s.isSettingsSheetOpen);
   const setSettingsSheetOpen = usePhotoboothStore((s) => s.setSettingsSheetOpen);
-  const selectedLayout = usePhotoboothStore((s) => s.selectedLayout);
   const capturedPhotos = usePhotoboothStore((s) => s.capturedPhotos);
 
   const {
@@ -49,9 +53,6 @@ function PhotoboothContent() {
 
       {stage !== "landing" && (
         <div className="relative min-h-screen overflow-hidden bg-[#FFF5F7]">
-          {/* Ambient background glow */}
-          <div className="pointer-events-none absolute top-1/2 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#FFB8C0]/20 blur-[130px]" />
-
           {/* Flash overlay */}
           <AnimatePresence>
             {stage === "flash" && (
@@ -65,31 +66,35 @@ function PhotoboothContent() {
             )}
           </AnimatePresence>
 
-          {/* Slim Header */}
-          <header className="sticky top-0 z-20 border-b border-[#FFB8C0]/15 bg-white/72 backdrop-blur-2xl">
-            <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-5">
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#E63946] to-[#9D0208]">
-                  <Camera className="h-3.5 w-3.5 text-white" />
+          {/* Header — 64px, aligned to content grid */}
+          <header className="sticky top-0 z-20 border-b border-black/[0.06] bg-white/80 backdrop-blur-md">
+            <div
+              className={`mx-auto flex h-16 max-w-[1320px] items-center gap-3 pr-5 ${SIDEBAR_GUTTER}`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#E63946]">
+                  <Camera className="h-4 w-4 text-white" />
                 </div>
-                <h1 className="text-sm font-bold text-[#3F2A35]">Photo Booth</h1>
+                <h1 className="text-[15px] font-semibold text-[#3F2A35]">
+                  Photo Booth
+                </h1>
               </div>
+
               {(stage === "countdown" || stage === "flash") && (
-                <span className="ml-auto rounded-full border border-[#FFB8C0]/30 bg-white/60 px-2.5 py-0.5 text-[10px] font-semibold text-[#E63946]">
+                <span className="ml-auto rounded-md border border-black/10 bg-white px-2.5 py-0.5 text-[11px] font-medium text-[#6D5561]">
                   Foto {capturedPhotos.length + 1} / {layoutDef.shots}
                 </span>
               )}
               {isEdit && (
-                <span className="ml-auto rounded-full border border-[#FFB8C0]/30 bg-white/60 px-2.5 py-0.5 text-[10px] font-semibold text-[#E63946]">
+                <span className="ml-auto rounded-md border border-black/10 bg-white px-2.5 py-0.5 text-[11px] font-medium text-[#6D5561]">
                   Mode Edit
                 </span>
               )}
 
-              {/* Mobile: open settings sheet */}
               {isCapture && (
                 <button
                   onClick={() => setSettingsSheetOpen(true)}
-                  className="ml-auto flex h-9 w-9 items-center justify-center rounded-xl border border-[#FFB8C0]/25 bg-white/60 text-[#6D5561] hover:text-[#E63946] lg:hidden"
+                  className="ml-auto flex h-9 w-9 items-center justify-center rounded-md border border-black/10 bg-white text-[#6D5561] hover:text-[#E63946] lg:hidden"
                   aria-label="Buka pengaturan"
                 >
                   <SlidersHorizontal className="h-4 w-4" />
@@ -99,10 +104,11 @@ function PhotoboothContent() {
           </header>
 
           {/* Main content */}
-          <main className="mx-auto max-w-7xl px-4 py-5 lg:px-6 lg:py-6 transition-all duration-500">
-            {/* Capture stage: asymmetric grid (preview hero + settings rail) */}
+          <main
+            className={`mx-auto max-w-[1320px] py-6 pr-5 ${SIDEBAR_GUTTER}`}
+          >
             {isCapture && (
-              <div className="grid gap-5 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_360px] 2xl:grid-cols-[1fr_380px] items-start">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_340px] items-start">
                 <StudioStage
                   webcamRef={webcamRef}
                   layoutDef={layoutDef}
@@ -117,9 +123,8 @@ function PhotoboothContent() {
               </div>
             )}
 
-            {/* Edit stage: keep existing 2-col editor + sidebar */}
             {isEdit && (
-              <div className="grid gap-5 lg:grid-cols-[1fr_320px] items-start">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px] items-start">
                 <PhotoPreview
                   previewRef={previewRef}
                   onStickerDragEnd={handleStickerDragEnd}
@@ -132,14 +137,11 @@ function PhotoboothContent() {
               </div>
             )}
 
-            {/* Done stage */}
             {stage === "done" && <DoneStage />}
           </main>
 
-          {/* Mobile bottom sheet for settings */}
           <SettingsSheet />
 
-          {/* Soft auth prompt replaces hard redirect */}
           <AuthPromptModal
             open={isAuthPromptOpen}
             onClose={() => setAuthPromptOpen(false)}
