@@ -4,7 +4,7 @@ import { useRef } from "react";
 import Webcam from "react-webcam";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Camera, SlidersHorizontal, Timer, FlipHorizontal, Zap } from "lucide-react";
+import { ArrowLeft, SlidersHorizontal, Timer, FlipHorizontal, Zap } from "lucide-react";
 import { ApolloWrapper } from "@/lib/apollo/ApolloWrapper";
 import { Providers } from "@/lib/Providers";
 import {
@@ -20,6 +20,7 @@ import { AuthPromptModal } from "./components/AuthPromptModal";
 import { WelcomeScreen } from "./components/WelcomeScreen";
 import { LayoutGallery } from "./components/LayoutGallery";
 import { FormatPicker } from "./components/FormatPicker";
+import { PhotoBoothMark } from "./components/PhotoBoothMark";
 
 const SIDEBAR_GUTTER = "md:pl-[48px]";
 
@@ -126,13 +127,18 @@ function SessionShell({ children }: { children: React.ReactNode }) {
     <div className="relative min-h-screen bg-[#FFF5F7]">
       <header className="sticky top-0 z-20 border-b border-black/[0.06] bg-white/80 backdrop-blur-md">
         <div
-          className={`mx-auto flex h-14 max-w-[1320px] items-center gap-3 pr-5 ${SIDEBAR_GUTTER}`}
+          className={`mx-auto flex h-14 max-w-[1320px] items-center gap-4 pr-5 ${SIDEBAR_GUTTER}`}
         >
           <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#E63946]">
-              <Camera className="h-3.5 w-3.5 text-white" />
+            <PhotoBoothMark size={26} />
+            <div className="flex items-baseline gap-1.5">
+              <h1 className="text-[14px] font-semibold tracking-tight text-[#3F2A35]">
+                Photo Booth
+              </h1>
+              <span className="text-[9px] font-semibold tracking-[0.22em] text-[#9D7B8A] uppercase">
+                · Studio
+              </span>
             </div>
-            <h1 className="text-sm font-semibold text-[#3F2A35]">Photo Booth</h1>
           </div>
         </div>
       </header>
