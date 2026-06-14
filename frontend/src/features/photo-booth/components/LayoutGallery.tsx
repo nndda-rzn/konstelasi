@@ -1,10 +1,10 @@
 "use client";
 
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import { usePhotoBoothStore, LAYOUT_LIST } from "../photoBoothStore";
 import { getRecommendedRatioId } from "../photoBooth.utils";
 import { LayoutCard } from "./LayoutCard";
 import { StepIndicator } from "./StepIndicator";
+import { StickyBottomBar } from "./shared/StickyBottomBar";
 
 /**
  * LayoutGallery - Visual gallery of layout cards.
@@ -23,7 +23,6 @@ export function LayoutGallery() {
 
   const handleLanjut = () => {
     if (!selected) return;
-    // Auto-sync the format to the recommended ratio for the chosen layout.
     setSelectedRatio(getRecommendedRatioId(selected));
     setSessionStep("choose-format");
   };
@@ -47,33 +46,18 @@ export function LayoutGallery() {
         ))}
       </div>
 
-      {/* Sticky bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-black/[0.06] bg-white/85 backdrop-blur-md md:pl-[260px]">
-        <div className="mx-auto flex max-w-[1320px] items-center gap-3 px-4 py-3 sm:px-6">
-          <button
-            onClick={handleBack}
-            className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#6D5561] transition-colors hover:text-[#3F2A35]"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Kembali
-          </button>
-          <div className="ml-auto flex items-center gap-3">
-            <span className="hidden text-[11px] text-[#8C7783] sm:inline">
-              {selected
-                ? "Layout dipilih. Lanjut ke format?"
-                : "Pilih satu layout untuk lanjut."}
-            </span>
-            <button
-              onClick={handleLanjut}
-              disabled={!selected}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#E63946] px-5 py-2.5 text-[13px] font-semibold text-white shadow-[0_4px_14px_rgba(230,57,70,0.22)] transition-colors hover:bg-[#D62828] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Lanjut Pilih Format
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
-      </div>
+      <StickyBottomBar
+        onBack={handleBack}
+        backLabel="Kembali"
+        nextLabel="Lanjut Pilih Format"
+        onNext={handleLanjut}
+        nextDisabled={!selected}
+        hint={
+          selected
+            ? "Layout dipilih. Lanjut ke format?"
+            : "Pilih satu layout untuk lanjut."
+        }
+      />
     </div>
   );
 }
