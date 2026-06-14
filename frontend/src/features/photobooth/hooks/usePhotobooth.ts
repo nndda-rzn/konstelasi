@@ -10,7 +10,9 @@ import {
   renderSingle,
   renderStrip,
   renderGrid,
+  renderWide,
 } from "../renderers";
+import { ZOOM_LEVELS } from "../constants";
 import { CREATE_NOTE, ADD_NOTE_IMAGE } from "@/graphql/mutations";
 import { createClient } from "@/lib/supabase/client";
 import { notify } from "@/lib/toast";
@@ -30,6 +32,11 @@ export const usePhotobooth = (
   const capturedPhotos = usePhotoboothStore((s) => s.capturedPhotos);
   const selectedFilter = usePhotoboothStore((s) => s.selectedFilter);
   const selectedLayout = usePhotoboothStore((s) => s.selectedLayout);
+  const selectedRatio = usePhotoboothStore((s) => s.selectedRatio);
+  const selectedQuality = usePhotoboothStore((s) => s.selectedQuality);
+  const selectedBackground = usePhotoboothStore((s) => s.selectedBackground);
+  const isBeautyEnabled = usePhotoboothStore((s) => s.isBeautyEnabled);
+  const zoomLevelKey = usePhotoboothStore((s) => s.zoomLevel);
   const selectedStripColor = usePhotoboothStore((s) => s.selectedStripColor);
   const caption = usePhotoboothStore((s) => s.caption);
   const stickers = usePhotoboothStore((s) => s.stickers);
@@ -56,35 +63,35 @@ export const usePhotobooth = (
     let cancelled = false;
     setProcessing(true);
 
+    const zoomScale = ZOOM_LEVELS.find(z => z.key === zoomLevelKey)?.scale || 1;
+    const renderOpts = {
+      photos: capturedPhotos,
+      filter: selectedFilter,
+      colorKey: selectedStripColor,
+      ratio: selectedRatio,
+      quality: selectedQuality,
+      background: selectedBackground,
+      stickers,
+      caption,
+      zoomScale,
+      isBeautyEnabled
+    };
+
     let p: Promise<string>;
     if (selectedLayout === "single") {
-      p = renderSingle(capturedPhotos[0], selectedFilter, stickers, caption);
+      p = renderSingle(renderOpts);
     } else if (selectedLayout === "grid4") {
-      p = renderGrid(
-        capturedPhotos,
-        selectedFilter,
-        selectedStripColor,
-        2,
-        stickers,
-        caption
-      );
+      p = renderGrid(renderOpts, 2);
     } else if (selectedLayout === "grid6") {
-      p = renderGrid(
-        capturedPhotos,
-        selectedFilter,
-        selectedStripColor,
-        3,
-        stickers,
-        caption
-      );
+      p = renderGrid(renderOpts, 3);
+    } else if (selectedLayout === "wide2") {
+      p = renderWide(renderOpts, '2');
+    } else if (selectedLayout === "cinematic3") {
+      p = renderWide(renderOpts, '3');
+    } else if (selectedLayout === "ultrawide4") {
+      p = renderWide(renderOpts, '4');
     } else {
-      p = renderStrip(
-        capturedPhotos,
-        selectedFilter,
-        selectedStripColor,
-        stickers,
-        caption
-      );
+      p = renderStrip(renderOpts);
     }
 
     p.then((r) => {
@@ -101,6 +108,11 @@ export const usePhotobooth = (
     capturedPhotos,
     selectedFilter,
     selectedStripColor,
+    selectedRatio,
+    selectedQuality,
+    selectedBackground,
+    isBeautyEnabled,
+    zoomLevelKey,
     caption,
     stickers,
     stage,
