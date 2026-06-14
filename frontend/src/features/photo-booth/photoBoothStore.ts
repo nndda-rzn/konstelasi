@@ -35,12 +35,34 @@ export type CapturePhase =
   | "result"
   | "error";
 
+/**
+ * FlowMode - top-level screen for the photobooth experience.
+ * welcome  → entry/start screen
+ * session  → in-progress capture (layout → format → camera)
+ * result   → finished, editing/saving
+ */
+export type FlowMode = "welcome" | "session" | "result";
+
+/**
+ * SessionStep - sub-step within the 'session' FlowMode.
+ */
+export type SessionStep =
+  | "choose-layout"
+  | "choose-format"
+  | "camera";
+
 interface PhotoBoothState {
   /* ----- Mode & stage ----- */
   mode: Mode;
   stage: Stage;
   setMode: (mode: Mode) => void;
   setStage: (stage: Stage) => void;
+
+  /* ----- Flow mode (multi-step) ----- */
+  flowMode: FlowMode;
+  sessionStep: SessionStep;
+  setFlowMode: (m: FlowMode) => void;
+  setSessionStep: (s: SessionStep) => void;
 
   /* ----- Capture phase (state machine) ----- */
   phase: CapturePhase;
@@ -121,6 +143,8 @@ const defaultState: Pick<
   PhotoBoothState,
   | "mode"
   | "stage"
+  | "flowMode"
+  | "sessionStep"
   | "phase"
   | "errorMessage"
   | "selectedRatioId"
@@ -148,6 +172,8 @@ const defaultState: Pick<
 > = {
   mode: "camera",
   stage: "landing",
+  flowMode: "welcome",
+  sessionStep: "choose-layout",
   phase: "idle",
   errorMessage: null,
   selectedRatioId: "square",
@@ -179,6 +205,9 @@ export const usePhotoBoothStore = create<PhotoBoothState>((set) => ({
 
   setMode: (mode) => set({ mode }),
   setStage: (stage) => set({ stage }),
+  setFlowMode: (flowMode) => set({ flowMode }),
+  setSessionStep: (sessionStep) => set({ sessionStep }),
+
   setPhase: (phase) => set({ phase }),
   setErrorMessage: (errorMessage) => set({ errorMessage }),
 
@@ -246,6 +275,8 @@ export const usePhotoBoothStore = create<PhotoBoothState>((set) => ({
     set({
       stage: "setup",
       phase: "idle",
+      flowMode: "session",
+      sessionStep: "camera",
       errorMessage: null,
       capturedFrames: [],
       composed: null,
@@ -287,6 +318,8 @@ export {
   PHOTO_BACKGROUNDS,
   PHOTO_EFFECTS,
   PHOTO_QUALITIES,
+  LAYOUT_DECORATIONS,
+  FRAME_COLORS,
   RATIO_LIST,
   LAYOUT_LIST,
   TIMERS,
