@@ -4,15 +4,18 @@ import { useRef } from "react";
 import Webcam from "react-webcam";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Camera, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, Camera, SlidersHorizontal, Timer, FlipHorizontal, Zap } from "lucide-react";
 import { ApolloWrapper } from "@/lib/apollo/ApolloWrapper";
 import { Providers } from "@/lib/Providers";
-import { usePhotoBoothStore, selectRequiredShots } from "./photoBoothStore";
+import {
+  usePhotoBoothStore,
+  selectRequiredShots,
+  selectPhotoLayout,
+  selectPhotoRatio,
+} from "./photoBoothStore";
 import { usePhotoBooth } from "./usePhotoBooth";
 import { CameraStage } from "./components/CameraStage";
-import { PhotoBoothSettings } from "./components/PhotoBoothSettings";
-import { ResultPreview } from "./components/ResultPreview";
-import { ResultEditorPanel } from "./components/ResultEditorPanel";
+import { StepIndicator } from "./components/StepIndicator";
 import { AuthPromptModal } from "./components/AuthPromptModal";
 import { WelcomeScreen } from "./components/WelcomeScreen";
 import { LayoutGallery } from "./components/LayoutGallery";
@@ -197,34 +200,26 @@ function CameraScreen({
               const s = usePhotoBoothStore.getState();
               s.setStage("setup");
               s.setFlowMode("session");
-              s.setSessionStep("choose-layout");
+              s.setSessionStep("choose-format");
             }}
             className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#6D5561] transition-colors hover:text-[#3F2A35]"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Pilih Ulang Layout
+            Pilih Ulang Format
           </button>
-          <div className="ml-auto flex items-center gap-3">
-            {(phase === "countdown" || phase === "capturing") && (
-              <span className="rounded-md border border-black/10 bg-white px-2.5 py-0.5 text-[11px] font-medium text-[#6D5561]">
-                Foto {capturedFramesCount + 1} / {requiredShots}
-              </span>
-            )}
-            <button
-              onClick={() => setSettingsSheetOpen(true)}
-              className="flex h-9 w-9 items-center justify-center rounded-md border border-black/10 bg-white text-[#6D5561] hover:text-[#E63946] lg:hidden"
-              aria-label="Buka pengaturan"
-            >
-              <SlidersHorizontal className="h-4 w-4" />
-            </button>
+          <div className="ml-auto flex items-center gap-2.5">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-[#8C7783]">
+              Capture
+            </span>
           </div>
         </div>
       </header>
 
       <main
-        className={`mx-auto max-w-[1320px] py-6 pr-5 ${SIDEBAR_GUTTER}`}
+        className={`mx-auto max-w-[1100px] py-6 pr-5 ${SIDEBAR_GUTTER}`}
       >
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_360px] items-start">
+        <div className="flex flex-col items-center gap-4">
+          <StepIndicator step={3} />
           <CameraStage
             webcamRef={webcamRef}
             onStart={onStart}
@@ -233,9 +228,6 @@ function CameraScreen({
             onDownload={onDownload}
             onSave={onSave}
           />
-          <div className="hidden lg:block">
-            <PhotoBoothSettings />
-          </div>
         </div>
       </main>
 
@@ -302,7 +294,7 @@ function ResultScreen({
         className={`mx-auto max-w-[1320px] py-6 pr-5 ${SIDEBAR_GUTTER}`}
       >
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] items-start">
-          <ResultPreview
+          <ResultPreviewInner
             previewRef={previewRef}
             onStickerDragEnd={onStickerDragEnd}
           />
@@ -317,4 +309,13 @@ function ResultScreen({
       />
     </div>
   );
+}
+
+// Local re-imports to keep imports at top minimal
+import { ResultPreview } from "./components/ResultPreview";
+import { ResultEditorPanel } from "./components/ResultEditorPanel";
+function ResultPreviewInner(
+  props: React.ComponentProps<typeof ResultPreview>
+) {
+  return <ResultPreview {...props} />;
 }

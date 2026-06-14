@@ -46,3 +46,27 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
     img.src = src;
   });
 }
+
+/**
+ * getRecommendedRatioId - The ratioId that best fits a given layout.
+ * Used to auto-set the default format when the user picks a layout
+ * (Ultra Wide → 21:9, Strip → 4:5, Grid → 1:1, etc.). The user can
+ * still override this choice in the FormatPicker step.
+ */
+export function getRecommendedRatioId(layoutId: string): RatioId {
+  const map: Record<string, RatioId> = {
+    ultraWide: "ultraWide",
+    strip3: "portrait",
+    strip4: "portrait",
+    classicStrip: "portrait",
+    vintageStrip: "portrait",
+    withLove: "portrait",
+    hearts: "portrait",
+    grid2x2: "square",
+    grid3x2: "square",
+    wide2: "wide",
+    cinematic3: "wide",
+    single: "square",
+  };
+  return map[layoutId] ?? "square";
+}
