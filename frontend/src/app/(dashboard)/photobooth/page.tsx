@@ -10,7 +10,8 @@ import { usePhotoboothStore } from "@/features/photobooth/store/usePhotoboothSto
 import { usePhotobooth } from "@/features/photobooth/hooks/usePhotobooth";
 import { LandingStage } from "@/features/photobooth/components/LandingStage";
 import { CameraStage } from "@/features/photobooth/components/CameraStage";
-import { SetupControls } from "@/features/photobooth/components/SetupControls";
+import { CaptureSettingsPanel } from "@/features/photobooth/components/CaptureSettingsPanel";
+import { StickyCaptureBar } from "@/features/photobooth/components/StickyCaptureBar";
 import { PhotoPreview } from "@/features/photobooth/components/PhotoPreview";
 import { EditorSidebar } from "@/features/photobooth/components/EditorSidebar";
 import { DoneStage } from "@/features/photobooth/components/DoneStage";
@@ -78,22 +79,20 @@ function PhotoboothContent() {
           </header>
 
           {/* Main content */}
-          <main className="mx-auto max-w-5xl px-6 py-8">
+          <main className="mx-auto max-w-6xl xl:max-w-7xl 2xl:max-w-[1600px] px-6 py-8 pb-32 transition-all duration-500">
             {/* SETUP / COUNTDOWN / FLASH stage */}
             {(stage === "setup" ||
               stage === "countdown" ||
               stage === "flash") && (
-              <div className="flex flex-col gap-6">
+              <div className="grid gap-8 lg:grid-cols-[1fr_360px] 2xl:grid-cols-[1fr_420px] items-start">
                 <CameraStage webcamRef={webcamRef} layoutDef={layoutDef} />
-                {stage === "setup" && (
-                  <SetupControls onStart={handleStart} />
-                )}
+                <CaptureSettingsPanel onStart={handleStart} />
               </div>
             )}
 
             {/* EDIT / SAVING stage */}
             {(stage === "edit" || stage === "saving") && (
-              <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+              <div className="grid gap-8 lg:grid-cols-[1fr_320px] 2xl:grid-cols-[1fr_380px] items-start">
                 <PhotoPreview
                   previewRef={previewRef}
                   onStickerDragEnd={handleStickerDragEnd}
@@ -109,6 +108,16 @@ function PhotoboothContent() {
             {/* DONE stage */}
             {stage === "done" && <DoneStage />}
           </main>
+
+          {/* Sticky Bottom Control Bar */}
+          {(stage === "setup" || stage === "countdown" || stage === "flash" || stage === "edit") && (
+            <StickyCaptureBar
+              onStart={handleStart}
+              onRetake={handleRetake}
+              onDownload={handleDownload}
+              onSave={handleSave}
+            />
+          )}
         </div>
       )}
     </>
