@@ -9,8 +9,9 @@ import {
   FlipHorizontal,
   AlertTriangle,
 } from "lucide-react";
-import { usePhotoBoothStore } from "../photoBoothStore";
-import type { CapturePhase } from "../photoBoothStore";
+import { usePhotoBoothStore, selectRequiredShots } from "../photoBoothStore";
+import type { CapturePhase } from "../store/types";
+import { IconBtn } from "./shared/IconBtn";
 
 interface CameraControlsProps {
   onStart: () => void;
@@ -56,23 +57,7 @@ export function CameraControls({
   const phase = usePhotoBoothStore((s) => s.phase);
   const stage = usePhotoBoothStore((s) => s.stage);
   const captured = usePhotoBoothStore((s) => s.capturedFrames);
-  const required = usePhotoBoothStore((s) =>
-    s.selectedLayoutId === "single"
-      ? 1
-      : s.selectedLayoutId === "strip3"
-        ? 3
-        : s.selectedLayoutId === "strip4" ||
-            s.selectedLayoutId === "grid2x2" ||
-            s.selectedLayoutId === "ultraWide"
-          ? 4
-          : s.selectedLayoutId === "grid3x2"
-            ? 6
-            : s.selectedLayoutId === "wide2"
-              ? 2
-              : s.selectedLayoutId === "cinematic3"
-                ? 3
-                : 4
-  );
+  const required = usePhotoBoothStore(selectRequiredShots);
   const toggleFacingMode = usePhotoBoothStore((s) => s.toggleFacingMode);
 
   const isSessionActive =
@@ -170,25 +155,5 @@ export function CameraControls({
         )}
       </div>
     </div>
-  );
-}
-
-function IconBtn({
-  onClick,
-  title,
-  children,
-}: {
-  onClick: () => void;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      title={title}
-      className="flex h-10 w-10 items-center justify-center rounded-lg border border-black/10 bg-white text-[#6D5561] transition-colors hover:border-[#E63946]/40 hover:text-[#E63946]"
-    >
-      {children}
-    </button>
   );
 }

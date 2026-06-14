@@ -3,70 +3,15 @@
 import { useEffect, useRef } from "react";
 import Webcam from "react-webcam";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, ShieldAlert } from "lucide-react";
 import { usePhotoBoothStore } from "../photoBoothStore";
 import { PHOTO_RATIOS } from "../photoBooth.config";
 import { useCameraReady } from "../hooks/useCameraReady";
+import { GridGuide } from "./camera/GridGuide";
+import { CameraEmptyState } from "./camera/CameraEmptyState";
+import { CountdownOverlay } from "./camera/CountdownOverlay";
 
 interface CameraPreviewProps {
   webcamRef: React.RefObject<Webcam | null>;
-}
-
-function GridGuide() {
-  return (
-    <div className="pointer-events-none absolute inset-0 grid grid-cols-3 grid-rows-3">
-      {Array.from({ length: 9 }).map((_, i) => (
-        <div key={i} className="border-[0.5px] border-white/[0.035]" />
-      ))}
-    </div>
-  );
-}
-
-function CameraEmptyState({
-  permissionDenied,
-  onRequest,
-}: {
-  permissionDenied: boolean;
-  onRequest: () => void;
-}) {
-  if (permissionDenied) {
-    return (
-      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2.5 bg-[#0f0b14] p-6 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-md bg-white/5 text-white/60">
-          <ShieldAlert className="h-5 w-5" />
-        </div>
-        <div className="max-w-xs">
-          <h3 className="text-[13px] font-semibold text-white">
-            Akses kamera ditolak
-          </h3>
-          <p className="mt-1 text-[11px] leading-relaxed text-white/55">
-            Izinkan akses kamera di pengaturan browser untuk mulai sesi foto.
-          </p>
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2.5 bg-[#0f0b14] p-6 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-md bg-white/5 text-white/45">
-        <Camera className="h-5 w-5" />
-      </div>
-      <div className="max-w-xs">
-        <h3 className="text-[13px] font-semibold text-white">
-          Pratinjau kamera akan tampil di sini
-        </h3>
-        <p className="mt-1 text-[11px] leading-relaxed text-white/55">
-          Izinkan akses kamera untuk mulai sesi foto.
-        </p>
-      </div>
-      <button
-        onClick={onRequest}
-        className="mt-1 rounded-md border border-white/15 bg-white/8 px-3.5 py-1.5 text-[11px] font-semibold text-white/85 transition-colors hover:bg-white/14 hover:text-white"
-      >
-        Aktifkan Kamera
-      </button>
-    </div>
-  );
 }
 
 /**
@@ -151,25 +96,10 @@ export function CameraPreview({ webcamRef }: CameraPreviewProps) {
           />
         )}
 
-        <AnimatePresence>
-          {stage === "countdown" &&
-            countdown !== null &&
-            countdown > 0 &&
-            isCameraReady && (
-              <motion.div
-                key={countdown}
-                initial={{ scale: 1.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.6, opacity: 0 }}
-                transition={{ duration: 0.35 }}
-                className="absolute inset-0 z-10 flex items-center justify-center"
-              >
-                <span className="text-[120px] font-black text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] leading-none select-none">
-                  {countdown}
-                </span>
-              </motion.div>
-            )}
-        </AnimatePresence>
+        <CountdownOverlay
+          countdown={countdown}
+          show={stage === "countdown" && isCameraReady}
+        />
 
         {stage === "setup" && isCameraReady && (
           <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur-md">

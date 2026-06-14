@@ -2,54 +2,68 @@
 
 import { create } from "zustand";
 import {
+  PHOTO_LAYOUTS,
+  PHOTO_THEMES,
+  type EffectId,
+} from "./photoBooth.config";
+import type { ComposeResult, GalleryMetadata, Sticker } from "./photoBooth.types";
+
+/**
+ * Re-export types from store/types.ts for consumers.
+ */
+export type {
+  CapturePhase,
+  FlowMode,
+  SessionStep,
+  ConfigSlice,
+  CaptureSlice,
+  UiSlice,
+  CameraSlice,
+  EditorSlice,
+  GallerySlice,
+  PhotoBoothState,
+} from "./store/types";
+
+import type {
+  RatioId,
+  LayoutId,
+  QualityId,
+  BackgroundId,
+  ThemeId,
+  FilterId,
+  Stage,
+  Mode,
+} from "./photoBooth.config";
+
+/**
+ * Re-export selectors from store/selectors.ts for consumers.
+ */
+export {
+  selectPhotoRatio,
+  selectPhotoLayout,
+  selectRequiredShots,
+  selectPhotoTheme,
+  selectIsSessionActive,
+} from "./store/selectors";
+
+// Re-export config constants for convenience from store consumers.
+export {
   PHOTO_RATIOS,
   PHOTO_LAYOUTS,
   PHOTO_FILTERS,
   PHOTO_THEMES,
   PHOTO_BACKGROUNDS,
   PHOTO_EFFECTS,
-  type RatioId,
-  type LayoutId,
-  type QualityId,
-  type BackgroundId,
-  type ThemeId,
-  type FilterId,
-  type EffectId,
-  type Stage,
-  type Mode,
-  type PhotoRatio,
-  type PhotoLayout,
+  PHOTO_QUALITIES,
+  LAYOUT_DECORATIONS,
+  FRAME_COLORS,
+  RATIO_LIST,
+  LAYOUT_LIST,
+  TIMERS,
 } from "./photoBooth.config";
-import type { Sticker, ComposeResult, GalleryMetadata } from "./photoBooth.types";
 
-/**
- * CapturePhase - explicit state machine for the capture session.
- * idle → countdown → capturing → processing → result
- * any state → error (on failure) → idle (on retry)
- */
-export type CapturePhase =
-  | "idle"
-  | "countdown"
-  | "capturing"
-  | "processing"
-  | "result"
-  | "error";
-
-/**
- * FlowMode - top-level screen for the photobooth experience.
- * welcome  → entry/start screen
- * session  → in-progress capture (layout → format → camera)
- * result   → finished, editing/saving
- */
-export type FlowMode = "welcome" | "session" | "result";
-
-/**
- * SessionStep - sub-step within the 'session' FlowMode.
- */
-export type SessionStep =
-  | "choose-layout"
-  | "choose-format"
-  | "camera";
+/** Legacy alias for backward compat. */
+import type { CapturePhase, FlowMode, SessionStep } from "./store/types";
 
 interface PhotoBoothState {
   /* ----- Mode & stage ----- */
@@ -292,35 +306,4 @@ export const usePhotoBoothStore = create<PhotoBoothState>((set) => ({
   resetAll: () => set({ ...defaultState }),
 }));
 
-/* ------------------------------------------------------------------ */
-/*  Convenience selectors                                                */
-/* ------------------------------------------------------------------ */
 
-export const selectPhotoRatio = (s: PhotoBoothState): PhotoRatio =>
-  PHOTO_RATIOS[s.selectedRatioId];
-export const selectPhotoLayout = (s: PhotoBoothState): PhotoLayout =>
-  PHOTO_LAYOUTS[s.selectedLayoutId];
-export const selectRequiredShots = (s: PhotoBoothState): number =>
-  PHOTO_LAYOUTS[s.selectedLayoutId].requiredShots;
-export const selectPhotoTheme = (s: PhotoBoothState) =>
-  PHOTO_THEMES[s.selectedTheme];
-export const selectIsSessionActive = (s: PhotoBoothState): boolean =>
-  s.phase === "countdown" ||
-  s.phase === "capturing" ||
-  s.phase === "processing";
-
-// Re-export config constants for convenience from store consumers.
-export {
-  PHOTO_RATIOS,
-  PHOTO_LAYOUTS,
-  PHOTO_FILTERS,
-  PHOTO_THEMES,
-  PHOTO_BACKGROUNDS,
-  PHOTO_EFFECTS,
-  PHOTO_QUALITIES,
-  LAYOUT_DECORATIONS,
-  FRAME_COLORS,
-  RATIO_LIST,
-  LAYOUT_LIST,
-  TIMERS,
-} from "./photoBooth.config";
