@@ -27,19 +27,17 @@ export function PhotoBoothPage() {
   const previewRef = useRef<HTMLDivElement>(null);
 
   const stage = usePhotoBoothStore((s) => s.stage);
+  const phase = usePhotoBoothStore((s) => s.phase);
   const capturedFrames = usePhotoBoothStore((s) => s.capturedFrames);
-  const composed = usePhotoBoothStore((s) => s.composed);
-  void composed;
   const isAuthPromptOpen = usePhotoBoothStore((s) => s.isAuthPromptOpen);
   const setAuthPromptOpen = usePhotoBoothStore((s) => s.setAuthPromptOpen);
   const isSettingsSheetOpen = usePhotoBoothStore((s) => s.isSettingsSheetOpen);
   const setSettingsSheetOpen = usePhotoBoothStore((s) => s.setSettingsSheetOpen);
-  const setSheetOpen = usePhotoBoothStore((s) => s.setSettingsSheetOpen);
   const selectedLayoutId = usePhotoBoothStore((s) => s.selectedLayoutId);
-  void setSheetOpen;
 
   const {
     handleStart,
+    handleRetry,
     handleRetake,
     handleDownload,
     handleSave,
@@ -61,8 +59,14 @@ export function PhotoBoothPage() {
     );
   };
 
-  const isCapture = stage === "setup" || stage === "countdown" || stage === "flash";
-  const isEdit = stage === "edit" || stage === "saving";
+  const isCapture =
+    phase === "idle" ||
+    phase === "countdown" ||
+    phase === "capturing" ||
+    phase === "processing" ||
+    phase === "error";
+  const isEdit = phase === "result" || stage === "saving";
+  const showFlashOverlay = stage === "flash";
 
   return (
     <ApolloWrapper>
@@ -72,7 +76,7 @@ export function PhotoBoothPage() {
         ) : (
           <div className="relative min-h-screen overflow-hidden bg-[#FFF5F7]">
             <AnimatePresence>
-              {stage === "flash" && (
+              {showFlashOverlay && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -97,7 +101,7 @@ export function PhotoBoothPage() {
                   </h1>
                 </div>
 
-                {(stage === "countdown" || stage === "flash") && (
+                {(phase === "countdown" || phase === "capturing") && (
                   <span className="ml-auto rounded-md border border-black/10 bg-white px-2.5 py-0.5 text-[11px] font-medium text-[#6D5561]">
                     Foto {capturedFrames.length + 1} / {requiredShots(selectedLayoutId)}
                   </span>
@@ -129,6 +133,7 @@ export function PhotoBoothPage() {
                   <CameraStage
                     webcamRef={webcamRef}
                     onStart={handleStart}
+                    onRetry={handleRetry}
                     onRetake={handleRetake}
                     onDownload={handleDownload}
                     onSave={handleSave}

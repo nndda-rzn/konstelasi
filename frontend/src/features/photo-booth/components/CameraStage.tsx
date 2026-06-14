@@ -8,6 +8,7 @@ import { CameraControls } from "./CameraControls";
 interface CameraStageProps {
   webcamRef: React.RefObject<Webcam | null>;
   onStart: () => void;
+  onRetry: () => void;
   onRetake: () => void;
   onDownload: () => void;
   onSave: () => void;
@@ -20,6 +21,7 @@ interface CameraStageProps {
 export function CameraStage({
   webcamRef,
   onStart,
+  onRetry,
   onRetake,
   onDownload,
   onSave,
@@ -30,6 +32,7 @@ export function CameraStage({
       <CapturedThumbs />
       <CameraControls
         onStart={onStart}
+        onRetry={onRetry}
         onRetake={onRetake}
         onDownload={onDownload}
         onSave={onSave}

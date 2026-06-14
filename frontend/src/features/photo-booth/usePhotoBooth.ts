@@ -6,7 +6,13 @@ import { useMutation } from "@apollo/client/react";
 import { notify } from "@/lib/toast";
 import { createClient } from "@/lib/supabase/client";
 import { CREATE_NOTE, ADD_NOTE_IMAGE } from "@/graphql/mutations";
-import { usePhotoBoothStore, selectPhotoRatio, selectPhotoLayout } from "./photoBoothStore";
+import {
+  usePhotoBoothStore,
+  selectPhotoRatio,
+  selectPhotoLayout,
+  type CapturePhase,
+} from "./photoBoothStore";
+import { PHOTO_LAYOUTS } from "./photoBooth.config";
 import { captureFrameFromVideo } from "./utils/captureFrameFromVideo";
 import { composePhotoBoothOutput } from "./utils/composePhotoBoothOutput";
 import { exportCanvasAsBlob } from "./utils/exportCanvas";
@@ -15,30 +21,54 @@ import { buildOutputFilename, uid } from "./photoBooth.utils";
 import type { ComposeResult, GalleryMetadata } from "./photoBooth.types";
 
 /**
- * usePhotoBooth - The main hook for the photobooth pipeline.
- * - captureFrameFromVideo: captures each frame using the active ratio
- *   + quality, center-cropped, returned as a dataURL.
- * - composePhotoBoothOutput: composes the final canvas whenever
- *   captured frames or settings change.
- * - Download and Save use the SAME canvas blob so result == download == save.
+ * Local session state for an in-progress capture run.
+ * We track frames count locally so we never rely on the store's
+ * capturedFrames (which can be stale during a re-render or React
+ * Strict Mode double-mount).
  */
-export function usePhotoBooth(
-  webcamRef: React.RefObject<Webcam | null>
-) {
+interface SessionState {
+  intervalId: ReturnType<typeof setInterval> | null;
+  flashTimeoutId: ReturnType<typeof setTimeout> | null;
+  total: number;
+  count: number;
+  cancelled: boolean;
+}
+
+/**
+ * usePhotoBooth - Capture session state machine.
+ *
+ * idle → countdown → capturing → [countdown ↔ capturing] → processing → result
+ *                  ↘ error (on failure)
+ *
+ * Single source of truth for the run is the sessionRef in this hook.
+ * The store mirrors UI-visible state (phase, countdown, isCapturing,
+ * processing, capturedFrames) but is NOT used to decide progression.
+ *
+ * All timers (countdown interval, flash overlay timeout) are tracked
+ * in sessionRef and cleared on:
+ *   - component unmount (useEffect cleanup)
+ *   - session completion (cleanupSession)
+ *   - error or retake
+ *   - stage change to landing/setup
+ */
+export function usePhotoBooth(webcamRef: React.RefObject<Webcam | null>) {
   const [createNote] = useMutation<{ createNote: { id: string } }>(CREATE_NOTE);
   const [addNoteImage] = useMutation<{ addNoteImage: { id: string } }>(
     ADD_NOTE_IMAGE
   );
 
+  // Store subscriptions
   const stage = usePhotoBoothStore((s) => s.stage);
   const setStage = usePhotoBoothStore((s) => s.setStage);
+  const phase = usePhotoBoothStore((s) => s.phase);
+  const setPhase = usePhotoBoothStore((s) => s.setPhase);
+  const errorMessage = usePhotoBoothStore((s) => s.errorMessage);
+  const setErrorMessage = usePhotoBoothStore((s) => s.setErrorMessage);
   const selectedRatioId = usePhotoBoothStore((s) => s.selectedRatioId);
   const selectedLayoutId = usePhotoBoothStore((s) => s.selectedLayoutId);
   const selectedTimer = usePhotoBoothStore((s) => s.selectedTimer);
-  const countdown = usePhotoBoothStore((s) => s.countdown);
-  const isCapturing = usePhotoBoothStore((s) => s.isCapturing);
-  const setIsCapturing = usePhotoBoothStore((s) => s.setIsCapturing);
   const setCountdown = usePhotoBoothStore((s) => s.setCountdown);
+  const setIsCapturing = usePhotoBoothStore((s) => s.setIsCapturing);
   const addFrame = usePhotoBoothStore((s) => s.addFrame);
   const clearFrames = usePhotoBoothStore((s) => s.clearFrames);
   const clearStickers = usePhotoBoothStore((s) => s.clearStickers);
@@ -57,60 +87,357 @@ export function usePhotoBooth(
   const stickers = usePhotoBoothStore((s) => s.stickers);
   const capturedFrames = usePhotoBoothStore((s) => s.capturedFrames);
 
+  // Local session ref — the ONLY source of truth during a capture run
+  const sessionRef = useRef<SessionState | null>(null);
+
   // Selector helpers
   const ratio = usePhotoBoothStore(selectPhotoRatio);
   const layout = usePhotoBoothStore(selectPhotoLayout);
-  const requiredShots = layout.requiredShots;
 
-  // Internal: capture one frame from the webcam
-  const captureInternal = useCallback(async () => {
-    const video = webcamRef.current?.video as HTMLVideoElement | null | undefined;
-    if (!video) {
-      notify.error("Kamera belum siap.");
-      return;
+  // ----------------------------------------------------------------
+  //  Camera ready validation
+  // ----------------------------------------------------------------
+
+  /**
+   * Verify the webcam is ready before starting a session. Returns
+   * `{ ok: true }` if ready, otherwise `{ ok: false, reason }`.
+   */
+  const validateCamera = useCallback((): {
+    ok: boolean;
+    reason?: string;
+  } => {
+    const web = webcamRef.current;
+    if (!web) {
+      return { ok: false, reason: "Webcam belum terpasang." };
     }
-    let cap;
+    const video = web.video as HTMLVideoElement | null | undefined;
+    if (!video) {
+      return { ok: false, reason: "Video belum tersedia." };
+    }
+    if (video.readyState < 2) {
+      return { ok: false, reason: "Kamera sedang memuat." };
+    }
+    if (!video.videoWidth || !video.videoHeight) {
+      return { ok: false, reason: "Ukuran video tidak valid." };
+    }
+    // Optional: trust the store-reported isCameraReady as well
+    return { ok: true };
+  }, [webcamRef]);
+
+  // ----------------------------------------------------------------
+  //  Cleanup
+  // ----------------------------------------------------------------
+
+  /**
+   * Stop all timers for the current session. Does NOT change phase.
+   * Idempotent and safe to call multiple times.
+   */
+  const cleanupSession = useCallback(() => {
+    const s = sessionRef.current;
+    if (!s) return;
+    s.cancelled = true;
+    if (s.intervalId) {
+      clearInterval(s.intervalId);
+      s.intervalId = null;
+    }
+    if (s.flashTimeoutId) {
+      clearTimeout(s.flashTimeoutId);
+      s.flashTimeoutId = null;
+    }
+    setCountdown(null);
+    setIsCapturing(false);
+  }, [setCountdown, setIsCapturing]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      const s = sessionRef.current;
+      if (s) {
+        s.cancelled = true;
+        if (s.intervalId) clearInterval(s.intervalId);
+        if (s.flashTimeoutId) clearTimeout(s.flashTimeoutId);
+      }
+    };
+  }, []);
+
+  // ----------------------------------------------------------------
+  //  State machine: countdown → capturing → (loop) → processing → result
+  // ----------------------------------------------------------------
+
+  const composeAndFinish = useCallback(async () => {
+    const s = sessionRef.current;
+    if (!s) return;
+    cleanupSession();
+    setPhase("processing");
+    setStage("edit");
+    setProcessing(true);
     try {
-      cap = await captureFrameFromVideo(video, ratio, selectedQuality);
+      const allFrames = usePhotoBoothStore.getState().capturedFrames;
+      const result = await composePhotoBoothOutput({
+        capturedFrames: allFrames,
+        selectedRatio: ratio,
+        selectedLayout: layout,
+        selectedQuality: selectedQuality,
+        selectedTheme: selectedTheme,
+        selectedBackground: selectedBackground,
+        selectedFilter: selectedFilter,
+        selectedEffect: selectedEffect,
+        caption,
+        stickers,
+      });
+      const blob = await exportCanvasAsBlob(result.canvas, true);
+      const final: ComposeResult = { ...result, blob };
+      setComposed(final);
+      setPhase("result");
+      setProcessing(false);
+    } catch (err) {
+      console.error("Composition failed:", err);
+      setErrorMessage("Gagal memproses hasil. Coba lagi.");
+      setPhase("error");
+      setStage("setup");
+      setProcessing(false);
+      setIsCapturing(false);
+    }
+  }, [
+    cleanupSession,
+    ratio,
+    layout,
+    selectedQuality,
+    selectedTheme,
+    selectedBackground,
+    selectedFilter,
+    selectedEffect,
+    caption,
+    stickers,
+    setPhase,
+    setStage,
+    setProcessing,
+    setComposed,
+    setErrorMessage,
+    setIsCapturing,
+  ]);
+
+  const captureOneFrame = useCallback(async () => {
+    const s = sessionRef.current;
+    if (!s || s.cancelled) return;
+
+    setPhase("capturing");
+    setIsCapturing(true);
+    setStage("flash");
+
+    // Brief flash overlay then revert stage so the user can see UI
+    if (s.flashTimeoutId) clearTimeout(s.flashTimeoutId);
+    s.flashTimeoutId = setTimeout(() => {
+      if (!sessionRef.current?.cancelled) {
+        setStage("edit");
+      }
+    }, 220);
+
+    try {
+      // Re-validate camera right before capture (in case state changed)
+      const web = webcamRef.current;
+      const video = web?.video as HTMLVideoElement | null | undefined;
+      if (!video || video.readyState < 2 || !video.videoWidth) {
+        throw new Error("Kamera belum siap");
+      }
+
+      const cap = await captureFrameFromVideo(
+        video,
+        ratio,
+        selectedQuality
+      );
+
+      // Bail out if the session was cancelled during the async capture
+      if (sessionRef.current?.cancelled) return;
+
+      // Local counter increments first; store mirrors afterward
+      s.count += 1;
+      addFrame(cap.dataUrl);
+
+      if (s.count >= s.total) {
+        // All frames collected — finish the session
+        await composeAndFinish();
+      } else {
+        // Start the next countdown
+        startCountdownInterval();
+      }
     } catch (err) {
       console.error("Capture failed:", err);
-      notify.error("Gagal mengambil foto.");
-      return;
+      cleanupSession();
+      const msg =
+        err instanceof Error ? err.message : "Gagal mengambil foto.";
+      setErrorMessage(msg);
+      setPhase("error");
+      setStage("setup");
+      setIsCapturing(false);
     }
-    setStage("flash");
-    setTimeout(() => {
-      const currentCount = usePhotoBoothStore.getState().capturedFrames.length;
-      addFrame(cap.dataUrl);
-      if (currentCount + 1 >= requiredShots) {
-        setIsCapturing(false);
-        setStage("edit");
-      } else {
-        setStage("countdown");
-        setCountdown(selectedTimer);
-      }
-    }, 200);
   }, [
     webcamRef,
     ratio,
     selectedQuality,
-    requiredShots,
-    selectedTimer,
     addFrame,
+    composeAndFinish,
+    cleanupSession,
+    setPhase,
     setStage,
     setIsCapturing,
-    setCountdown,
+    setErrorMessage,
   ]);
 
-  // Effect: when countdown hits 0, capture
-  useEffect(() => {
-    if (countdown !== 0 || !isCapturing) return;
-    setCountdown(null);
-    captureInternal();
-  }, [countdown, isCapturing, captureInternal, setCountdown]);
+  const startCountdownInterval = useCallback(() => {
+    const s = sessionRef.current;
+    if (!s || s.cancelled) return;
 
-  // Effect: compose the final canvas whenever inputs change
+    setPhase("countdown");
+    setStage("countdown");
+    setIsCapturing(false);
+    setCountdown(selectedTimer);
+
+    // Clear any previous interval (defensive)
+    if (s.intervalId) {
+      clearInterval(s.intervalId);
+      s.intervalId = null;
+    }
+
+    let remaining = selectedTimer;
+    s.intervalId = setInterval(() => {
+      // Re-check session validity (could have been cancelled)
+      const current = sessionRef.current;
+      if (!current || current.cancelled) {
+        if (current?.intervalId) {
+          clearInterval(current.intervalId);
+          current.intervalId = null;
+        }
+        return;
+      }
+
+      remaining -= 1;
+      if (remaining <= 0) {
+        // Time to capture
+        if (current.intervalId) {
+          clearInterval(current.intervalId);
+          current.intervalId = null;
+        }
+        setCountdown(0);
+        // Fire and forget — captureOneFrame manages its own state
+        void captureOneFrame();
+      } else {
+        setCountdown(remaining);
+      }
+    }, 1000);
+  }, [selectedTimer, captureOneFrame, setCountdown, setIsCapturing, setPhase, setStage]);
+
+  // ----------------------------------------------------------------
+  //  Public handlers
+  // ----------------------------------------------------------------
+
+  const handleStart = useCallback(() => {
+    const currentPhase = usePhotoBoothStore.getState().phase;
+
+    // Prevent re-entry / double session
+    if (
+      currentPhase === "countdown" ||
+      currentPhase === "capturing" ||
+      currentPhase === "processing"
+    ) {
+      console.warn("[photobooth] session already active:", currentPhase);
+      return;
+    }
+
+    // Validate camera before starting
+    const check = validateCamera();
+    if (!check.ok) {
+      notify.error(check.reason || "Kamera belum siap, coba lagi sebentar.");
+      return;
+    }
+
+    // Total shots derived from currently selected layout
+    const layoutId = usePhotoBoothStore.getState().selectedLayoutId;
+    const total = PHOTO_LAYOUTS[layoutId].requiredShots;
+
+    // Reset previous session data and timers
+    cleanupSession();
+    clearFrames();
+    setComposed(null);
+    clearStickers();
+    setErrorMessage(null);
+
+    // Initialize local session
+    sessionRef.current = {
+      intervalId: null,
+      flashTimeoutId: null,
+      total,
+      count: 0,
+      cancelled: false,
+    };
+
+    setIsCapturing(true);
+    startCountdownInterval();
+  }, [
+    validateCamera,
+    cleanupSession,
+    clearFrames,
+    setComposed,
+    clearStickers,
+    setErrorMessage,
+    setIsCapturing,
+    startCountdownInterval,
+  ]);
+
+  const handleRetry = useCallback(() => {
+    cleanupSession();
+    handleStart();
+  }, [handleStart, cleanupSession]);
+
+  const handleRetake = useCallback(() => {
+    cleanupSession();
+    setStage("setup");
+    setPhase("idle");
+    setErrorMessage(null);
+    clearFrames();
+    setComposed(null);
+    setCaption("");
+    clearStickers();
+    setIsCapturing(false);
+    setCountdown(null);
+    setProcessing(false);
+  }, [
+    cleanupSession,
+    setStage,
+    setPhase,
+    setErrorMessage,
+    clearFrames,
+    setComposed,
+    setCaption,
+    clearStickers,
+    setIsCapturing,
+    setCountdown,
+    setProcessing,
+  ]);
+
+  // ----------------------------------------------------------------
+  //  Auto-cancel on stage change to setup/landing
+  // ----------------------------------------------------------------
+
   useEffect(() => {
-    if (capturedFrames.length === 0 || stage !== "edit") return;
+    if (stage === "setup" || stage === "landing") {
+      // Cancel any in-flight session if user navigates back
+      if (sessionRef.current) {
+        cleanupSession();
+        setPhase(stage === "landing" ? "idle" : "idle");
+        setErrorMessage(null);
+      }
+    }
+  }, [stage, cleanupSession, setPhase, setErrorMessage]);
+
+  // ----------------------------------------------------------------
+  //  Composition effect — runs whenever inputs change during result phase
+  // ----------------------------------------------------------------
+
+  useEffect(() => {
+    if (phase !== "result") return;
+    if (stage !== "edit") return;
+    if (capturedFrames.length === 0) return;
     let cancelled = false;
     setProcessing(true);
 
@@ -118,17 +445,16 @@ export function usePhotoBooth(
       capturedFrames,
       selectedRatio: ratio,
       selectedLayout: layout,
-      selectedQuality,
-      selectedTheme,
-      selectedBackground,
-      selectedFilter,
-      selectedEffect,
+      selectedQuality: selectedQuality,
+      selectedTheme: selectedTheme,
+      selectedBackground: selectedBackground,
+      selectedFilter: selectedFilter,
+      selectedEffect: selectedEffect,
       caption,
       stickers,
     })
       .then(async (result) => {
         if (cancelled) return;
-        // also produce a blob so download/save use the same bytes
         const blob = await exportCanvasAsBlob(result.canvas, true);
         const final: ComposeResult = { ...result, blob };
         setComposed(final);
@@ -153,60 +479,24 @@ export function usePhotoBooth(
     selectedEffect,
     caption,
     stickers,
-    stage,
+    phase,
     selectedLayoutId,
     selectedRatioId,
     ratio,
     layout,
+    stage,
     setProcessing,
     setComposed,
   ]);
 
-  // Start a new capture session
-  const handleStart = useCallback(() => {
-    clearFrames();
-    setComposed(null);
-    clearStickers();
-    setIsCapturing(true);
-    setStage("countdown");
-    setCountdown(selectedTimer);
-  }, [
-    selectedTimer,
-    clearFrames,
-    setComposed,
-    clearStickers,
-    setIsCapturing,
-    setStage,
-    setCountdown,
-  ]);
+  // ----------------------------------------------------------------
+  //  Download and Save (unchanged behavior)
+  // ----------------------------------------------------------------
 
-  // Retake all photos
-  const handleRetake = useCallback(() => {
-    setStage("setup");
-    clearFrames();
-    setComposed(null);
-    setCaption("");
-    clearStickers();
-    setIsCapturing(false);
-    setCountdown(null);
-  }, [
-    clearFrames,
-    setComposed,
-    setCaption,
-    clearStickers,
-    setIsCapturing,
-    setCountdown,
-    setStage,
-  ]);
-
-  // Download final — uses the exact same blob as save
-  const handleDownload = useCallback(async () => {
+  const handleDownload = useCallback(() => {
     const composed = usePhotoBoothStore.getState().composed;
     if (!composed) return;
-    const filename = buildOutputFilename(
-      composed.ratioId,
-      composed.layoutId
-    );
+    const filename = buildOutputFilename(composed.ratioId, composed.layoutId);
     const a = document.createElement("a");
     a.href = composed.dataUrl;
     a.download = filename;
@@ -214,7 +504,6 @@ export function usePhotoBooth(
     notify.success("Foto diunduh!");
   }, []);
 
-  // Save to Canvas (and add to in-memory Gallery)
   const handleSave = useCallback(async () => {
     const composed = usePhotoBoothStore.getState().composed;
     if (!composed) return;
@@ -234,7 +523,6 @@ export function usePhotoBooth(
 
     setStage("saving");
     try {
-      // Generate a high-quality thumbnail (max 480px)
       const thumbDataUrl = await resizeDataUrl(
         composed.dataUrl,
         480,
@@ -321,6 +609,7 @@ export function usePhotoBooth(
 
   return {
     handleStart,
+    handleRetry,
     handleRetake,
     handleDownload,
     handleSave,

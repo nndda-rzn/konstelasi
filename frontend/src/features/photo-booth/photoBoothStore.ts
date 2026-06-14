@@ -22,12 +22,31 @@ import {
 } from "./photoBooth.config";
 import type { Sticker, ComposeResult, GalleryMetadata } from "./photoBooth.types";
 
+/**
+ * CapturePhase - explicit state machine for the capture session.
+ * idle → countdown → capturing → processing → result
+ * any state → error (on failure) → idle (on retry)
+ */
+export type CapturePhase =
+  | "idle"
+  | "countdown"
+  | "capturing"
+  | "processing"
+  | "result"
+  | "error";
+
 interface PhotoBoothState {
   /* ----- Mode & stage ----- */
   mode: Mode;
   stage: Stage;
   setMode: (mode: Mode) => void;
   setStage: (stage: Stage) => void;
+
+  /* ----- Capture phase (state machine) ----- */
+  phase: CapturePhase;
+  setPhase: (p: CapturePhase) => void;
+  errorMessage: string | null;
+  setErrorMessage: (m: string | null) => void;
 
   /* ----- Selected config ----- */
   selectedRatioId: RatioId;
@@ -102,6 +121,8 @@ const defaultState: Pick<
   PhotoBoothState,
   | "mode"
   | "stage"
+  | "phase"
+  | "errorMessage"
   | "selectedRatioId"
   | "selectedLayoutId"
   | "selectedQuality"
@@ -127,6 +148,8 @@ const defaultState: Pick<
 > = {
   mode: "camera",
   stage: "landing",
+  phase: "idle",
+  errorMessage: null,
   selectedRatioId: "square",
   selectedLayoutId: "strip4",
   selectedQuality: "standard",
@@ -156,6 +179,8 @@ export const usePhotoBoothStore = create<PhotoBoothState>((set) => ({
 
   setMode: (mode) => set({ mode }),
   setStage: (stage) => set({ stage }),
+  setPhase: (phase) => set({ phase }),
+  setErrorMessage: (errorMessage) => set({ errorMessage }),
 
   setSelectedRatio: (id) => set({ selectedRatioId: id }),
   setSelectedLayout: (id) => {
@@ -220,6 +245,8 @@ export const usePhotoBoothStore = create<PhotoBoothState>((set) => ({
   resetSession: () =>
     set({
       stage: "setup",
+      phase: "idle",
+      errorMessage: null,
       capturedFrames: [],
       composed: null,
       stickers: [],
@@ -246,6 +273,10 @@ export const selectRequiredShots = (s: PhotoBoothState): number =>
   PHOTO_LAYOUTS[s.selectedLayoutId].requiredShots;
 export const selectPhotoTheme = (s: PhotoBoothState) =>
   PHOTO_THEMES[s.selectedTheme];
+export const selectIsSessionActive = (s: PhotoBoothState): boolean =>
+  s.phase === "countdown" ||
+  s.phase === "capturing" ||
+  s.phase === "processing";
 
 // Re-export config constants for convenience from store consumers.
 export {
