@@ -21,12 +21,12 @@ interface ViewModeGroupProps {
 
 export function ViewModeGroup({ viewMode, onChange }: ViewModeGroupProps) {
   return (
-    <div className="flex items-center bg-white/70 border border-[#FFB4A2]/20 rounded-lg p-0.5 shadow-sm">
+    <div className="flex items-center bg-[#F7F1EA]/70 border border-[rgba(47,39,48,0.06)] rounded-[10px] p-0.5">
       <GroupedIconButton
         active={viewMode === "canvas"}
         onClick={() => onChange("canvas")}
         title="Canvas"
-        ariaLabel="Tampilan canvas"
+        ariaLabel="Canvas view"
       >
         <LayoutTemplate className="w-4 h-4" />
       </GroupedIconButton>
@@ -34,7 +34,7 @@ export function ViewModeGroup({ viewMode, onChange }: ViewModeGroupProps) {
         active={viewMode === "thread"}
         onClick={() => onChange("thread")}
         title="Thread"
-        ariaLabel="Tampilan thread"
+        ariaLabel="Thread view"
       >
         <List className="w-4 h-4" />
       </GroupedIconButton>
@@ -42,7 +42,7 @@ export function ViewModeGroup({ viewMode, onChange }: ViewModeGroupProps) {
         active={viewMode === "timeline"}
         onClick={() => onChange("timeline")}
         title="Timeline"
-        ariaLabel="Tampilan timeline"
+        ariaLabel="Timeline view"
       >
         <Clock className="w-4 h-4" />
       </GroupedIconButton>
@@ -62,12 +62,12 @@ export function PanelGroup({
   selectedTagFiltersCount,
 }: PanelGroupProps) {
   return (
-    <div className="flex items-center bg-white/70 border border-[#FFB4A2]/20 rounded-lg p-0.5 shadow-sm">
+    <div className="flex items-center bg-[#F7F1EA]/70 border border-[rgba(47,39,48,0.06)] rounded-[10px] p-0.5">
       <GroupedIconButton
         active={activePanel === "tag"}
         onClick={() => onToggle("tag")}
         title="Tags"
-        ariaLabel="Buka panel tags"
+        ariaLabel="Open tags panel"
         badge={selectedTagFiltersCount}
       >
         <TagIcon className="w-4 h-4" />
@@ -75,24 +75,24 @@ export function PanelGroup({
       <GroupedIconButton
         active={activePanel === "stats"}
         onClick={() => onToggle("stats")}
-        title="Statistik"
-        ariaLabel="Buka panel statistik"
+        title="Statistics"
+        ariaLabel="Open statistics panel"
       >
         <BarChart3 className="w-4 h-4" />
       </GroupedIconButton>
       <GroupedIconButton
         active={activePanel === "calendar"}
         onClick={() => onToggle("calendar")}
-        title="Kalender"
-        ariaLabel="Buka panel kalender"
+        title="Calendar"
+        ariaLabel="Open calendar panel"
       >
         <CalendarDays className="w-4 h-4" />
       </GroupedIconButton>
       <GroupedIconButton
         active={activePanel === "archive"}
         onClick={() => onToggle("archive")}
-        title="Arsip"
-        ariaLabel="Buka panel arsip"
+        title="Archive"
+        ariaLabel="Open archive panel"
       >
         <Archive className="w-4 h-4" />
       </GroupedIconButton>
@@ -100,7 +100,7 @@ export function PanelGroup({
         active={activePanel === "export"}
         onClick={() => onToggle("export")}
         title="Export"
-        ariaLabel="Buka panel export"
+        ariaLabel="Open export panel"
       >
         <Download className="w-4 h-4" />
       </GroupedIconButton>
@@ -116,9 +116,9 @@ export function AutoLayoutButton({ onClick }: AutoLayoutButtonProps) {
   return (
     <button
       onClick={onClick}
-      title="Auto-Organize: rapikan node otomatis"
-      aria-label="Rapikan layout otomatis"
-      className="p-2 rounded-lg bg-white/70 border border-[#FFB4A2]/20 shadow-sm text-[#5A3E4C]/60 hover:text-[#FF8FA3] hover:bg-white hover:border-[#FF8FA3]/30 transition-all"
+      title="Auto-organize"
+      aria-label="Auto-organize layout"
+      className="p-2 rounded-[10px] bg-[#F7F1EA]/70 border border-[rgba(47,39,48,0.06)] text-[#6F626A] hover:text-[#B84A5A] hover:bg-[#FFFCF8] hover:border-[#C99A45]/40 transition-colors"
     >
       <Wand2 className="w-4 h-4" />
     </button>

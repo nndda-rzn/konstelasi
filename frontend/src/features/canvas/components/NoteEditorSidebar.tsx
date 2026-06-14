@@ -32,6 +32,11 @@ interface NoteEditorSidebarProps {
   onNavigate?: (nodeId: string) => void;
 }
 
+/**
+ * NoteEditorSidebar - Inspector panel for editing a single note.
+ * Rendered as a flex child in DiaryCanvas layout (not absolute).
+ * Sticky header, scrollable content, warm editorial palette.
+ */
 export default function NoteEditorSidebar({
   note,
   allNotes = [],
@@ -56,9 +61,9 @@ export default function NoteEditorSidebar({
   if (!note) return null;
 
   const handleDeleteWithConfirm = () => {
-    toast("Hapus catatan ini beserta semua linknya?", {
+    toast("Delete this note and all its connections?", {
       action: {
-        label: "Hapus",
+        label: "Delete",
         onClick: editor.handleDeleteNode,
       },
     });
@@ -66,13 +71,13 @@ export default function NoteEditorSidebar({
 
   const handleArchiveWithToast = async () => {
     await editor.handleArchiveNode();
-    notify.success("Catatan diarsipkan");
+    notify.success("Note archived");
   };
 
   const handleRemoveImage = (imageId: string) => {
-    toast("Hapus gambar ini?", {
+    toast("Remove this image?", {
       action: {
-        label: "Hapus",
+        label: "Remove",
         onClick: () => editor.deleteImage(imageId),
       },
     });
@@ -80,23 +85,25 @@ export default function NoteEditorSidebar({
 
   return (
     <>
-      <div className="absolute top-0 right-0 h-full w-[400px] bg-white/95 backdrop-blur-2xl shadow-2xl shadow-pink-200/30 border-l border-[#FFB4A2]/15 z-50 flex flex-col pt-16 animate-slide-in-right">
-        <div className="absolute top-16 left-0 w-px h-full bg-gradient-to-b from-[#FF8FA3]/40 via-[#FFB4A2]/10 to-transparent" />
+      <aside className="w-[420px] flex-shrink-0 border-l border-[rgba(47,39,48,0.08)] bg-[#FFFCF8] h-full flex flex-col z-50 min-h-0">
+        {/* Sticky header */}
+        <div className="sticky top-0 z-10 flex h-[64px] flex-shrink-0 items-center justify-between border-b border-[rgba(47,39,48,0.07)] bg-[#FFFCF8]/95 px-6 backdrop-blur">
+          <SidebarHeader
+            showVersions={editor.showVersions}
+            onToggleVersions={() => editor.setShowVersions(!editor.showVersions)}
+            onOpenDrawing={() => editor.setShowDrawing(true)}
+            onArchive={handleArchiveWithToast}
+            onDelete={handleDeleteWithConfirm}
+            onClose={onClose}
+          />
+        </div>
 
-        <SidebarHeader
-          showVersions={editor.showVersions}
-          onToggleVersions={() => editor.setShowVersions(!editor.showVersions)}
-          onOpenDrawing={() => editor.setShowDrawing(true)}
-          onArchive={handleArchiveWithToast}
-          onDelete={handleDeleteWithConfirm}
-          onClose={onClose}
-        />
-
-        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
           {/* Title */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-semibold text-[#5A3E4C]/40 uppercase tracking-wider">
+              <label className="block text-[11px] font-medium uppercase tracking-[0.14em] text-[#9A8F95]">
                 Title
               </label>
               <TitleFontPicker
@@ -107,11 +114,11 @@ export default function NoteEditorSidebar({
             <input
               ref={editor.titleRef}
               type="text"
-              className="w-full bg-white/60 border border-[#FFB4A2]/20 rounded-xl text-[#4A2F3C] text-lg font-semibold px-4 py-3 placeholder-[#5A3E4C]/30 focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/30 focus:border-[#FF8FA3]/30 transition-all hover:bg-white/80"
+              className="w-full bg-[#FAF7F2] border border-[rgba(47,39,48,0.08)] rounded-[14px] text-[#2F2730] text-lg font-semibold px-4 py-3 placeholder-[#9A8F95] focus:outline-none focus:ring-1 focus:ring-[#C99A45]/40 focus:border-[#C99A45]/50 transition-colors"
               style={editor.titleFont ? { fontFamily: editor.titleFont } : undefined}
               value={editor.title}
               onChange={(e) => editor.setTitle(e.target.value)}
-              placeholder="Untitled Note"
+              placeholder="Untitled note"
             />
             <NoteTimestamps
               createdAt={note?.createdAt}
@@ -121,7 +128,7 @@ export default function NoteEditorSidebar({
 
           {/* Content */}
           <div>
-            <label className="block text-xs font-semibold text-[#5A3E4C]/40 uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-medium uppercase tracking-[0.14em] text-[#9A8F95] mb-2">
               Content
             </label>
             <TiptapEditor content={editor.content} onChange={editor.setContent} />
@@ -166,7 +173,7 @@ export default function NoteEditorSidebar({
           />
 
           {/* Backlinks */}
-          <div className="border-t border-[#FFB4A2]/15 pt-6 pb-4">
+          <div className="border-t border-[rgba(47,39,48,0.08)] pt-6 pb-4">
             <BacklinksPanel
               note={note}
               allNotes={allNotes}
@@ -174,7 +181,7 @@ export default function NoteEditorSidebar({
             />
           </div>
         </div>
-      </div>
+      </aside>
 
       <DrawingCanvas
         isOpen={editor.showDrawing}

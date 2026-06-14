@@ -11,9 +11,6 @@ interface SidebarHeaderProps {
   onClose: () => void;
 }
 
-/**
- * SidebarHeader - Top bar of the note editor with action buttons.
- */
 export function SidebarHeader({
   showVersions,
   onToggleVersions,
@@ -23,49 +20,49 @@ export function SidebarHeader({
   onClose,
 }: SidebarHeaderProps) {
   return (
-    <div className="flex items-center justify-between p-5 border-b border-[#FFB4A2]/15">
-      <h2 className="text-lg font-bold bg-gradient-to-r from-[#FF8FA3] to-[#FFB4A2] bg-clip-text text-transparent">
-        Edit Note
+    <div className="flex items-center justify-between px-0">
+      <h2 className="text-[15px] font-semibold tracking-tight text-[#2F2730]">
+        Edit note
       </h2>
-      <div className="flex gap-1.5">
+      <div className="flex gap-1">
         <button
           onClick={onToggleVersions}
-          className={`p-2 rounded-lg transition-all ${
+          className={`p-2 rounded-[10px] transition-colors ${
             showVersions
-              ? "text-[#FF8FA3] bg-[#FF8FA3]/10"
-              : "text-[#5A3E4C]/30 hover:text-[#5A3E4C]/60 hover:bg-[#FFB4A2]/10"
+              ? "text-[#B84A5A] bg-[#B84A5A]/8"
+              : "text-[#9A8F95] hover:text-[#2F2730] hover:bg-[#F3ECE4]"
           }`}
-          title="Riwayat Versi"
+          title="Version history"
         >
           <History className="w-4 h-4" />
         </button>
         <button
           onClick={onOpenDrawing}
-          className="p-2 text-[#5A3E4C]/30 hover:text-[#5A3E4C]/60 hover:bg-[#FFB4A2]/10 rounded-lg transition-all"
-          title="Drawing Canvas"
+          className="p-2 rounded-[10px] text-[#9A8F95] hover:text-[#2F2730] hover:bg-[#F3ECE4] transition-colors"
+          title="Drawing canvas"
         >
           <Pencil className="w-4 h-4" />
         </button>
         <button
           onClick={onArchive}
-          className="p-2 text-[#5A3E4C]/30 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all"
-          title="Arsipkan"
+          className="p-2 rounded-[10px] text-[#9A8F95] hover:text-[#C99A45] hover:bg-[#FAF3E0] transition-colors"
+          title="Archive"
         >
           <Archive className="w-4 h-4" />
         </button>
         <button
           onClick={onDelete}
-          className="p-2 text-[#5A3E4C]/30 hover:text-[#FF6B9D] hover:bg-[#FF6B9D]/10 rounded-lg transition-all"
+          className="p-2 rounded-[10px] text-[#9A8F95] hover:text-[#B84A5A] hover:bg-[#FBEFEC] transition-colors"
           title="Delete note"
         >
           <Trash2 className="w-4 h-4" />
         </button>
         <button
           onClick={onClose}
-          className="p-2 text-[#5A3E4C]/30 hover:text-[#5A3E4C]/60 hover:bg-[#FFB4A2]/10 rounded-lg transition-all"
+          className="p-2 rounded-[10px] text-[#9A8F95] hover:text-[#2F2730] hover:bg-[#F3ECE4] transition-colors"
           title="Close editor"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
       </div>
     </div>

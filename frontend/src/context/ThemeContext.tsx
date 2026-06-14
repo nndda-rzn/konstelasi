@@ -23,7 +23,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme] = useState<Theme>("light");
 
   useEffect(() => {
-    localStorage.removeItem("konstelasi-theme");
+    localStorage.removeItem("constella-theme");
     document.documentElement.classList.remove("dark");
   }, []);
 

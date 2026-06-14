@@ -5,34 +5,35 @@ interface Props {
 }
 
 /**
- * Bottom-area UI for the canvas view: a floating hint and a FAB
- * that creates a new note at the viewport center. Provides an
- * accessible alternative to right-click for touch/keyboard users.
+ * Bottom-area UI: subtle hint pill + new-note FAB.
+ * Muted deep-rose palette consistent with the editorial redesign.
  */
 export default function CanvasFooter({ onCreate }: Props) {
   return (
     <>
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-2.5 bg-white/70 backdrop-blur-xl border border-[#FFB4A2]/15 text-[#5A3E4C]/50 text-sm rounded-full shadow-lg pointer-events-none tracking-wide font-light flex items-center gap-2">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#FF8FA3] shadow-[0_0_8px_rgba(255,143,163,0.6)] animate-pulse" />
-        Right-click anywhere or press{' '}
-        <kbd className="px-1.5 py-0.5 rounded bg-[#FFB4A2]/15 text-[#5A3E4C]/70 text-xs font-mono">N</kbd>{' '}
-        to create
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-[#FFFCF8]/80 backdrop-blur-xl border border-[rgba(47,39,48,0.08)] text-[#6F626A] text-[12px] rounded-full shadow-[0_2px_10px_rgba(47,39,48,0.04)] pointer-events-none font-medium flex items-center gap-1.5">
+        <span className="h-1.5 w-1.5 rounded-full bg-[#C99A45]" />
+        <span>Press</span>
+        <kbd className="px-1.5 py-0.5 rounded bg-[#F3ECE4] border border-[rgba(47,39,48,0.08)] text-[#2F2730] text-[10.5px] font-mono">
+          N
+        </kbd>
+        <span>to add a note</span>
       </div>
 
       <button
         type="button"
         onClick={onCreate}
-        aria-label="Buat note baru"
-        title="Buat note baru (N)"
-        className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-[#FF8FA3] to-[#FFB4A2] hover:from-[#FF7A8A] hover:to-[#FF8FA3] text-white shadow-lg shadow-pink-300/40 hover:shadow-pink-300/60 transition-all hover:scale-105 active:scale-95 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#FF8FA3]/60 focus:ring-offset-2 focus:ring-offset-[#FFFAF7] z-20"
+        aria-label="New note"
+        title="New note (N)"
+        className="absolute bottom-6 right-6 w-12 h-12 rounded-full bg-[#B84A5A] hover:bg-[#A94352] text-white shadow-[0_4px_16px_rgba(184,74,90,0.22)] transition-all hover:-translate-y-px active:translate-y-0 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#B84A5A]/30 focus:ring-offset-2 focus:ring-offset-[#F7F1EA] z-20"
       >
         <svg
-          width="20"
-          height="20"
+          width="18"
+          height="18"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2.5"
+          strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
         >

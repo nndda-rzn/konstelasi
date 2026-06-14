@@ -21,7 +21,7 @@ export default function BacklinksPanel({ note, allNotes, onNavigate }: Backlinks
   const findTitle = (id?: string): string => {
     if (!id) return 'Untitled';
     const found = allNotes.find(n => n.id === id);
-    return found?.title || 'Untitled Note';
+    return found?.title || 'Untitled note';
   };
 
   const incoming: BacklinkItem[] = (note.incomingEdges || [])
@@ -44,34 +44,34 @@ export default function BacklinksPanel({ note, allNotes, onNavigate }: Backlinks
 
   if (incoming.length === 0 && outgoing.length === 0) {
     return (
-      <div className="px-4 py-3 rounded-xl bg-[#FFE5E8]/30 border border-[#FFB8C0]/20">
+      <div className="px-4 py-3 rounded-[12px] bg-[#F3ECE4]/50 border border-[rgba(47,39,48,0.08)]">
         <div className="flex items-center gap-2">
-          <Link2 className="w-3.5 h-3.5 text-[#E63946]/60" />
-          <p className="text-[11px] font-bold uppercase tracking-widest text-[#6D5561]">Kenangan Terkait</p>
+          <Link2 className="w-3.5 h-3.5 text-[#9A8F95]" />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#6F626A]">Related memories</p>
         </div>
-        <p className="text-[10px] text-[#8C7783] mt-2 leading-relaxed">
-          Belum ada koneksi. Tarik garis antar note di kanvas untuk membangun jejaring kenangan.
+        <p className="text-[11px] text-[#9A8F95] mt-2 leading-relaxed">
+          No connections yet. Link notes on the canvas to build a memory network.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="px-4 py-3 rounded-xl bg-[#FFE5E8]/30 border border-[#FFB8C0]/20 space-y-3">
+    <div className="px-4 py-3 rounded-[12px] bg-[#F3ECE4]/50 border border-[rgba(47,39,48,0.08)] space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Link2 className="w-3.5 h-3.5 text-[#E63946]" />
-          <p className="text-[11px] font-bold uppercase tracking-widest text-[#6D5561]">Kenangan Terkait</p>
+          <Link2 className="w-3.5 h-3.5 text-[#B84A5A]" />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#6F626A]">Related memories</p>
         </div>
-        <span className="text-[9px] text-[#8C7783]">{incoming.length + outgoing.length}</span>
+        <span className="text-[10px] text-[#9A8F95]">{incoming.length + outgoing.length}</span>
       </div>
 
       {outgoing.length > 0 && (
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
-            <ArrowRight className="w-3 h-3 text-[#E63946]/70" />
-            <p className="text-[9px] font-semibold uppercase tracking-wider text-[#8C7783]">
-              Menuju ke ({outgoing.length})
+            <ArrowRight className="w-3 h-3 text-[#B84A5A]/70" />
+            <p className="text-[9px] font-semibold uppercase tracking-wider text-[#9A8F95]">
+              Linked to ({outgoing.length})
             </p>
           </div>
           <div className="space-y-1">
@@ -79,13 +79,13 @@ export default function BacklinksPanel({ note, allNotes, onNavigate }: Backlinks
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.noteId)}
-                className="w-full text-left px-3 py-2 rounded-lg bg-white/70 hover:bg-white border border-[#FFB8C0]/20 hover:border-[#E63946]/30 hover:shadow-[0_2px_8px_rgba(230,57,70,0.08)] transition-all group"
+                className="w-full text-left px-3 py-2 rounded-[10px] bg-[#FFFCF8]/80 hover:bg-white border border-[rgba(47,39,48,0.06)] hover:border-[#B84A5A]/25 transition-colors group"
               >
-                <p className="text-xs font-medium text-[#3F2A35] truncate group-hover:text-[#E63946]">
+                <p className="text-xs font-medium text-[#2F2730] truncate group-hover:text-[#B84A5A]">
                   {item.title}
                 </p>
                 {item.label && (
-                  <p className="text-[9px] text-[#8C7783] mt-0.5 italic truncate">{item.label}</p>
+                  <p className="text-[10px] text-[#9A8F95] mt-0.5 italic truncate">{item.label}</p>
                 )}
               </button>
             ))}
@@ -96,9 +96,9 @@ export default function BacklinksPanel({ note, allNotes, onNavigate }: Backlinks
       {incoming.length > 0 && (
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
-            <ArrowLeft className="w-3 h-3 text-[#E63946]/70" />
-            <p className="text-[9px] font-semibold uppercase tracking-wider text-[#8C7783]">
-              Disebut oleh ({incoming.length})
+            <ArrowLeft className="w-3 h-3 text-[#B84A5A]/70" />
+            <p className="text-[9px] font-semibold uppercase tracking-wider text-[#9A8F95]">
+              Referenced by ({incoming.length})
             </p>
           </div>
           <div className="space-y-1">
@@ -106,13 +106,13 @@ export default function BacklinksPanel({ note, allNotes, onNavigate }: Backlinks
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.noteId)}
-                className="w-full text-left px-3 py-2 rounded-lg bg-white/70 hover:bg-white border border-[#FFB8C0]/20 hover:border-[#E63946]/30 hover:shadow-[0_2px_8px_rgba(230,57,70,0.08)] transition-all group"
+                className="w-full text-left px-3 py-2 rounded-[10px] bg-[#FFFCF8]/80 hover:bg-white border border-[rgba(47,39,48,0.06)] hover:border-[#B84A5A]/25 transition-colors group"
               >
-                <p className="text-xs font-medium text-[#3F2A35] truncate group-hover:text-[#E63946]">
+                <p className="text-xs font-medium text-[#2F2730] truncate group-hover:text-[#B84A5A]">
                   {item.title}
                 </p>
                 {item.label && (
-                  <p className="text-[9px] text-[#8C7783] mt-0.5 italic truncate">{item.label}</p>
+                  <p className="text-[10px] text-[#9A8F95] mt-0.5 italic truncate">{item.label}</p>
                 )}
               </button>
             ))}

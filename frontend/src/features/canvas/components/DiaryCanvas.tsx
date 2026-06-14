@@ -58,7 +58,6 @@ import AdvancedAnalyticsPanel from '../panels/AdvancedAnalyticsPanel';
 import ArchivePanel from '../panels/ArchivePanel';
 import ExportPanel from '../panels/ExportPanel';
 import CalendarPanel from '../panels/CalendarPanel';
-import StreakWidget from './StreakWidget';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
 const nodeTypes = {
@@ -208,10 +207,10 @@ function DiaryCanvasInner() {
       pushSnapshot(nodes, edges);
       nodesToDelete.forEach((node) => {
         deleteNote({ variables: { id: node.id } })
-          .then(() => toast.success('Note dihapus'))
+          .then(() => toast.success('Note deleted'))
           .catch((err) => {
             console.error(err);
-            toast.error('Gagal menghapus note');
+            toast.error('Failed to delete note');
           });
       });
       setSelectedNote(null);
@@ -273,7 +272,7 @@ function DiaryCanvasInner() {
     if (!canvasElement) return;
 
     toPng(canvasElement, {
-      backgroundColor: "#09090b",
+      backgroundColor: "#F7F1EA",
       quality: 1,
       pixelRatio: 2,
     })
@@ -281,7 +280,7 @@ function DiaryCanvasInner() {
         const a = document.createElement("a");
         a.setAttribute(
           "download",
-          `Konstelasi_Export_${new Date().toISOString().split("T")[0]}.png`
+          `Constella_Export_${new Date().toISOString().split("T")[0]}.png`
         );
         a.setAttribute("href", dataUrl);
         a.click();
@@ -317,13 +316,8 @@ function DiaryCanvasInner() {
     return <CanvasError message={error.message} onRetry={() => refetch()} />;
 
   return (
-    <div className="w-full h-screen relative bg-[#FFFAF7] overflow-hidden">
-      {/* Ambient glows */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(255,180,162,0.1),_transparent_60%)] pointer-events-none" />
-      <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] bg-[#FFCAD4]/15 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[8000ms]" />
-      <div className="absolute -bottom-[20%] -left-[10%] w-[40%] h-[40%] bg-[#FFB4A2]/15 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[10000ms]" />
-
-      {/* Header / Toolbar */}
+    <div className="h-screen flex flex-col bg-[#F7F1EA] overflow-hidden">
+      {/* Header / Toolbar (flex-shrink-0 = always visible) */}
       <CanvasToolbar
         searchInputRef={searchInputRef}
         searchQuery={searchQuery}
@@ -339,163 +333,129 @@ function DiaryCanvasInner() {
         canRedo={canRedo}
         onUndo={() => {
           const s = undo();
-          if (s) {
-            setNodes(s.nodes);
-            setEdges(s.edges);
-          }
+          if (s) { setNodes(s.nodes); setEdges(s.edges); }
         }}
         onRedo={() => {
           const s = redo();
-          if (s) {
-            setNodes(s.nodes);
-            setEdges(s.edges);
-          }
+          if (s) { setNodes(s.nodes); setEdges(s.edges); }
         }}
       />
 
-      {/* Main view area */}
-      <div
-        className="w-full h-full pt-16 relative z-0"
-        onContextMenu={handleCanvasContextMenu}
-      >
-        {viewMode === 'canvas' ? (
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            edgeTypes={edgeTypes}
-            onNodesChange={handleNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={handleConnect}
-            onNodesDelete={handleNodesDelete}
-            onEdgesDelete={handleEdgesDelete}
-            connectionMode={ConnectionMode.Loose}
-            defaultEdgeOptions={{
-              type: 'semanticEdge',
-              animated: true,
-            }}
-            onNodeDoubleClick={(_, node) => handleNodeDoubleClick(node.id)}
-            nodeTypes={nodeTypes}
-            fitView
-            fitViewOptions={{ padding: 2 }}
-          >
-            <Background color="rgba(255,180,162,0.06)" gap={24} size={1.5} />
-            <Controls className="!bg-white/80 !border-[#FFB4A2]/15 !backdrop-blur-xl !shadow-lg !rounded-xl overflow-hidden" />
-            <MiniMap
-              className="!bg-white/80 !border-[#FFB4A2]/15 !backdrop-blur-xl !shadow-lg !rounded-2xl overflow-hidden"
-              nodeColor={(n) =>
-                n.id === selectedNote?.id ? '#FF8FA3' : 'rgba(255,180,162,0.3)'
-              }
-              maskColor="rgba(255,250,247,0.4)"
+      {/* Main area: canvas + optional inspector */}
+      <div className="flex-1 flex min-h-0">
+        {/* Canvas */}
+        <div
+          className="flex-1 min-w-0 relative bg-[#F7F1EA]"
+          onContextMenu={handleCanvasContextMenu}
+        >
+          {/* Subtle warm ambient glows */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(201,154,69,0.06),_transparent_60%)] pointer-events-none" />
+          <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] bg-[#C99A45]/8 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[8000ms]" />
+          <div className="absolute -bottom-[20%] -left-[10%] w-[40%] h-[40%] bg-[#B84A5A]/8 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[10000ms]" />
+
+          {viewMode === 'canvas' ? (
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              edgeTypes={edgeTypes}
+              onNodesChange={handleNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={handleConnect}
+              onNodesDelete={handleNodesDelete}
+              onEdgesDelete={handleEdgesDelete}
+              connectionMode={ConnectionMode.Loose}
+              defaultEdgeOptions={{ type: 'semanticEdge', animated: true }}
+              onNodeDoubleClick={(_, node) => handleNodeDoubleClick(node.id)}
+              nodeTypes={nodeTypes}
+              fitView
+              fitViewOptions={{ padding: 2 }}
+            >
+              <Background color="rgba(47, 39, 48, 0.08)" gap={28} size={1.2} />
+              <Controls className="!bg-[#FFFCF8]/85 !border-[rgba(47,39,48,0.08)] !backdrop-blur-xl !shadow-md !rounded-[12px] overflow-hidden" />
+              <MiniMap
+                className="!bg-[#FFFCF8]/85 !border-[rgba(47,39,48,0.08)] !backdrop-blur-xl !shadow-md !rounded-[14px] overflow-hidden !m-4"
+                nodeColor={(n) => n.id === selectedNote?.id ? '#B84A5A' : 'rgba(47, 39, 48, 0.25)'}
+                maskColor="rgba(247, 241, 234, 0.6)"
+              />
+            </ReactFlow>
+          ) : (
+            <ThreadView
+              nodes={nodes}
+              selectedNoteId={selectedNote?.id}
+              onNodeClick={handleNodeDoubleClick}
             />
-          </ReactFlow>
-        ) : (
-          <ThreadView
-            nodes={nodes}
-            selectedNoteId={selectedNote?.id}
-            onNodeClick={handleNodeDoubleClick}
+          )}
+
+          {viewMode === 'timeline' && data?.getNotes && (
+            <TimelineView
+              notes={data.getNotes}
+              onNoteClick={(noteId) => handleNodeDoubleClick(noteId)}
+              selectedNoteId={selectedNote?.id}
+            />
+          )}
+
+          {viewMode === 'canvas' && (
+            <CanvasFooter onCreate={handleCreateAtCenter} />
+          )}
+
+          {viewMode === 'canvas' && !loading && nodes.length === 0 && (
+            <CanvasEmptyState onCreate={handleCreateAtCenter} />
+          )}
+
+          {/* Tag panel */}
+          {activePanel === 'tag' && <TagPanel onClose={closePanel} />}
+
+          {/* Search panel */}
+          {activePanel === 'search' && data?.getNotes && (
+            <SearchPanel notes={data.getNotes} onNoteClick={(noteId) => { handleNodeDoubleClick(noteId); closePanel(); }} onClose={closePanel} />
+          )}
+
+          {/* Stats panel */}
+          {activePanel === 'stats' && data?.getNotes && (
+            <AdvancedAnalyticsPanel isOpen={true} notes={data.getNotes} onClose={closePanel} />
+          )}
+
+          {/* Archive panel */}
+          <ArchivePanel isOpen={activePanel === 'archive'} onClose={closePanel} onRestoreSuccess={() => refetch()} />
+
+          {/* Export panel */}
+          {activePanel === 'export' && data?.getNotes && (
+            <ExportPanel isOpen={true} onClose={closePanel} notes={data.getNotes} />
+          )}
+
+          {/* Calendar panel */}
+          {activePanel === 'calendar' && data?.getNotes && (
+            <CalendarPanel
+              isOpen={true}
+              onClose={closePanel}
+              notes={data.getNotes}
+              onNoteClick={(noteId) => { handleNodeDoubleClick(noteId); closePanel(); }}
+            />
+          )}
+        </div>
+
+        {/* Inspector panel (flex-shrink-0, never overlaps canvas) */}
+        {selectedNote && (
+          <NoteEditorSidebar
+            note={selectedNote}
+            allNotes={data?.getNotes || []}
+            onClose={() => { setSelectedNote(null); restoreFocus(); }}
+            onUpdateCache={handleUpdateCache}
+            onDeleteSuccess={handleDeleteSuccess}
+            onNavigate={(id) => handleNodeDoubleClick(id)}
           />
-        )}
-
-        {viewMode === 'timeline' && data?.getNotes && (
-          <TimelineView
-            notes={data.getNotes}
-            onNoteClick={(noteId) => handleNodeDoubleClick(noteId)}
-            selectedNoteId={selectedNote?.id}
-          />
-        )}
-
-        {viewMode === 'canvas' && (
-          <CanvasFooter onCreate={handleCreateAtCenter} />
-        )}
-
-        {viewMode === 'canvas' && !loading && nodes.length === 0 && (
-          <CanvasEmptyState onCreate={handleCreateAtCenter} />
         )}
       </div>
-
-      {/* Note editor sidebar */}
-      {selectedNote && (
-        <NoteEditorSidebar
-          note={selectedNote}
-          allNotes={data?.getNotes || []}
-          onClose={() => {
-            setSelectedNote(null);
-            restoreFocus();
-          }}
-          onUpdateCache={handleUpdateCache}
-          onDeleteSuccess={handleDeleteSuccess}
-          onNavigate={(id) => handleNodeDoubleClick(id)}
-        />
-      )}
-
-      {/* Tag panel */}
-      {activePanel === 'tag' && <TagPanel onClose={closePanel} />}
-
-      {/* Search panel */}
-      {activePanel === 'search' && data?.getNotes && (
-        <SearchPanel
-          notes={data.getNotes}
-          onNoteClick={(noteId) => {
-            handleNodeDoubleClick(noteId);
-            closePanel();
-          }}
-          onClose={closePanel}
-        />
-      )}
-
-      {/* Stats panel */}
-      {activePanel === 'stats' && data?.getNotes && (
-        <AdvancedAnalyticsPanel
-          isOpen={true}
-          notes={data.getNotes}
-          onClose={closePanel}
-        />
-      )}
-
-      {/* Archive panel */}
-      <ArchivePanel
-        isOpen={activePanel === 'archive'}
-        onClose={closePanel}
-        onRestoreSuccess={() => refetch()}
-      />
-
-      {/* Export panel */}
-      {activePanel === 'export' && data?.getNotes && (
-        <ExportPanel
-          isOpen={true}
-          onClose={closePanel}
-          notes={data.getNotes}
-        />
-      )}
-
-      {/* Calendar panel */}
-      {activePanel === 'calendar' && data?.getNotes && (
-        <CalendarPanel
-          isOpen={true}
-          onClose={closePanel}
-          notes={data.getNotes}
-          onNoteClick={(noteId) => {
-            handleNodeDoubleClick(noteId);
-            closePanel();
-          }}
-        />
-      )}
-
-      {/* Streak widget */}
-      <StreakWidget />
 
       {/* Multi-delete confirmation */}
       <ConfirmDialog
         open={pendingDelete.length > 0}
-        title={`Hapus ${pendingDelete.length} catatan?`}
-        description="Aksi ini akan menghapus semua catatan terpilih beserta koneksinya. Tindakan ini tidak bisa dibatalkan."
-        confirmLabel="Hapus semua"
+        title={`Delete ${pendingDelete.length} note${pendingDelete.length > 1 ? 's' : ''}?`}
+        description="This will delete all selected notes and their connections. This action cannot be undone."
+        confirmLabel="Delete all"
         variant="danger"
         onCancel={clearPendingDelete}
-        onConfirm={() => {
-          performNodesDelete(pendingDelete);
-          clearPendingDelete();
-        }}
+        onConfirm={() => { performNodesDelete(pendingDelete); clearPendingDelete(); }}
       />
     </div>
   );

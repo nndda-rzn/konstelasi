@@ -36,12 +36,12 @@ export default memo(function NoteNode({
 
   const searchFade =
     isSearching && !isMatch
-      ? "opacity-20 scale-95 pointer-events-none grayscale blur-[1px]"
+      ? "opacity-25 scale-95 pointer-events-none"
       : "opacity-100 scale-100";
 
   const searchHighlight =
     isSearching && isMatch
-      ? "ring-2 ring-[#E63946]/60 shadow-[0_0_60px_-8px_rgba(230,57,70,0.45)] z-50 animate-[pulse_2.5s_ease-in-out_infinite]"
+      ? "ring-2 ring-[#B84A5A]/70 shadow-[0_0_60px_-8px_rgba(184,74,90,0.45)] z-50 animate-[pulse_2.5s_ease-in-out_infinite]"
       : "";
 
   const isSelectedStyle = selected && (!isSearching || isMatch);
@@ -58,19 +58,19 @@ export default memo(function NoteNode({
     <>
       {viewMode === "canvas" && (
         <NodeResizer
-          color={theme.topLine.split("-")[1] ? `#${theme.topLine.split("-")[1]}` : "#FF8FA3"}
+          color={theme.topLine.split("-")[1] ? `#${theme.topLine.split("-")[1]}` : "#B84A5A"}
           isVisible={selected}
           minWidth={200}
           minHeight={120}
           maxWidth={1200}
-          handleClassName="h-3 w-3 bg-white border-2 border-[#FFF5F0] rounded-full"
-          lineClassName="border-[#FFB4A2]/30"
+          handleClassName="h-3 w-3 bg-white border-2 border-[#F7F1EA] rounded-full"
+          lineClassName="border-[#C99A45]/30"
         />
       )}
       <div
         className={`
           relative w-full h-full min-w-[200px] min-h-[120px] ${bubbleRadiusClass} backdrop-blur-3xl transition-all duration-500 group
-          bg-white/85
+          bg-[#FFFCF8]/90
           ${searchFade} ${searchHighlight}
           ${
             isSelectedStyle

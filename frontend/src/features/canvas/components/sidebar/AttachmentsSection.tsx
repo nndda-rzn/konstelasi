@@ -9,9 +9,6 @@ interface AttachmentsSectionProps {
   onRemove: (imageId: string) => void;
 }
 
-/**
- * AttachmentsSection - Image grid + upload trigger.
- */
 export function AttachmentsSection({
   images,
   uploading,
@@ -19,8 +16,8 @@ export function AttachmentsSection({
   onRemove,
 }: AttachmentsSectionProps) {
   return (
-    <div className="border-t border-[#FFB4A2]/15 pt-6">
-      <label className="block text-xs font-semibold text-[#5A3E4C]/40 uppercase tracking-wider mb-3">
+    <div className="border-t border-[rgba(47,39,48,0.08)] pt-6">
+      <label className="block text-[11px] font-medium uppercase tracking-[0.14em] text-[#9A8F95] mb-3">
         Attachments
       </label>
 
@@ -29,7 +26,7 @@ export function AttachmentsSection({
           {images.map((img) => (
             <div
               key={img.id}
-              className="relative group rounded-xl overflow-hidden border border-[#FFB4A2]/15 bg-[#FFF5F0]/50"
+              className="relative group rounded-[12px] overflow-hidden border border-[rgba(47,39,48,0.08)] bg-[#F7F1EA]/50"
             >
               <img
                 src={img.imageUrl}
@@ -40,7 +37,7 @@ export function AttachmentsSection({
               />
               <button
                 onClick={() => onRemove(img.id)}
-                className="absolute top-1.5 right-1.5 bg-[#FF6B9D]/80 hover:bg-[#FF6B9D] text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm"
+                className="absolute top-1.5 right-1.5 bg-[#B84A5A] hover:bg-[#9D3F4C] text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -49,12 +46,12 @@ export function AttachmentsSection({
         </div>
       )}
 
-      <label className="flex items-center justify-center w-full p-4 border border-dashed border-[#FFB4A2]/20 rounded-xl hover:border-[#FF8FA3]/40 hover:bg-[#FF8FA3]/[0.04] cursor-pointer transition-all text-[#5A3E4C]/30 hover:text-[#FF8FA3] font-medium text-sm">
+      <label className="flex items-center justify-center w-full p-4 border border-dashed border-[rgba(47,39,48,0.12)] rounded-[12px] hover:border-[#B84A5A]/40 hover:bg-[#B84A5A]/[0.03] cursor-pointer transition-colors text-[#9A8F95] hover:text-[#B84A5A] font-medium text-sm">
         {uploading ? (
           <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
           <>
-            <ImagePlus className="w-5 h-5 mr-2" /> Upload Image
+            <ImagePlus className="w-5 h-5 mr-2" /> Upload image
           </>
         )}
         <input

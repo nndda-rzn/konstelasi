@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { TAGS_QUERY, type Tag } from "../api/tags";
-import { useSession } from "@/hooks/useSession";
+import { useHasSession } from "@/lib/supabase/use-has-session";
 
 interface UseTagsParams {
   onLoaded?: (tags: Tag[]) => void;
@@ -11,20 +11,20 @@ interface UseTagsParams {
 
 /**
  * useTags - Fetches the user's tags with cache-and-network policy.
- * Skipped when no auth session is present.
+ * Skips the query entirely when no Supabase session is present.
  * Local state managed here (tags array, loading flag) for caching.
  */
 export const useTags = ({ onLoaded }: UseTagsParams = {}) => {
+  const hasSession = useHasSession();
   const [tags, setTags] = useState<Tag[]>([]);
   const [internalLoading, setInternalLoading] = useState<boolean>(true);
-  const { hasSession } = useSession();
 
   const { data, loading, error, refetch } = useQuery<{ tags: Tag[] }>(
     TAGS_QUERY,
     {
       fetchPolicy: "cache-and-network",
       ssr: false,
-      skip: !hasSession,
+      skip: hasSession !== true,
     }
   );
 
@@ -36,11 +36,10 @@ export const useTags = ({ onLoaded }: UseTagsParams = {}) => {
     }
   }, [data, loading, onLoaded]);
 
-  useEffect(() => {
-    if (error && hasSession) {
-      console.error("Error fetching tags:", error);
-    }
-  }, [error, hasSession]);
-
-  return { tags, loading, error, refetch };
+  return {
+    tags,
+    loading: hasSession === null || internalLoading || loading,
+    error,
+    refetch,
+  };
 };

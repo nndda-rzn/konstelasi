@@ -48,7 +48,7 @@ export default function CanvasToolbar({
   onRedo,
 }: Props) {
   return (
-    <div className="absolute top-0 left-0 right-0 h-14 bg-[#FFFAF7]/85 backdrop-blur-2xl border-b border-[#FFB4A2]/20 shadow-sm shadow-pink-100/30 z-10 flex items-center justify-between px-4">
+    <div className="absolute top-0 left-0 right-0 h-[60px] bg-[#FFFCF8]/85 backdrop-blur-2xl border-b border-[rgba(47,39,48,0.06)] shadow-[0_1px_0_rgba(47,39,48,0.04)] z-10 flex items-center justify-between px-4">
       <div className="flex items-center gap-3">
         <CanvasToolbarBrand />
         <HistoryControls
@@ -73,7 +73,7 @@ export default function CanvasToolbar({
           onToggle={onTogglePanel}
           selectedTagFiltersCount={selectedTagFiltersCount}
         />
-        <div className="hidden lg:block pl-1 border-l border-[#FFB4A2]/20 ml-1">
+        <div className="hidden lg:block pl-1 border-l border-[rgba(47,39,48,0.08)] ml-1">
           <StreakWidget />
         </div>
       </div>

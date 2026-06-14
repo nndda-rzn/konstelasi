@@ -22,10 +22,10 @@ function CanvasTreeItem({ canvas, allCanvases, selectedId, onSelect, onCreateSub
   return (
     <div>
       <div
-        className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer transition-all group ${
+        className={`flex items-center gap-1.5 px-2 py-1.5 rounded-[8px] cursor-pointer transition-colors group ${
           isSelected
-            ? 'bg-[#FF8FA3]/10 text-[#FF8FA3] border border-[#FF8FA3]/20'
-            : 'hover:bg-[#FFB4A2]/5 text-[#5A3E4C]/70 border border-transparent'
+            ? 'bg-[#F3ECE4] text-[#2F2730] border border-[#C99A45]/30'
+            : 'hover:bg-[#F3ECE4]/60 text-[#6F626A] border border-transparent'
         }`}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
         onClick={() => onSelect(canvas.id)}
@@ -33,7 +33,7 @@ function CanvasTreeItem({ canvas, allCanvases, selectedId, onSelect, onCreateSub
         {hasChildren ? (
           <button
             onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-            className="p-0.5 rounded hover:bg-[#FFB4A2]/10"
+            className="p-0.5 rounded hover:bg-[#C99A45]/15"
           >
             {expanded ? (
               <ChevronDown className="w-3 h-3" />
@@ -46,17 +46,19 @@ function CanvasTreeItem({ canvas, allCanvases, selectedId, onSelect, onCreateSub
         )}
 
         {isSelected ? (
-          <FolderOpen className="w-3.5 h-3.5 shrink-0" />
+          <FolderOpen className="w-3.5 h-3.5 shrink-0 text-[#B84A5A]" />
         ) : (
           <Folder className="w-3.5 h-3.5 shrink-0" />
         )}
 
-        <span className="text-xs font-medium truncate flex-1">{canvas.name}</span>
+        <span className={`text-xs truncate flex-1 ${isSelected ? 'font-semibold' : 'font-medium'}`}>
+          {canvas.name}
+        </span>
 
         <button
           onClick={(e) => { e.stopPropagation(); onCreateSub(canvas.id); }}
-          className="p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-[#FFB4A2]/10 transition-all"
-          title="Buat sub-canvas"
+          className="p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-[#C99A45]/15 transition-opacity text-[#6F626A]"
+          title="Create sub-canvas"
         >
           <FolderPlus className="w-3 h-3" />
         </button>
@@ -112,11 +114,13 @@ export default function CanvasHierarchy() {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between px-2 mb-1">
-        <span className="text-[10px] uppercase tracking-wider text-[#5A3E4C]/40 font-semibold">Canvases</span>
+        <span className="text-[10px] uppercase tracking-wider text-[#9A8F95] font-semibold">
+          Canvases
+        </span>
         <button
           onClick={handleCreateRoot}
-          className="p-1 rounded hover:bg-[#FFB4A2]/10 text-[#5A3E4C]/40 hover:text-[#FF8FA3] transition-all"
-          title="Buat canvas baru"
+          className="p-1 rounded hover:bg-[#C99A45]/15 text-[#9A8F95] hover:text-[#2F2730] transition-colors"
+          title="Create new canvas"
         >
           <FolderPlus className="w-3.5 h-3.5" />
         </button>
@@ -135,17 +139,24 @@ export default function CanvasHierarchy() {
 
       {showNewInput && (
         <div className="px-2 mt-1">
-          <div className="flex items-center gap-1.5 text-xs text-[#5A3E4C]/50 mb-1">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#6F626A] mb-1">
             <Folder className="w-3 h-3" />
-            <span>{parentIdForNew ? `Sub-canvas dari ${canvases.find((c: any) => c.id === parentIdForNew)?.name}` : 'Canvas baru'}</span>
+            <span>
+              {parentIdForNew
+                ? `Sub-canvas of ${canvases.find((c: any) => c.id === parentIdForNew)?.name}`
+                : 'New canvas'}
+            </span>
           </div>
           <input
             type="text"
             value={newCanvasName}
             onChange={(e) => setNewCanvasName(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleSubmitNew(); if (e.key === 'Escape') setShowNewInput(false); }}
-            placeholder="Nama canvas..."
-            className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#FFB4A2]/20 bg-white/60 focus:outline-none focus:ring-1 focus:ring-[#FF8FA3]/30"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSubmitNew();
+              if (e.key === 'Escape') setShowNewInput(false);
+            }}
+            placeholder="Canvas name..."
+            className="w-full px-2.5 py-1.5 text-xs rounded-[8px] border border-[rgba(47,39,48,0.08)] bg-[#FFFCF8] focus:outline-none focus:ring-1 focus:ring-[#C99A45]/40 focus:border-[#C99A45]/50"
             autoFocus
           />
         </div>

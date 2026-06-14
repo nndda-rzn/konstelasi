@@ -9,14 +9,11 @@ interface Props {
 }
 
 /**
- * Live save status indicator. Shows saving spinner, success check,
- * or error icon. After save, displays relative time ("2 detik lalu")
- * that auto-updates every 10 seconds.
+ * Live save status indicator. English copy, muted warm palette.
  */
 export default function SaveIndicator({ status, lastSavedAt }: Props) {
   const [, forceUpdate] = useState(0);
 
-  // Periodically refresh to update relative timestamp.
   useEffect(() => {
     if (status !== 'saved') return;
     const interval = setInterval(() => forceUpdate((n) => n + 1), 10000);
@@ -25,48 +22,47 @@ export default function SaveIndicator({ status, lastSavedAt }: Props) {
 
   if (status === 'idle' && !lastSavedAt) {
     return (
-      <p className="text-[11px] text-[#5A3E4C]/30 mt-2 flex items-center gap-1.5">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#5A3E4C]/20" />
-        Belum disimpan
+      <p className="text-[11px] text-[#9A8F95] mt-2 flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#9A8F95]/50" />
+        Not saved yet
       </p>
     );
   }
 
   if (status === 'saving') {
     return (
-      <p className="text-[11px] text-[#FF8FA3]/70 mt-2 flex items-center gap-1.5">
+      <p className="text-[11px] text-[#6F626A] mt-2 flex items-center gap-1.5">
         <Loader2 className="w-3 h-3 animate-spin" />
-        Menyimpan...
+        Saving...
       </p>
     );
   }
 
   if (status === 'error') {
     return (
-      <p className="text-[11px] text-red-500/80 mt-2 flex items-center gap-1.5">
+      <p className="text-[11px] text-[#B84A5A] mt-2 flex items-center gap-1.5">
         <AlertCircle className="w-3 h-3" />
-        Gagal menyimpan
+        Save failed
       </p>
     );
   }
 
-  // saved (or idle with lastSavedAt set)
-  const label = lastSavedAt ? formatRelative(lastSavedAt) : 'Tersimpan';
+  const label = lastSavedAt ? formatRelative(lastSavedAt) : 'Saved';
   return (
-    <p className="text-[11px] text-emerald-600/70 mt-2 flex items-center gap-1.5">
-      <Check className="w-3 h-3" />
-      Disimpan {label}
+    <p className="text-[11px] text-[#6F626A] mt-2 flex items-center gap-1.5">
+      <Check className="w-3 h-3 text-[#B84A5A]/70" />
+      Saved {label}
     </p>
   );
 }
 
 function formatRelative(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
-  if (diff < 5) return 'baru saja';
-  if (diff < 60) return `${diff} detik lalu`;
+  if (diff < 5) return 'just now';
+  if (diff < 60) return `${diff} seconds ago`;
   const min = Math.floor(diff / 60);
-  if (min < 60) return `${min} menit lalu`;
+  if (min < 60) return `${min} minute${min > 1 ? 's' : ''} ago`;
   const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr} jam lalu`;
-  return new Date(ts).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+  if (hr < 24) return `${hr} hour${hr > 1 ? 's' : ''} ago`;
+  return new Date(ts).toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 }
