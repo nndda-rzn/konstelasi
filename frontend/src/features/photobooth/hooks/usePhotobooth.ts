@@ -5,14 +5,9 @@ import { useRouter } from "next/navigation";
 import type Webcam from "react-webcam";
 import { useMutation } from "@apollo/client/react";
 import { usePhotoboothStore } from "../store/usePhotoboothStore";
-import { LAYOUTS } from "../constants";
-import {
-  renderSingle,
-  renderStrip,
-  renderGrid,
-  renderWide,
-} from "../renderers";
-import { ZOOM_LEVELS } from "../constants";
+import { LAYOUTS, PHOTO_RATIOS } from "../constants";
+import { captureFrameFromVideo } from "../lib/capture";
+import { composePhotoBoothOutput } from "../lib/compose";
 import { CREATE_NOTE, ADD_NOTE_IMAGE } from "@/graphql/mutations";
 import { createClient } from "@/lib/supabase/client";
 import { notify } from "@/lib/toast";
@@ -32,7 +27,7 @@ export const usePhotobooth = (
   const capturedPhotos = usePhotoboothStore((s) => s.capturedPhotos);
   const selectedFilter = usePhotoboothStore((s) => s.selectedFilter);
   const selectedLayout = usePhotoboothStore((s) => s.selectedLayout);
-  const selectedRatio = usePhotoboothStore((s) => s.selectedRatio);
+  const selectedRatioKey = usePhotoboothStore((s) => s.selectedRatio);
   const selectedQuality = usePhotoboothStore((s) => s.selectedQuality);
   const selectedBackground = usePhotoboothStore((s) => s.selectedBackground);
   const selectedEffect = usePhotoboothStore((s) => s.selectedEffect);
@@ -56,50 +51,40 @@ export const usePhotobooth = (
   const setCaption = usePhotoboothStore((s) => s.setCaption);
 
   const layoutDef = LAYOUTS.find((l) => l.key === selectedLayout)!;
+  // Single source of truth for the active ratio config
+  const photoRatio = PHOTO_RATIOS[selectedRatioKey];
 
-  // Effect: Process final image when photos or filter changes
+  // Effect: Compose final image when photos or settings change
   useEffect(() => {
     if (capturedPhotos.length === 0 || stage !== "edit") return;
     let cancelled = false;
     setProcessing(true);
 
-    const zoomScale = ZOOM_LEVELS.find(z => z.key === zoomLevelKey)?.scale || 1;
-    const renderOpts = {
-      photos: capturedPhotos,
-      filter: selectedFilter,
-      colorKey: selectedStripColor,
-      ratio: selectedRatio,
-      quality: selectedQuality,
-      background: selectedBackground,
-      stickers,
+    composePhotoBoothOutput({
+      capturedFrames: capturedPhotos,
+      selectedLayout,
+      selectedRatio: photoRatio,
       caption,
-      zoomScale,
-      isBeautyEnabled: selectedEffect !== "off",
-    };
-
-    let p: Promise<string>;
-    if (selectedLayout === "single") {
-      p = renderSingle(renderOpts);
-    } else if (selectedLayout === "grid4") {
-      p = renderGrid(renderOpts, 2);
-    } else if (selectedLayout === "grid6") {
-      p = renderGrid(renderOpts, 3);
-    } else if (selectedLayout === "wide2") {
-      p = renderWide(renderOpts, '2');
-    } else if (selectedLayout === "cinematic3") {
-      p = renderWide(renderOpts, '3');
-    } else if (selectedLayout === "ultrawide4") {
-      p = renderWide(renderOpts, '4');
-    } else {
-      p = renderStrip(renderOpts);
-    }
-
-    p.then((r) => {
-      if (!cancelled) {
-        setFinalPhoto(r);
-        setProcessing(false);
-      }
-    });
+      filter: selectedFilter,
+      selectedBackground,
+      selectedStripColor,
+      selectedEffect,
+      zoomLevelKey,
+      stickers,
+      selectedQuality,
+    })
+      .then((dataUrl) => {
+        if (!cancelled) {
+          setFinalPhoto(dataUrl);
+          setProcessing(false);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.error("Composition failed:", err);
+          setProcessing(false);
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -108,7 +93,7 @@ export const usePhotobooth = (
     capturedPhotos,
     selectedFilter,
     selectedStripColor,
-    selectedRatio,
+    selectedRatioKey,
     selectedQuality,
     selectedBackground,
     selectedEffect,
@@ -117,6 +102,7 @@ export const usePhotobooth = (
     stickers,
     stage,
     selectedLayout,
+    photoRatio,
     setProcessing,
     setFinalPhoto,
   ]);
@@ -125,7 +111,6 @@ export const usePhotobooth = (
   useEffect(() => {
     if (countdown === null || countdown <= 0) return;
     const t = setTimeout(() => {
-      // Use store action directly with a function for atomic update
       usePhotoboothStore.setState((s) => ({
         countdown: s.countdown !== null ? s.countdown - 1 : null,
       }));
@@ -133,14 +118,28 @@ export const usePhotobooth = (
     return () => clearTimeout(t);
   }, [countdown]);
 
-  // Internal: Capture photo from webcam
-  const captureInternal = useCallback(() => {
-    const raw = webcamRef.current?.getScreenshot({ width: 1920, height: 1920 });
-    if (!raw) return;
+  // Internal: Capture photo from webcam using new aspect-corrected pipeline
+  const captureInternal = useCallback(async () => {
+    const video = webcamRef.current?.video as HTMLVideoElement | null | undefined;
+    if (!video) {
+      notify.error("Kamera belum siap.");
+      return;
+    }
+    let dataUrl: string;
+    try {
+      dataUrl = await captureFrameFromVideo(video, {
+        ratio: photoRatio,
+        quality: selectedQuality,
+      });
+    } catch (err) {
+      console.error("Capture failed:", err);
+      notify.error("Gagal mengambil foto.");
+      return;
+    }
     setStage("flash");
     setTimeout(() => {
       const currentCount = usePhotoboothStore.getState().capturedPhotos.length;
-      addPhoto(raw);
+      addPhoto(dataUrl);
       if (currentCount + 1 >= layoutDef.shots) {
         setIsCapturing(false);
         setStage("edit");
@@ -151,6 +150,8 @@ export const usePhotobooth = (
     }, 200);
   }, [
     webcamRef,
+    photoRatio,
+    selectedQuality,
     layoutDef.shots,
     selectedTimer,
     addPhoto,
@@ -220,7 +221,6 @@ export const usePhotobooth = (
     const caption = usePhotoboothStore.getState().caption;
     if (!finalPhoto) return;
 
-    // Precheck: show soft auth prompt if no session, never hard-redirect.
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
@@ -312,6 +312,7 @@ export const usePhotobooth = (
   return {
     // State
     layoutDef,
+    photoRatio,
     // Handlers
     handleStart,
     handleRetake,
