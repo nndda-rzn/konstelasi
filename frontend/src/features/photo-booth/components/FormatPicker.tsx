@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Sparkles, Smartphone, Monitor, Square, Tv, Recta
 import { usePhotoBoothStore, RATIO_LIST, LAYOUT_LIST } from "../photoBoothStore";
 import { getRecommendedRatioId } from "../photoBooth.utils";
 import type { RatioId } from "../photoBooth.config";
+import { tagForLayout } from "../photoBooth.config";
 import { StepIndicator } from "./StepIndicator";
 
 const ICON: Record<RatioId, React.ComponentType<{ className?: string }>> = {
@@ -166,23 +167,4 @@ export function FormatPicker() {
       </div>
     </div>
   );
-}
-
-function tagForLayout(l: { type: string }): string {
-  switch (l.type) {
-    case "single":
-      return "Single";
-    case "vertical-strip":
-      return "Strip";
-    case "grid":
-      return "Grid";
-    case "horizontal-strip":
-      return "Wide";
-    case "cinematic":
-      return "Cinematic";
-    case "ultra-wide-collage":
-      return "Panorama";
-    default:
-      return l.type;
-  }
 }

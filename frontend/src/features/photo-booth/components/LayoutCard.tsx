@@ -3,6 +3,7 @@
 import { Check } from "lucide-react";
 import { usePhotoBoothStore } from "../photoBoothStore";
 import type { LayoutId, PhotoLayout } from "../photoBooth.config";
+import { tagForLayout } from "../photoBooth.config";
 import { MiniPreview } from "./MiniPreview";
 
 interface LayoutCardProps {
@@ -48,23 +49,4 @@ export function LayoutCard({ layout }: LayoutCardProps) {
       </div>
     </button>
   );
-}
-
-function tagForLayout(l: PhotoLayout): string {
-  switch (l.type) {
-    case "single":
-      return "Single";
-    case "vertical-strip":
-      return "Strip";
-    case "grid":
-      return "Grid";
-    case "horizontal-strip":
-      return "Wide";
-    case "cinematic":
-      return "Cinematic";
-    case "ultra-wide-collage":
-      return "Panorama";
-    default:
-      return l.type;
-  }
 }

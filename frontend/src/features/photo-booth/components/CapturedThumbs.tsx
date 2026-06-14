@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { usePhotoBoothStore } from "../photoBoothStore";
+import { usePhotoBoothStore, selectRequiredShots } from "../photoBoothStore";
 
 /**
  * CapturedThumbs - Compact row of thumbnails shown between preview and
@@ -9,21 +9,7 @@ import { usePhotoBoothStore } from "../photoBoothStore";
  */
 export function CapturedThumbs() {
   const captured = usePhotoBoothStore((s) => s.capturedFrames);
-  const required = usePhotoBoothStore((s) =>
-    s.selectedLayoutId === "single"
-      ? 1
-      : s.selectedLayoutId === "strip3"
-        ? 3
-        : s.selectedLayoutId === "strip4" || s.selectedLayoutId === "grid2x2" || s.selectedLayoutId === "ultraWide"
-          ? 4
-          : s.selectedLayoutId === "grid3x2"
-            ? 6
-            : s.selectedLayoutId === "wide2"
-              ? 2
-              : s.selectedLayoutId === "cinematic3"
-                ? 3
-                : 4
-  );
+  const required = usePhotoBoothStore(selectRequiredShots);
 
   if (captured.length === 0) return null;
 
