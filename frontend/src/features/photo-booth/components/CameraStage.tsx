@@ -1,9 +1,11 @@
 "use client";
 
+import { motion } from "framer-motion";
 import Webcam from "react-webcam";
 import { CameraPreview } from "./CameraPreview";
-import { CapturedThumbs } from "./CapturedThumbs";
+import { PoseProgress } from "./CapturedThumbs";
 import { CameraControls } from "./CameraControls";
+import { SessionSummary } from "./SessionSummary";
 
 interface CameraStageProps {
   webcamRef: React.RefObject<Webcam | null>;
@@ -15,8 +17,8 @@ interface CameraStageProps {
 }
 
 /**
- * CameraStage - Hero column composition: preview + thumbs + controls.
- * Bar is in-flow; nothing covers the camera viewport.
+ * CameraStage - Centered studio composition:
+ *   session summary → camera preview → pose progress → capture controls.
  */
 export function CameraStage({
   webcamRef,
@@ -27,9 +29,15 @@ export function CameraStage({
   onSave,
 }: CameraStageProps) {
   return (
-    <div className="flex flex-col gap-3">
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex w-full max-w-[960px] flex-col items-center gap-5"
+    >
+      <SessionSummary />
       <CameraPreview webcamRef={webcamRef} />
-      <CapturedThumbs />
+      <PoseProgress />
       <CameraControls
         onStart={onStart}
         onRetry={onRetry}
@@ -37,6 +45,6 @@ export function CameraStage({
         onDownload={onDownload}
         onSave={onSave}
       />
-    </div>
+    </motion.div>
   );
 }

@@ -21,9 +21,6 @@ interface CameraControlsProps {
   onSave: () => void;
 }
 
-/**
- * Map capture phase to the small status label shown on the left.
- */
 const PHASE_LABEL: Record<CapturePhase, string> = {
   idle: "Siap",
   countdown: "Menghitung",
@@ -33,9 +30,6 @@ const PHASE_LABEL: Record<CapturePhase, string> = {
   error: "Gagal",
 };
 
-/**
- * Map capture phase to the primary action button label.
- */
 function getPrimaryLabel(phase: CapturePhase, stage: string): string {
   if (stage === "saving") return "Memproses";
   if (phase === "error") return "Coba Lagi";
@@ -43,10 +37,6 @@ function getPrimaryLabel(phase: CapturePhase, stage: string): string {
   return "Mulai Sesi Foto";
 }
 
-/**
- * CameraControls - Slim 68px bar under the preview.
- * Labels and disabled state are driven by CapturePhase.
- */
 export function CameraControls({
   onStart,
   onRetry,
@@ -56,8 +46,6 @@ export function CameraControls({
 }: CameraControlsProps) {
   const phase = usePhotoBoothStore((s) => s.phase);
   const stage = usePhotoBoothStore((s) => s.stage);
-  const captured = usePhotoBoothStore((s) => s.capturedFrames);
-  const required = usePhotoBoothStore(selectRequiredShots);
   const toggleFacingMode = usePhotoBoothStore((s) => s.toggleFacingMode);
 
   const isSessionActive =
@@ -71,32 +59,41 @@ export function CameraControls({
   const statusLabel = isError ? "Gagal" : PHASE_LABEL[phase];
 
   const indicatorColor = isSessionActive
-    ? "bg-red-500 animate-pulse"
+    ? "bg-red-500"
     : isError
       ? "bg-amber-500"
       : isResult
         ? "bg-emerald-500"
-        : "bg-emerald-500";
+        : "bg-[#9D7B3F]";
 
   const primaryLabel = getPrimaryLabel(phase, stage);
   const primaryAction = isError ? onRetry : isResult ? onSave : onStart;
   const primaryDisabled = isSessionActive || isSaving;
 
   return (
-    <div className="flex h-[68px] w-full items-center justify-between gap-3 rounded-lg border border-black/10 bg-white px-3.5 shadow-sm">
+    <div
+      className="flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-3"
+      style={{
+        background: "linear-gradient(180deg, #FFFCF8 0%, #FAF5EE 100%)",
+        boxShadow:
+          "0 1px 2px rgba(60, 30, 40, 0.05), 0 6px 16px rgba(60, 30, 40, 0.06), inset 0 0 0 1px rgba(225, 210, 195, 0.5)",
+      }}
+    >
+      {/* Left: Status */}
       <div className="flex min-w-0 items-center gap-2.5">
         <div className="flex items-center gap-1.5">
-          <div className={`h-1.5 w-1.5 rounded-full ${indicatorColor}`} />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#6D5561]">
+          <div
+            className={`h-1.5 w-1.5 rounded-full ${indicatorColor} ${
+              isSessionActive ? "animate-pulse" : ""
+            }`}
+          />
+          <span className="text-[10.5px] font-semibold tracking-[0.18em] uppercase" style={{ color: "#6D5561" }}>
             {statusLabel}
           </span>
         </div>
-        <div className="hidden h-3 w-px bg-black/10 sm:block" />
-        <span className="hidden text-[11px] font-medium tabular-nums text-[#8C7783] sm:inline">
-          {captured.length} / {required}
-        </span>
       </div>
 
+      {/* Right: Actions */}
       <div className="flex items-center gap-1.5">
         {isIdle && !isResult && (
           <IconBtn onClick={toggleFacingMode} title="Ganti Kamera">
@@ -113,18 +110,40 @@ export function CameraControls({
               exit={{ opacity: 0, scale: 0.96 }}
               onClick={primaryAction}
               disabled={primaryDisabled}
-              className={`flex h-10 items-center gap-2 rounded-lg px-5 text-[13px] font-semibold text-white transition-colors active:scale-[0.98] ${
-                isError
-                  ? "bg-amber-500 hover:bg-amber-600 disabled:opacity-60"
-                  : "bg-[#E63946] hover:bg-[#D62828] disabled:opacity-60"
-              }`}
+              whileHover={!primaryDisabled ? { y: -1 } : undefined}
+              whileTap={!primaryDisabled ? { scale: 0.98 } : undefined}
+              transition={{ type: "spring", stiffness: 380, damping: 22 }}
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-2 text-[12.5px] font-semibold tracking-wide transition-all disabled:cursor-not-allowed disabled:opacity-40"
+              style={{
+                background: primaryDisabled
+                  ? "rgba(212, 165, 116, 0.2)"
+                  : isError
+                    ? "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)"
+                    : "linear-gradient(135deg, #E63946 0%, #C52836 100%)",
+                color: primaryDisabled ? "#B89A8A" : "white",
+                boxShadow: primaryDisabled
+                  ? "none"
+                  : "0 4px 16px rgba(230, 57, 70, 0.25), inset 0 1px 0 rgba(255,255,255,0.15)",
+              }}
             >
-              {isError ? (
-                <AlertTriangle className="h-4 w-4" />
-              ) : (
-                <Camera className="h-4 w-4" />
+              <span className="relative z-10 inline-flex items-center gap-2">
+                {isError ? (
+                  <AlertTriangle className="h-4 w-4" />
+                ) : (
+                  <Camera className="h-4 w-4" />
+                )}
+                {primaryLabel}
+              </span>
+              {!primaryDisabled && (
+                <span
+                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                  style={{
+                    background:
+                      "linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%)",
+                  }}
+                  aria-hidden
+                />
               )}
-              <span>{primaryLabel}</span>
             </motion.button>
           )}
           {isEdit && (
@@ -135,10 +154,29 @@ export function CameraControls({
               exit={{ opacity: 0, scale: 0.96 }}
               onClick={onSave}
               disabled={isSaving}
-              className="flex h-10 items-center gap-2 rounded-lg bg-[#E63946] px-5 text-[13px] font-semibold text-white transition-colors hover:bg-[#D62828] disabled:opacity-60 active:scale-[0.98]"
+              whileHover={!isSaving ? { y: -1 } : undefined}
+              whileTap={!isSaving ? { scale: 0.98 } : undefined}
+              transition={{ type: "spring", stiffness: 380, damping: 22 }}
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-2 text-[12.5px] font-semibold tracking-wide text-white transition-all disabled:opacity-50"
+              style={{
+                background:
+                  "linear-gradient(135deg, #E63946 0%, #C52836 100%)",
+                boxShadow:
+                  "0 4px 16px rgba(230, 57, 70, 0.25), inset 0 1px 0 rgba(255,255,255,0.15)",
+              }}
             >
-              <Save className="h-4 w-4" />
-              <span>Simpan ke Kanvas</span>
+              <span className="relative z-10 inline-flex items-center gap-2">
+                <Save className="h-4 w-4" />
+                Simpan ke Kanvas
+              </span>
+              <span
+                className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                style={{
+                  background:
+                    "linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%)",
+                }}
+                aria-hidden
+              />
             </motion.button>
           )}
         </AnimatePresence>
