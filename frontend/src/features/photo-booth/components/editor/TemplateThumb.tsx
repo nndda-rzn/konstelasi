@@ -1,19 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type {
-  TemplateConfig,
-  PhotoSlot,
-  OverlayShape,
-} from "../../config/templates";
+import type { TemplateConfig } from "../../config/templates";
+import { SlotPlaceholder } from "./template-thumbs/SlotPlaceholder";
+import { DecorMarker } from "./template-thumbs/DecorMarker";
+import { getMockupStyle } from "./template-thumbs/getMockupStyle";
 
 /**
  * TemplateThumb - A static CSS/SVG miniature that visualizes a
  * template. Renders the background, photo slot positions, decor
  * markers, and badge — without spinning up a Konva stage.
- *
- * Each thumb is unique (different background, slot arrangement,
- * and decor) so the user can see the difference at a glance.
  */
 export function TemplateThumb({
   template,
@@ -26,7 +22,6 @@ export function TemplateThumb({
   onSelect: () => void;
   disabled?: boolean;
 }) {
-  // Use aspect 3:4 (portrait) for strip-style templates
   const aspectClass = template.photoSlots.length > 2
     ? "aspect-[3/4]"
     : "aspect-[4/3]";
@@ -52,7 +47,6 @@ export function TemplateThumb({
         border: "1px solid rgba(225, 210, 195, 0.4)",
       }}
     >
-      {/* Selected check */}
       {active && (
         <motion.div
           initial={{ scale: 0.5, opacity: 0 }}
@@ -76,7 +70,6 @@ export function TemplateThumb({
         </motion.div>
       )}
 
-      {/* Badge */}
       {template.badge && (
         <div
           className="absolute left-1 top-1 z-10 flex items-center gap-0.5 rounded-full px-1.5 py-0.5"
@@ -120,22 +113,18 @@ export function TemplateThumb({
         </div>
       )}
 
-      {/* Thumbnail mockup */}
       <div
         className={`relative w-full overflow-hidden rounded-[3px] ${aspectClass}`}
         style={getMockupStyle(template)}
       >
-        {/* Photo slot placeholders */}
         {template.photoSlots.map((slot, i) => (
           <SlotPlaceholder key={i} slot={slot} index={i} />
         ))}
 
-        {/* Decor markers */}
         {template.overlays.slice(0, 6).map((overlay, i) => (
           <DecorMarker key={i} overlay={overlay} />
         ))}
 
-        {/* Bottom brand strip */}
         {template.frame.showBrand && (
           <div
             className="absolute left-0 right-0 flex items-center justify-center"
@@ -151,7 +140,6 @@ export function TemplateThumb({
         )}
       </div>
 
-      {/* Meta */}
       <div className="mt-1.5 px-1">
         <p className="text-[10.5px] font-semibold tracking-tight text-[#3F2A35]">
           {template.name}
@@ -162,163 +150,4 @@ export function TemplateThumb({
       </div>
     </motion.button>
   );
-}
-
-/* ----- Helpers ----- */
-
-function getMockupStyle(template: TemplateConfig): React.CSSProperties {
-  const bg = template.background;
-  if (bg.type === "solid") {
-    return { background: bg.color || "#FFFFFF" };
-  }
-  if (bg.type === "gradient" && bg.gradientStops && bg.gradientStops.length >= 2) {
-    const angle = bg.gradientAngle ?? 180;
-    return {
-      background: `linear-gradient(${angle}deg, ${bg.gradientStops
-        .map((s) => `${s.color} ${s.offset * 100}%`)
-        .join(", ")})`,
-    };
-  }
-  return { background: "#FFFFFF" };
-}
-
-function SlotPlaceholder({ slot, index }: { slot: PhotoSlot; index: number }) {
-  // Generate a slightly varied pastel color per slot for visibility
-  const colors = ["#FFE0E8", "#F0E2C5", "#E8DEF2", "#FCDCE6", "#E8E0F0", "#F5E8D8"];
-  const color = colors[index % colors.length];
-
-  return (
-    <div
-      className="absolute"
-      style={{
-        left: `${slot.x * 100}%`,
-        top: `${slot.y * 100}%`,
-        width: `${slot.w * 100}%`,
-        height: `${slot.h * 100}%`,
-        background: `linear-gradient(135deg, ${color} 0%, ${darken(color, 0.05)} 100%)`,
-        border: slot.stroke
-          ? `0.5px solid ${slot.stroke.color}`
-          : "0.5px solid rgba(255,255,255,0.6)",
-        borderRadius: (slot.radius ?? 0) > 0 ? (slot.radius ?? 0) / 8 : 0.5,
-        boxShadow: "inset 0 0 0 0.5px rgba(255,255,255,0.4)",
-      }}
-    />
-  );
-}
-
-function DecorMarker({
-  overlay,
-}: {
-  overlay: import("../../config/templates").OverlayElement;
-}) {
-  const left = `${overlay.x * 100}%`;
-  const top = `${overlay.y * 100}%`;
-  const w = (overlay.width ?? 5) / 8;
-  const h = (overlay.height ?? 5) / 8;
-
-  if (overlay.shape === "rect" && overlay.fill) {
-    return (
-      <div
-        className="absolute"
-        style={{
-          left,
-          top,
-          width: w,
-          height: h,
-          background: overlay.fill,
-          transform: "translate(-50%, -50%)",
-          opacity: overlay.opacity,
-        }}
-      />
-    );
-  }
-  if (overlay.shape === "circle" && overlay.fill) {
-    return (
-      <div
-        className="absolute rounded-full"
-        style={{
-          left,
-          top,
-          width: w,
-          height: h,
-          background: overlay.fill,
-          transform: "translate(-50%, -50%)",
-          opacity: overlay.opacity,
-        }}
-      />
-    );
-  }
-  if (overlay.shape === "heart" && overlay.fill) {
-    return (
-      <svg
-        className="absolute"
-        style={{
-          left,
-          top,
-          width: w,
-          height: h,
-          transform: "translate(-50%, -50%)",
-          opacity: overlay.opacity,
-        }}
-        viewBox="0 0 10 10"
-        fill="none"
-        aria-hidden
-      >
-        <path
-          d="M5 9 C2 7 0.5 5 0.5 3 C0.5 1.5 1.5 0.5 3 0.5 C3.8 0.5 4.5 1 5 1.7 C5.5 1 6.2 0.5 7 0.5 C8.5 0.5 9.5 1.5 9.5 3 C9.5 5 8 7 5 9 Z"
-          fill={overlay.fill}
-        />
-      </svg>
-    );
-  }
-  if (overlay.shape === "star" && overlay.fill) {
-    return (
-      <svg
-        className="absolute"
-        style={{
-          left,
-          top,
-          width: w,
-          height: h,
-          transform: "translate(-50%, -50%)",
-          opacity: overlay.opacity,
-        }}
-        viewBox="0 0 10 10"
-        fill="none"
-        aria-hidden
-      >
-        <path
-          d="M5 0L5.7 4.3L10 5L5.7 5.7L5 10L4.3 5.7L0 5L4.3 4.3L5 0Z"
-          fill={overlay.fill}
-        />
-      </svg>
-    );
-  }
-  if (overlay.shape === "line" && overlay.stroke) {
-    return (
-      <div
-        className="absolute"
-        style={{
-          left,
-          top,
-          width: w,
-          height: 0.3,
-          background: overlay.stroke,
-          transform: "translate(-50%, -50%)",
-          opacity: overlay.opacity,
-        }}
-      />
-    );
-  }
-  return null;
-}
-
-function darken(hex: string, amount: number): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  const dr = Math.max(0, Math.floor(r * (1 - amount)));
-  const dg = Math.max(0, Math.floor(g * (1 - amount)));
-  const db = Math.max(0, Math.floor(b * (1 - amount)));
-  return `#${dr.toString(16).padStart(2, "0")}${dg.toString(16).padStart(2, "0")}${db.toString(16).padStart(2, "0")}`;
 }
