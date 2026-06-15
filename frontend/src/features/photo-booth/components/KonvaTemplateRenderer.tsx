@@ -63,24 +63,32 @@ export const KonvaTemplateRenderer = forwardRef<
   const stageWidth = BASE;
   const stageHeight = Math.round(stageWidth * (1 - template.footerHeight));
 
-  const [images, setImages] = useState<HTMLImageElement[]>([]);
+  // Map preserves slot.id → image index alignment even when some images fail to load.
+  // Using array.filter() would shift indices, mapping slot[1] to frame[2] etc.
+  const [imageMap, setImageMap] = useState<Map<number, HTMLImageElement>>(new Map());
 
   useEffect(() => {
     let cancelled = false;
     Promise.all(
       capturedFrames.map(
-        (src) =>
-          new Promise<HTMLImageElement | null>((resolve) => {
+        (src, index) =>
+          new Promise<{ index: number; img: HTMLImageElement | null }>((resolve) => {
             const img = new window.Image();
-            img.crossOrigin = "anonymous";
-            img.onload = () => resolve(img);
-            img.onerror = () => resolve(null);
+            img.onload = () => resolve({ index, img });
+            img.onerror = () => resolve({ index, img: null });
             img.src = src;
           })
       )
-    ).then((loaded) => {
-      if (!cancelled) setImages(loaded.filter((x): x is HTMLImageElement => x !== null));
-    });
+    )
+      .then((loaded) => {
+        if (cancelled) return;
+        const map = new Map<number, HTMLImageElement>();
+        for (const entry of loaded) {
+          if (entry.img) map.set(entry.index, entry.img);
+        }
+        setImageMap(map);
+      })
+      .catch(() => { /* ignore load errors */ });
     return () => {
       cancelled = true;
     };
@@ -140,7 +148,7 @@ export const KonvaTemplateRenderer = forwardRef<
         </Layer>
         <Layer listening={false}>
           {template.photoSlots.map((slot) => {
-            const img = images[slot.id];
+            const img = imageMap.get(slot.id);
             if (!img) return null;
             return (
               <PhotoSlotNode

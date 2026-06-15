@@ -15,6 +15,9 @@ interface PhotoSlotNodeProps {
 }
 
 export function PhotoSlotNode({ slot, image, stageWidth, stageHeight, filterStr }: PhotoSlotNodeProps) {
+  // Guard against unloaded/zero-dimension images to avoid NaN aspect calculations
+  if (!image || !image.width || !image.height) return null;
+
   const slotX = slot.x * stageWidth;
   const slotY = slot.y * stageHeight;
   const slotW = slot.w * stageWidth;
