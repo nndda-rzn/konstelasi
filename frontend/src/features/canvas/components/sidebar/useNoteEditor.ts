@@ -1,17 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useMutation } from "@apollo/client/react";
-import {
-  UPDATE_NOTE_CONTENT,
-  DELETE_NOTE,
-  ARCHIVE_NOTE,
-} from "@/graphql/mutations";
+import { useRef, useState, useEffect } from "react";
 import { useTags } from "@/context/TagContext";
 import { useNoteImageUpload } from "@/features/canvas/hooks/useNoteImageUpload";
-import { AUTO_SAVE_DELAY } from "./sidebarConstants";
-
-export type SaveStatus = "idle" | "saving" | "saved" | "error";
+import { useNoteForm } from "./use-note-form";
+import { useAutoSave } from "./use-auto-save";
+import { useNoteActions } from "./use-note-actions";
 
 interface UseNoteEditorParams {
   note: any;
@@ -27,42 +21,45 @@ interface UseNoteEditorParams {
 }
 
 /**
- * useNoteEditor - Encapsulates all note editor state + mutations + auto-save.
- * Manages: title, content, color, type, mood, titleFont, tags, images.
- * Handles: auto-save debounce, reset on note change, focus management.
+ * useNoteEditor - Composes the note editor's state, auto-save,
+ * tag management, image upload, and delete/archive actions.
  */
 export const useNoteEditor = ({
   note,
   onUpdateCache,
   onDeleteSuccess,
 }: UseNoteEditorParams) => {
-  const [title, setTitle] = useState(note?.title || "");
-  const [content, setContent] = useState(note?.content || "");
-  const [color, setColor] = useState(note?.color || "default");
-  const [noteTags, setNoteTags] = useState<any[]>(note?.tags || []);
-  const [noteType, setNoteType] = useState<string>(note?.type || "text");
-  const [mood, setMood] = useState<string>(note?.mood || "");
-  const [titleFont, setTitleFont] = useState<string>(note?.titleFont || "");
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
-  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
-  const [showVersions, setShowVersions] = useState(false);
-  const [showDrawing, setShowDrawing] = useState(false);
-
-  const titleRef = useRef<HTMLInputElement>(null);
-  const { tags, assignTagsToNote, removeTagFromNote } = useTags();
-  const [updateNoteContent] = useMutation(UPDATE_NOTE_CONTENT);
-  const [deleteNoteMut] = useMutation(DELETE_NOTE);
-  const [archiveNote] = useMutation(ARCHIVE_NOTE);
-
+  const form = useNoteForm(note);
   const { images, setImages, uploading, uploadFromInputEvent, deleteImage } =
     useNoteImageUpload({
       noteId: note?.id,
       initialImages: note?.images || [],
       onImagesChange: (newImages) =>
-        onUpdateCache(note.id, title, content, newImages),
+        onUpdateCache(note.id, form.title, form.content, newImages),
     });
 
-  // Auto-focus title on open
+  const { saveStatus, lastSavedAt } = useAutoSave({
+    note,
+    title: form.title,
+    content: form.content,
+    color: form.color,
+    noteType: form.noteType,
+    mood: form.mood,
+    titleFont: form.titleFont,
+    onSaved: (id, t, c, color, mood) =>
+      onUpdateCache(id, t, c, undefined, color, mood),
+  });
+
+  const { tags, assignTagsToNote, removeTagFromNote } = useTags();
+  const { handleDelete, handleArchive } = useNoteActions(
+    note?.id ?? "",
+    onDeleteSuccess
+  );
+
+  const titleRef = useRef<HTMLInputElement>(null);
+  const [showVersions, setShowVersions] = useState(false);
+  const [showDrawing, setShowDrawing] = useState(false);
+
   useEffect(() => {
     if (note?.id) {
       const timer = setTimeout(() => titleRef.current?.focus(), 120);
@@ -70,149 +67,36 @@ export const useNoteEditor = ({
     }
   }, [note?.id]);
 
-  // Reset state on note change
-  useEffect(() => {
-    setTitle(note?.title || "");
-    setContent(note?.content || "");
-    setColor(note?.color || "default");
-    setImages(note?.images || []);
-    setNoteTags(note?.tags || []);
-    setNoteType(note?.type || "text");
-    setMood(note?.mood || "");
-    setTitleFont(note?.titleFont || "");
-  }, [note]);
-
-  // Auto-save (debounced)
-  useEffect(() => {
-    if (!note) return;
-    const handler = setTimeout(() => {
-      const isDirty =
-        title !== note.title ||
-        content !== note.content ||
-        color !== (note.color || "default") ||
-        noteType !== (note.type || "text") ||
-        mood !== (note.mood || "") ||
-        titleFont !== (note.titleFont || "");
-      if (isDirty) {
-        setSaveStatus("saving");
-        updateNoteContent({
-          variables: {
-            input: {
-              id: note.id,
-              title,
-              content,
-              color,
-              type: noteType,
-              mood,
-              titleFont,
-            },
-          },
-        })
-          .then(() => {
-            setSaveStatus("saved");
-            setLastSavedAt(Date.now());
-          })
-          .catch(() => setSaveStatus("error"));
-        onUpdateCache(note.id, title, content, undefined, color, mood);
-      }
-    }, AUTO_SAVE_DELAY);
-    return () => clearTimeout(handler);
-  }, [
-    title,
-    content,
-    color,
-    noteType,
-    mood,
-    titleFont,
-    note,
-    updateNoteContent,
-    onUpdateCache,
-  ]);
-
-  // Tag management
   const handleAddTag = async (tag: any) => {
     await assignTagsToNote(note.id, [tag.id]);
-    setNoteTags([...noteTags, tag]);
+    form.setNoteTags([...form.noteTags, tag]);
   };
 
   const handleRemoveTag = async (tagId: string) => {
     await removeTagFromNote(note.id, tagId);
-    setNoteTags(noteTags.filter((t) => t.id !== tagId));
-  };
-
-  // Note operations
-  const handleDeleteNode = async () => {
-    await deleteNoteMut({
-      variables: { id: note.id },
-      update(cache) {
-        cache.modify({
-          fields: {
-            getNotes(existingNotes = [], { readField }) {
-              return existingNotes.filter(
-                (noteRef: any) => note.id !== readField("id", noteRef)
-              );
-            },
-          },
-        });
-      },
-    });
-    onDeleteSuccess(note.id);
-  };
-
-  const handleArchiveNode = async () => {
-    await archiveNote({
-      variables: { id: note.id },
-      update(cache) {
-        cache.modify({
-          fields: {
-            getNotes(existingNotes = [], { readField }) {
-              return existingNotes.filter(
-                (noteRef: any) => note.id !== readField("id", noteRef)
-              );
-            },
-          },
-        });
-      },
-    });
-    onDeleteSuccess(note.id);
+    form.setNoteTags(form.noteTags.filter((t) => t.id !== tagId));
   };
 
   return {
-    // Form state
-    title,
-    setTitle,
-    content,
-    setContent,
-    color,
-    setColor,
-    noteType,
-    setNoteType,
-    mood,
-    setMood,
-    titleFont,
-    setTitleFont,
-    noteTags,
+    ...form,
     saveStatus,
     lastSavedAt,
     showVersions,
     setShowVersions,
     showDrawing,
     setShowDrawing,
-    // Refs
     titleRef,
-    // Tag data
     availableTags: tags.filter(
-      (t: any) => !noteTags.some((nt: any) => nt.id === t.id)
+      (t: any) => !form.noteTags.some((nt: any) => nt.id === t.id)
     ),
-    // Image data
     images,
+    setImages,
     uploading,
     uploadFromInputEvent,
     deleteImage,
-    // Handlers
     handleAddTag,
     handleRemoveTag,
-    handleDeleteNode,
-    handleArchiveNode,
+    handleDeleteNode: handleDelete,
+    handleArchiveNode: handleArchive,
   };
 };
