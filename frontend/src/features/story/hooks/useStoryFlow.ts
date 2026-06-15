@@ -5,82 +5,28 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
-  addEdge,
-  reconnectEdge,
   type NodeChange,
 } from "@xyflow/react";
-import { useMutation } from "@apollo/client/react";
-import { CREATE_NOTE_LINK, DELETE_NOTE_LINK } from "@/graphql/mutations";
 import { useStoryStore } from "../store/useStoryStore";
+import { useEdgeConnection } from "./use-edge-connection";
+import { useNodeCache } from "./use-node-cache";
+import { matchesQuery, dimStyle } from "../utils/searchFilter";
+import type { StoryNode, FlowNode, FlowEdge } from "../types/flow-types";
 
 interface UseStoryFlowParams {
-  story: any;
-  batchUpdateMutation: any;
-}
-
-interface StoryNode {
-  id: string;
-  title?: string;
-  content?: string;
-  color?: string;
-  mood?: string;
-  storyNodeType?: string;
-  storyMetadata?: string;
-  isLocked?: boolean;
-  unlockDate?: string;
-  isTimeLocked?: boolean;
-  eventDate?: string;
-  eventLocation?: string;
-  positionX?: number;
-  positionY?: number;
-  width?: number;
-  height?: number;
-  images?: any[];
-  tags?: any[];
-  outgoingEdges?: Array<{
-    id: string;
-    source: { id: string };
-    target: { id: string };
-    sourceHandle?: string;
-    targetHandle?: string;
-    label?: string;
-    color?: string;
-  }>;
-}
-
-export interface FlowNode {
-  id: string;
-  position: { x: number; y: number };
-  style?: any;
-  data: any;
-  type: string;
-}
-
-export interface FlowEdge {
-  id: string;
-  source: string;
-  target: string;
-  sourceHandle?: string;
-  targetHandle?: string;
-  data?: any;
-  type: string;
+  story: { nodes?: StoryNode[] } | null | undefined;
+  batchUpdateMutation: unknown;
 }
 
 /**
- * useStoryFlow - Orchestrates React Flow nodes/edges for the story canvas.
- * Handles:
- * - Data transformation: story nodes -> flow nodes
- * - Connection creation/deletion
- * - Drag lifecycle tracking
- * - Position persistence (batched)
+ * useStoryFlow - Thin orchestrator that wires React Flow state
+ * with edge/cache handlers. Splits heavy work into useEdgeConnection,
+ * useNodeCache, and searchFilter.
  */
-export const useStoryFlow = ({ story, batchUpdateMutation }: UseStoryFlowParams) => {
+export const useStoryFlow = ({ story }: UseStoryFlowParams) => {
   const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
   const { screenToFlowPosition } = useReactFlow();
-
-  const [createNoteLink] = useMutation(CREATE_NOTE_LINK);
-  const [deleteNoteLink] = useMutation(DELETE_NOTE_LINK);
 
   const isDragging = useStoryStore((s) => s.isDragging);
   const setIsDragging = useStoryStore((s) => s.setIsDragging);
@@ -88,23 +34,20 @@ export const useStoryFlow = ({ story, batchUpdateMutation }: UseStoryFlowParams)
   const selectedNoteId = useStoryStore((s) => s.selectedNoteId);
   const setSelectedNoteId = useStoryStore((s) => s.setSelectedNoteId);
 
-  // Track ref for edge reconnection (used in handlers below)
-  const edgeReconnectSuccessful = { current: true };
+  const { onConnect, onReconnectStart, onReconnect, onReconnectEnd } =
+    useEdgeConnection(setEdges);
+  const { updateNodeCache, removeNodeFromFlow } = useNodeCache(
+    setNodes,
+    setEdges
+  );
 
-  // Transform story nodes to flow nodes
+  // Transform story nodes to flow nodes + edges
   useEffect(() => {
-    if (!story?.nodes) return;
-    if (isDragging) return;
+    if (!story?.nodes || isDragging) return;
+    const query = searchQuery.trim();
 
-    const query = searchQuery.trim().toLowerCase();
     const flowNodes: FlowNode[] = (story.nodes as StoryNode[]).map((note) => {
-      const titleMatch = note.title?.toLowerCase().includes(query);
-      const contentMatch = note.content
-        ?.replace(/<[^>]+>/g, "")
-        .toLowerCase()
-        .includes(query);
-      const isMatch = !query || titleMatch || contentMatch;
-
+      const isMatch = matchesQuery(query, note.title, note.content);
       return {
         id: note.id,
         position: {
@@ -114,9 +57,7 @@ export const useStoryFlow = ({ story, batchUpdateMutation }: UseStoryFlowParams)
         style: {
           width: note.width || undefined,
           height: note.height || undefined,
-          opacity: query && !isMatch ? 0.25 : 1,
-          filter: query && !isMatch ? "grayscale(0.6)" : "none",
-          transition: "opacity 0.3s ease, filter 0.3s ease",
+          ...dimStyle(query !== "" && isMatch),
         },
         data: {
           title: note.title,
@@ -156,73 +97,6 @@ export const useStoryFlow = ({ story, batchUpdateMutation }: UseStoryFlowParams)
     setEdges(flowEdges);
   }, [story, isDragging, searchQuery, setNodes, setEdges]);
 
-  // Connection handler
-  const onConnect = useCallback(
-    async (connection: any) => {
-      try {
-        await createNoteLink({
-          variables: {
-            input: {
-              sourceId: connection.source,
-              targetId: connection.target,
-              sourceHandle: connection.sourceHandle || "right",
-              targetHandle: connection.targetHandle || "left",
-            },
-          },
-        });
-        setEdges((eds: any[]) => addEdge(connection, eds));
-      } catch (err) {
-        console.error("Failed to create connection:", err);
-        throw err;
-      }
-    },
-    [createNoteLink, setEdges]
-  );
-
-  // Reconnection handlers
-  const onReconnectStart = useCallback(() => {
-    edgeReconnectSuccessful.current = false;
-  }, []);
-
-  const onReconnect = useCallback(
-    async (oldEdge: any, newConnection: any) => {
-      edgeReconnectSuccessful.current = true;
-      try {
-        setEdges((eds: any[]) => reconnectEdge(oldEdge, newConnection, eds));
-        if (!oldEdge.id.startsWith("temp-")) {
-          await deleteNoteLink({ variables: { id: oldEdge.id } });
-        }
-        await createNoteLink({
-          variables: {
-            input: {
-              sourceId: newConnection.source,
-              targetId: newConnection.target,
-              sourceHandle: newConnection.sourceHandle || "right",
-              targetHandle: newConnection.targetHandle || "left",
-            },
-          },
-        });
-      } catch (err) {
-        console.error("Failed to reconnect edge:", err);
-        throw err;
-      }
-    },
-    [createNoteLink, deleteNoteLink, setEdges]
-  );
-
-  const onReconnectEnd = useCallback(
-    (_event: any, edge: any) => {
-      if (!edgeReconnectSuccessful.current) {
-        setEdges((eds: any[]) => eds.filter((e: any) => e.id !== edge.id));
-        if (!edge.id.startsWith("temp-")) {
-          deleteNoteLink({ variables: { id: edge.id } }).catch(() => {});
-        }
-      }
-      edgeReconnectSuccessful.current = true;
-    },
-    [deleteNoteLink, setEdges]
-  );
-
   // Drag handlers
   const handleNodeDragStart = useCallback(() => {
     setIsDragging(true);
@@ -236,87 +110,33 @@ export const useStoryFlow = ({ story, batchUpdateMutation }: UseStoryFlowParams)
   const handleNodesChange = useCallback(
     (changes: NodeChange[]) => {
       onNodesChange(changes);
-      // Position persistence happens in parent via usePositionPersistence
     },
     [onNodesChange]
   );
 
   // Node selection
   const handleNodeDoubleClick = useCallback(
-    (_event: any, node: any) => {
-      const noteData = story?.nodes?.find((n: any) => n.id === node.id);
-      if (noteData) {
-        setSelectedNoteId(noteData.id);
-      }
+    (_event: unknown, node: { id: string }) => {
+      const noteData = story?.nodes?.find((n) => n.id === node.id);
+      if (noteData) setSelectedNoteId(noteData.id);
     },
     [story, setSelectedNoteId]
   );
 
   const handleSelectNodeId = useCallback(
     (nodeId: string) => {
-      const noteData = story?.nodes?.find((n: any) => n.id === nodeId);
-      if (noteData) {
-        setSelectedNoteId(noteData.id);
-      }
+      const noteData = story?.nodes?.find((n) => n.id === nodeId);
+      if (noteData) setSelectedNoteId(noteData.id);
     },
     [story, setSelectedNoteId]
   );
 
-  // Cache updater (for editor changes)
-  const updateNodeCache = useCallback(
-    (
-      nodeId: string,
-      newTitle?: string,
-      newContent?: string,
-      newImages?: any[],
-      color?: string,
-      mood?: string,
-      extra?: any
-    ) => {
-      setNodes((nds: any[]) =>
-        nds.map((n: any) => {
-          if (n.id === nodeId) {
-            return {
-              ...n,
-              data: {
-                ...n.data,
-                title: newTitle ?? n.data.title,
-                content: newContent ?? n.data.content,
-                images: newImages ?? n.data.images,
-                color: color ?? n.data.color,
-                mood: mood ?? n.data.mood,
-                ...extra,
-              },
-            };
-          }
-          return n;
-        })
-      );
-    },
-    [setNodes]
-  );
-
-  // Delete node from local state (called on successful server delete)
-  const removeNodeFromFlow = useCallback(
-    (nodeId: string) => {
-      setNodes((nds: any[]) => nds.filter((n: any) => n.id !== nodeId));
-      setEdges((eds: any[]) =>
-        eds.filter(
-          (e: any) => e.source !== nodeId && e.target !== nodeId
-        )
-      );
-    },
-    [setNodes, setEdges]
-  );
-
   return {
-    // Flow state
     nodes,
     edges,
     setNodes,
     setEdges,
     screenToFlowPosition,
-    // Handlers
     onConnect,
     onReconnectStart,
     onReconnect,
@@ -326,7 +146,7 @@ export const useStoryFlow = ({ story, batchUpdateMutation }: UseStoryFlowParams)
     handleNodesChange,
     handleNodeDoubleClick,
     handleSelectNodeId,
-    onEdgesChange: onEdgesChange,
+    onEdgesChange,
     updateNodeCache,
     removeNodeFromFlow,
     selectedNoteId,
